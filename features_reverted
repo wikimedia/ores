@@ -1,0 +1,4 @@
+#!/usr/bin/env python3
+from ores import features_reverted
+
+features_reverted.main()

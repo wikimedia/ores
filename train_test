@@ -1,0 +1,4 @@
+#!/usr/bin/env python3
+from ores import train_test
+
+train_test.main()
