@@ -38,7 +38,7 @@ def read_rev_ids(f):
         
         if len(parts) == 1:
             rev_id = parts
-            yield int(rev_id), None
+            yield int(rev_id[0]), None
         elif len(parts) == 2:
             rev_id, page_id = parts
             yield int(rev_id), int(page_id)
@@ -63,7 +63,7 @@ def main():
     if args['--rev_ids'] == "<stdin>":
         rev_pages = read_rev_ids(sys.stdin)
     else:
-        rev_pages = read_rev_ids(open(args['rev_ids']))
+        rev_pages = read_rev_ids(open(args['--rev_ids']))
     
     api_url = args['--api']
     
@@ -72,7 +72,7 @@ def main():
 def run(rev_pages, api_url, model):
     
     session = api.Session(api_url)
-    extractor = APIExtractor(session, language=English()) # This is a hack.  Need to fix langauges
+    extractor = APIExtractor(session, language=English()) # This is a hack.  Need to fix languages
     
     for rev_id, page_id in rev_pages:
         sys.stderr.write(".");sys.stderr.flush()
