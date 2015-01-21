@@ -47,7 +47,7 @@ def main():
     if args['--feature-scores'] == "<stdin>":
         feature_scores_file = sys.stdin
     else:
-        feature_scores_file = open(args['--feature-scores'], 'rb')
+        feature_scores_file = open(args['--feature-scores'], 'r')
     
     feature_scores = read_feature_scores(feature_scores_file, model.features)
     
@@ -57,12 +57,20 @@ def run(feature_scores, model):
     
     feature_scores = list(feature_scores)
     random.shuffle(feature_scores)
-    
-    test_set = feature_scores[:1000]
-    train_set = feature_scores[1000:]
+    test_set_size = int(0.6*len(feature_scores))
+    test_set = feature_scores[:test_set_size]
+    train_set = feature_scores[test_set_size:]
     
     model.train(train_set)
     
     sys.stderr.write(pprint.pformat(model.test(test_set)) + "\n")
     
     model.dump(sys.stdout.buffer)
+
+"""
+./train_test \
+    models/reverts.halfak_mix.model \
+    revscores.scorers.LinearSVCModel \
+    --feature-scores=datasets/enwiki.features_reverted.tsv > \
+models/train_test.log
+"""

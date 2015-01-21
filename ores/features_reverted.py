@@ -99,27 +99,8 @@ if __name__ == "__main__": main()
 """
 cat datasets/enwiki.rev_pages.tsv | tail -n+2 | \
 ./features_reverted \
-    revscores.features.added_badwords_ratio \
-    revscores.features.added_misspellings_ratio \
-    revscores.features.day_of_week_in_utc \
-    revscores.features.hour_of_day_in_utc \
-    revscores.features.is_custom_comment \
-    revscores.features.is_mainspace \
-    revscores.features.is_section_comment \
-    revscores.features.longest_repeated_char_added \
-    revscores.features.longest_token_added \
-    revscores.features.numeric_chars_added \
-    revscores.features.prev_words \
-    revscores.features.proportion_of_markup_added \
-    revscores.features.proportion_of_numeric_added \
-    revscores.features.proportion_of_symbolic_added \
-    revscores.features.proportion_of_uppercase_added \
-    revscores.features.seconds_since_last_page_edit \
-    revscores.features.segments_added \
-    revscores.features.segments_removed \
-    revscores.features.user_age_in_seconds \
-    revscores.features.user_is_anon \
-    revscores.features.user_is_bot \
+    models/reverts.halfak_mix.model \
+    revscores.scorers.LinearSVCModel \
     --api=https://en.wikipedia.org/w/api.php > \
 datasets/enwiki.features_reverted.tsv
 """
