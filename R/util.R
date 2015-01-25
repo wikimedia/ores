@@ -125,45 +125,6 @@ ifnull = function(x, then){
 	
 }
 
-clean.monthly_creations = function(dt){
-	dt$month_created = as.Date(dt$month_created)
-	dt$account_creation = sapply(
-		dt$account_type,
-		function(type){
-			if(is.na(type)){
-				"self"
-			}else if(type == "anon"){
-				"anon"
-			}else if(type == "autocreate"){
-				"autocreated"
-			}else{
-				"self"
-			}
-		}
-	)
-	dt$experience_type = factor(
-		mapply(
-			function(experience, account_type){
-				if(!is.na(account_type)){
-					if(account_type == "anon"){
-						"anon"
-					}else if(account_type == "autocreate"){
-						"autocreate"
-					}else{
-						as.character(experience)
-					}
-				}else{
-					as.character(experience)
-				}
-			},
-			dt$experience,
-			dt$account_type
-		),
-		levels=c("anon", "autocreate", "day", "week", "month", "oldtimer")
-	)
-	dt
-}
-
 wiki.table = function(dt){
 	cat("{|\n")
 	for(name in names(dt)){
