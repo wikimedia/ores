@@ -3,12 +3,11 @@ Trains and tests a classifier.
 
 Usage:
     train_test -h | --help
-    train_test <model> <class> [--feature-scores=<path>]
+    train_test <model> [--feature-scores=<path>]
 
 Options:
     -h --help                Prints this documentation
-    <mode>                   Path to a model file
-    <class>                  Class path of the model
+    <model>                  ClassPath to a model
     --feature-scores=<path>  Path to a file containing features and scores
                              [default: <stdin>]
 """
@@ -41,8 +40,7 @@ def read_feature_scores(f, features):
 def main():
     args = docopt.docopt(__doc__)
     
-    Model = import_from_path(args['<class>'])
-    model = Model.load(open(args['<model>'], 'rb'))
+    model = import_from_path(args['<model>'])
     
     if args['--feature-scores'] == "<stdin>":
         feature_scores_file = sys.stdin
@@ -58,11 +56,13 @@ def run(feature_scores, model):
     feature_scores = list(feature_scores)
     random.shuffle(feature_scores)
     
-    test_set = feature_scores[:1000]
     train_set = feature_scores[1000:]
+    test_set = feature_scores[:1000]
     
     model.train(train_set)
     
-    sys.stderr.write(pprint.pformat(model.test(test_set)) + "\n")
+    stats = model.test(test_set)
+    del stats['roc']
+    sys.stderr.write(pprint.pformat(stats) + "\n")
     
     model.dump(sys.stdout.buffer)

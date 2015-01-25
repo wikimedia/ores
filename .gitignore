@@ -3,9 +3,9 @@ __pycache__/
 *.py[cod]
 *~
 
-# Datasets
+# Datasets & model files
 datasets/
-models/
+*.model
 
 # C extensions
 *.so
