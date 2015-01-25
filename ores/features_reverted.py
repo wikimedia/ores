@@ -37,7 +37,7 @@ def read_rev_ids(f):
         
         if len(parts) == 1:
             rev_id = parts
-            yield int(rev_id), None
+            yield int(rev_id[0]), None
         elif len(parts) == 2:
             rev_id, page_id = parts
             yield int(rev_id), int(page_id)
