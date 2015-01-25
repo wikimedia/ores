@@ -3,14 +3,15 @@ Uses a model to score a revision.
 
 Usage:
     score -h | --help
-    score --api=<url> [--features] <model> <revid>...
+    score <model> <revid>... --api=<url> [--language=<path>] [--print-features]
     
 Options:
-    -h --help         Prints out this documentation
-    <model>           The path to a trained model file
-    <revid>           Revisions to make predictions for
-    --show-features   Prints the feature values along with the score
-    --api=<url>       The url of the API to use to extract features
+    -h --help            Prints out this documentation
+    <model>              The path to a trained model file
+    <revid>              Revisions to make predictions for
+    --language=<path>    A classpath for a language module to use when extracting features
+    --print-features     Prints the feature values along with the score
+    --api=<url>          The url of the API to use to extract features
 """
 import sys
 import traceback
@@ -19,10 +20,8 @@ from pprint import pformat
 
 import docopt
 from mw import api
-from mw.lib import reverts
 
 from revscores.extractors import APIExtractor
-from revscores.languages import english
 from revscores.scorers import MLScorerModel
 
 
@@ -42,17 +41,22 @@ def main():
     
     model = MLScorerModel.load(open(args['<model>'], 'rb'))
     
+    if args['--language'] is not None:
+        language = import_from_path(args['--language'])
+    else:
+        langauge = None
+    
     rev_ids = [int(rev_id) for rev_id in args['<revid>']]
     
     api_url = args['--api']
-    show_features = args['--show-features']
+    print_features = args['--print-features']
     
-    run(model, rev_ids, api_url, show_features)
+    run(model, rev_ids, api_url, language, print_features)
 
-def run(model, rev_ids, api_url, show_features):
+def run(model, rev_ids, api_url, language, print_features):
     
-    session = api.Session(api_url)
-    extractor = APIExtractor(session, language=english) # This is a hack.  Need to fix langauges
+    session = api.Session(api_url, user_agent="Revscores test scoring script")
+    extractor = APIExtractor(session, language=language)
     
     feature_values = [extractor.extract(rev_id, model.features)
                       for rev_id in rev_ids]
@@ -60,7 +64,7 @@ def run(model, rev_ids, api_url, show_features):
     scores = model.score(feature_values, probabilities=True)
     
     for rev_id, values, score in zip(rev_ids, feature_values, scores):
-        if show_features:
+        if print_features:
             print(pformat({str(f): v
                            for f, v in zip(model.features, values)}))
         print("{0}: {1}".format(rev_id, pformat(score)))

@@ -101,3 +101,12 @@ def run(rev_pages, api_url, language, features):
 
 
 if __name__ == "__main__": main()
+
+"""
+cat datasets/enwiki.rev_pages.tsv | tail -n+2 | \
+./features_reverted \
+    models/reverts.halfak_mix.model \
+    revscores.scorers.LinearSVCModel \
+    --api=https://en.wikipedia.org/w/api.php > \
+datasets/enwiki.features_reverted.tsv
+"""
