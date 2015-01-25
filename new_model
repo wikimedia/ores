@@ -1,4 +1,0 @@
-#!/usr/bin/env python3
-from ores import new_model
-
-new_model.main()
