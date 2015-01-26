@@ -6,17 +6,16 @@ prints a TSV to stdout of the format:
 
 Usage:
     features_reverted -h | --help
-    features_reverted <model> <class> --api=<url> [--rev_ids=<path>]
+    features_reverted --api=<url> --language=<clspath> <features> [--rev_pages=<path>]
     
 Options:
-    -h --help         Prints out this documentation
-    <model>           The path to a model file configured with features to
-                      extract.
-    <class>           The class path of the model file.
-    --api=<url>       The url of the API to use to extract features
-    --rev_ids=<path>  The location of a file containing rev_ids to extract.
-                      Optionally, you can include a page_id with each revid to
-                      check for reverts more efficiently [default: <stdin>]
+    -h --help             Prints out this documentation
+    <features>            The ClassPath to a list of features to extract.
+    --api=<url>           The url of the API to use to extract features
+    --language=<clspath>  The ClassPath to a language to use (required for some
+                          features)
+    --rev_pages=<path>    The location of a file containing rev_ids and
+                          page_ids to extract. [default: <stdin>]
 """
 import sys
 import traceback
@@ -27,7 +26,7 @@ from mw import api
 from mw.lib import reverts
 
 from revscores.extractors import APIExtractor
-from revscores.language import English
+from revscores.languages import english
 from revscores.scorers import MLScorerModel
 
 
@@ -57,28 +56,31 @@ def import_from_path(path):
 def main():
     args = docopt.docopt(__doc__)
     
-    Model = import_from_path(args['<class>'])
-    model = Model.load(open(args['<model>'], 'rb'))
-    
-    if args['--rev_ids'] == "<stdin>":
+    if args['--rev_pages'] == "<stdin>":
         rev_pages = read_rev_ids(sys.stdin)
     else:
-        rev_pages = read_rev_ids(open(args['--rev_ids']))
+        rev_pages = read_rev_ids(open(args['--rev_pages']))
+    
+    features = import_from_path(args['<features>'])
+    if args['--language'] is not None:
+        language = import_from_path(args['--language'])
+    else:
+        language = None
     
     api_url = args['--api']
     
-    run(rev_pages, api_url, model)
+    run(rev_pages, api_url, language, features)
 
-def run(rev_pages, api_url, model):
+def run(rev_pages, api_url, language, features):
     
     session = api.Session(api_url)
-    extractor = APIExtractor(session, language=English()) # This is a hack.  Need to fix languages
+    extractor = APIExtractor(session, language=language)
     
     for rev_id, page_id in rev_pages:
         sys.stderr.write(".");sys.stderr.flush()
         try:
             # Extract features
-            values = extractor.extract(rev_id, model.features)
+            values = extractor.extract(rev_id, features)
             
             # Detect reverted status
             revert = reverts.api.check(session, rev_id, page_id, radius=3)
@@ -86,7 +88,11 @@ def run(rev_pages, api_url, model):
             
             # Print out row
             print('\t'.join(str(v) for v in values + [reverted]))
-            
+        
+        except KeyboardInterrupt:
+            sys.stderr.write("\n^C Caught.  Exiting...")
+            break
+        
         except:
             sys.stderr.write(traceback.format_exc())
             sys.stderr.write("\n")
