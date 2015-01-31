@@ -1,17 +1,18 @@
-from revscores.features import (added_badwords_ratio, added_misspellings_ratio,
-                                day_of_week_in_utc, hour_of_day_in_utc,
-                                is_content_namespace, is_custom_comment,
-                                is_section_comment, longest_repeated_char_added,
-                                longest_token_added, numeric_chars_added,
-                                prev_words, proportion_of_markup_added,
-                                proportion_of_numeric_added,
-                                proportion_of_symbolic_added,
-                                proportion_of_uppercase_added,
-                                seconds_since_last_page_edit,
-                                user_age_in_seconds, user_is_anon, user_is_bot,
-                                words_added, words_removed)
-from revscores.features.modifiers import log
-from revscores.scorers import LinearSVCModel, RBFSVCModel
+from revscoring.features import (added_badwords_ratio, added_misspellings_ratio,
+                                 day_of_week_in_utc, hour_of_day_in_utc,
+                                 is_content_namespace, is_custom_comment,
+                                 is_section_comment,
+                                 longest_repeated_char_added,
+                                 longest_token_added, numeric_chars_added,
+                                 prev_words, proportion_of_markup_added,
+                                 proportion_of_numeric_added,
+                                 proportion_of_symbolic_added,
+                                 proportion_of_uppercase_added,
+                                 seconds_since_last_page_edit,
+                                 user_age_in_seconds, user_is_anon, user_is_bot,
+                                 words_added, words_removed)
+from revscoring.features.modifiers import log
+from revscoring.scorers import LinearSVCModel, RBFSVCModel
 
 features = [
     log(added_badwords_ratio + 1),
