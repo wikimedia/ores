@@ -3,13 +3,12 @@ Uses a model to score a revision.
 
 Usage:
     score -h | --help
-    score <model> <revid>... --api=<url> [--language=<path>] [--print-features]
+    score <model> <revid>... --api=<url> [--print-features]
     
 Options:
     -h --help            Prints out this documentation
     <model>              The path to a trained model file
     <revid>              Revisions to make predictions for
-    --language=<path>    A classpath for a language module to use when extracting features
     --print-features     Prints the feature values along with the score
     --api=<url>          The url of the API to use to extract features
 """
@@ -21,8 +20,8 @@ from pprint import pformat
 import docopt
 from mw import api
 
-from revscores.extractors import APIExtractor
-from revscores.scorers import MLScorerModel
+from revscoring.extractors import APIExtractor
+from revscoring.scorers import MLScorerModel
 
 
 def import_from_path(path):
@@ -41,27 +40,22 @@ def main():
     
     model = MLScorerModel.load(open(args['<model>'], 'rb'))
     
-    if args['--language'] is not None:
-        language = import_from_path(args['--language'])
-    else:
-        langauge = None
-    
     rev_ids = [int(rev_id) for rev_id in args['<revid>']]
     
     api_url = args['--api']
     print_features = args['--print-features']
     
-    run(model, rev_ids, api_url, language, print_features)
+    run(model, rev_ids, api_url, print_features)
 
-def run(model, rev_ids, api_url, language, print_features):
+def run(model, rev_ids, api_url, print_features):
     
     session = api.Session(api_url, user_agent="Revscores test scoring script")
-    extractor = APIExtractor(session, language=language)
+    extractor = APIExtractor(session, language=model.language)
     
     feature_values = [extractor.extract(rev_id, model.features)
                       for rev_id in rev_ids]
     
-    scores = model.score(feature_values, probabilities=True)
+    scores = model.score(feature_values)
     
     for rev_id, values, score in zip(rev_ids, feature_values, scores):
         if print_features:

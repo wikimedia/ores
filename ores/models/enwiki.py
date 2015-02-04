@@ -12,6 +12,7 @@ from revscoring.features import (added_badwords_ratio, added_misspellings_ratio,
                                  user_age_in_seconds, user_is_anon, user_is_bot,
                                  words_added, words_removed)
 from revscoring.features.modifiers import log
+from revscoring.languages import english
 from revscoring.scorers import LinearSVCModel, RBFSVCModel
 
 features = [
@@ -38,5 +39,5 @@ features = [
     is_section_comment
 ]
 
-linear_svc = LinearSVCModel(features)
-rbf_svc = RBFSVCModel(features)
+linear_svc = LinearSVCModel(features, english)
+rbf_svc = RBFSVCModel(features, english)
