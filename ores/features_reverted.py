@@ -7,7 +7,7 @@ prints a TSV to stdout of the format:
 Usage:
     features_reverted -h | --help
     features_reverted <model> --api=<url> [--rev_pages=<path>]
-    
+
 Options:
     -h --help             Prints out this documentation
     <model>               The ClassPath to a model for which to extract features
@@ -24,15 +24,13 @@ from mw import api
 from mw.lib import reverts
 
 from revscoring.extractors import APIExtractor
-from revscoring.languages import english
-from revscoring.scorers import MLScorerModel
 
 
 def read_rev_ids(f):
-    
+
     for line in f:
         parts = line.strip().split('\t')
-        
+
         if len(parts) == 1:
             rev_id = parts
             yield int(rev_id[0]), None
@@ -44,16 +42,16 @@ def import_from_path(path):
     parts = path.split(".")
     module_path = ".".join(parts[:-1])
     attribute_name = parts[-1]
-    
+
     module = import_module(module_path)
-    
+
     attribute = getattr(module, attribute_name)
-    
+
     return attribute
 
 def main():
     args = docopt.docopt(__doc__)
-    
+
     if args['--rev_pages'] == "<stdin>":
         rev_pages = read_rev_ids(sys.stdin)
     else:
@@ -74,23 +72,24 @@ def run(rev_pages, api_url, model):
         sys.stderr.write(".");sys.stderr.flush()
         try:
             # Extract features
+
             values = extractor.extract(rev_id, model.features)
             
             # Detect reverted status
             revert = reverts.api.check(session, rev_id, page_id, radius=3)
             reverted = revert is not None
-            
+
             # Print out row
             print('\t'.join(str(v) for v in values + [reverted]))
-        
+
         except KeyboardInterrupt:
             sys.stderr.write("\n^C Caught.  Exiting...")
             break
-        
+
         except:
             sys.stderr.write(traceback.format_exc())
             sys.stderr.write("\n")
-    
+
     sys.stderr.write("\n")
 
 
