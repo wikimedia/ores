@@ -6,14 +6,12 @@ prints a TSV to stdout of the format:
 
 Usage:
     features_reverted -h | --help
-    features_reverted --api=<url> --language=<clspath> <features> [--rev_pages=<path>]
+    features_reverted <model> --api=<url> [--rev_pages=<path>]
     
 Options:
     -h --help             Prints out this documentation
-    <features>            The ClassPath to a list of features to extract.
+    <model>               The ClassPath to a model for which to extract features
     --api=<url>           The url of the API to use to extract features
-    --language=<clspath>  The ClassPath to a language to use (required for some
-                          features)
     --rev_pages=<path>    The location of a file containing rev_ids and
                           page_ids to extract. [default: <stdin>]
 """
@@ -25,9 +23,9 @@ import docopt
 from mw import api
 from mw.lib import reverts
 
-from revscores.extractors import APIExtractor
-from revscores.languages import english
-from revscores.scorers import MLScorerModel
+from revscoring.extractors import APIExtractor
+from revscoring.languages import english
+from revscoring.scorers import MLScorerModel
 
 
 def read_rev_ids(f):
@@ -61,26 +59,22 @@ def main():
     else:
         rev_pages = read_rev_ids(open(args['--rev_pages']))
     
-    features = import_from_path(args['<features>'])
-    if args['--language'] is not None:
-        language = import_from_path(args['--language'])
-    else:
-        language = None
+    model = import_from_path(args['<model>'])
     
     api_url = args['--api']
     
-    run(rev_pages, api_url, language, features)
+    run(rev_pages, api_url, model)
 
-def run(rev_pages, api_url, language, features):
+def run(rev_pages, api_url, model):
     
     session = api.Session(api_url)
-    extractor = APIExtractor(session, language=language)
+    extractor = APIExtractor(session, language=model.language)
     
     for rev_id, page_id in rev_pages:
         sys.stderr.write(".");sys.stderr.flush()
         try:
             # Extract features
-            values = extractor.extract(rev_id, features)
+            values = extractor.extract(rev_id, model.features)
             
             # Detect reverted status
             revert = reverts.api.check(session, rev_id, page_id, radius=3)
@@ -101,12 +95,3 @@ def run(rev_pages, api_url, language, features):
 
 
 if __name__ == "__main__": main()
-
-"""
-cat datasets/enwiki.rev_pages.tsv | tail -n+2 | \
-./features_reverted \
-    models/reverts.halfak_mix.model \
-    revscores.scorers.LinearSVCModel \
-    --api=https://en.wikipedia.org/w/api.php > \
-datasets/enwiki.features_reverted.tsv
-"""
