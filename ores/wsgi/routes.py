@@ -1,7 +1,11 @@
+import traceback
+from collections import defaultdict
+
 from flask import jsonify, render_template, request
 
-from . import scorers
+from . import errors, scorers
 from .app import app
+from .util import ParamError, read_bar_split_param
 
 
 '''
@@ -19,14 +23,38 @@ def scores():
     return render_template("scores.html", wiki_scorers)
 '''
 
-@app.route("/score/enwiki/reverted/<revids>")
-def enwiki_reverted(revids):
-    rev_ids = [int(rid) for rid in revids.split("|")]
+
+
+# /enwiki?models=reverted
+@app.route("/<wiki>/")
+def enwiki_reverted(wiki):
     
-    scores = {}
-    for rev_id in rev_ids:
-        score = next(scorers.enwiki_reverted.score([rev_id]))
+    scorer_models = {
+        ('enwiki', 'reverted'): scorers.enwiki_reverted,
+        ('ptwiki', 'reverted'): scorers.ptwiki_reverted
+    }
+    
+    try:
+        models = read_bar_split_param(request, "models", str) # Ignored for now
+        rev_ids = read_bar_split_param(request, "revids", int)
+    except ParamError as e:
+        return e.error
         
-        scores[rev_id] = {'reverted': score}
+    
+    for model in models:
+        if (wiki, model) not in scorer_models:
+            return errors.bad_request("Model '{0}' not available for '{1}'" \
+                                      .format(model, wiki))
+    
+    scores = defaultdict(lambda: {})
+    for rev_id in rev_ids:
+        for model in models:
+            scorer = scorer_models[(wiki, model)]
+            try:
+                score = next(scorer.score([rev_id]))
+            except Exception as e:
+                score = {"error": {'type': str(type(e)), 'message': str(e)}}
+            
+            scores[rev_id].update({model: score})
     
     return jsonify(scores)
