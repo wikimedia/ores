@@ -26,6 +26,6 @@ def main():
                       'https://en.wikipedia.org/w/api.php',
                       'https://pt.wikipedia.org/w/api.php')
     
-    app.run(host="localhost",
+    app.run(host="0.0.0.0",
             port=int(args['--port']),
             debug=True)
