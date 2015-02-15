@@ -8,31 +8,36 @@ from .app import app
 from .util import ParamError, read_bar_split_param
 
 
-'''
-@app.route("/")
-def index():
-    return render_template("index.html")
-    
-@app.route("/scores/")
-def scores():
-    wiki_scorers = [(wiki, scorer) for wiki in scorers
-                                   for scorer in scorers[wiki]]
-    
-    wiki_scorers.sort()
-    
-    return render_template("scores.html", wiki_scorers)
-'''
 
 
-
-# /enwiki?models=reverted
-@app.route("/<wiki>/")
-def enwiki_reverted(wiki):
-    
-    scorer_models = {
+def scorer_map():
+    return {
         ('enwiki', 'reverted'): scorers.enwiki_reverted,
         ('ptwiki', 'reverted'): scorers.ptwiki_reverted
     }
+	
+
+# /
+@app.route("/")
+def index():
+    return "Welcome to the index page"
+    
+# /scores/
+@app.route("/scores/")
+def scores():
+    wiki_models = [wiki_model for wiki_model in scorer_map()]
+    
+    wiki_models.sort()
+    
+    return "These are the scorers I have: {0}.".format(wiki_models)
+
+
+
+# /scores/enwiki?models=reverted&revids=456789|4567890
+@app.route("/scores/<wiki>")
+def enwiki_reverted(wiki):
+    
+    scorer_models = scorer_map()
     
     try:
         models = read_bar_split_param(request, "models", str) # Ignored for now
