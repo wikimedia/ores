@@ -38,26 +38,29 @@ def score_revisions(wiki):
     scorer_models = scorer_map()
     
     try:
-        models = read_bar_split_param(request, "models", str)
+        model_names = read_bar_split_param(request, "models", str)
         rev_ids = read_bar_split_param(request, "revids", int)
     except ParamError as e:
         return e.error
         
     
-    for model in models:
-        if (wiki, model) not in scorer_models:
+    for model_name in model_names:
+        if (wiki, model_name) not in scorer_models:
             return errors.bad_request("Model '{0}' not available for '{1}'" \
-                                      .format(model, wiki))
+                                      .format(model_name, wiki))
     
     scores = defaultdict(lambda: {})
-    for rev_id in rev_ids:
-        for model in models:
-            scorer = scorer_models[(wiki, model)]
+    for model_name in model_names:
+        scorer = scorer_models[(wiki, model_name)]
+        for rev_id in rev_ids:
+            print(rev_id)
             try:
                 score = next(scorer.score([rev_id]))
             except Exception as e:
                 score = {"error": {'type': str(type(e)), 'message': str(e)}}
             
-            scores[rev_id].update({model: score})
+            scores[rev_id][model_name] = score
+        
+        
     
     return jsonify(scores)
