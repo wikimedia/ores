@@ -53,7 +53,7 @@ def score_revisions(wiki):
     for model_name in model_names:
         scorer = scorer_models[(wiki, model_name)]
         for rev_id in rev_ids:
-            print(rev_id)
+            
             try:
                 score = next(scorer.score([rev_id]))
             except Exception as e:
