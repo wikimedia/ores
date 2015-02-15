@@ -8,8 +8,6 @@ from .app import app
 from .util import ParamError, read_bar_split_param
 
 
-
-
 def scorer_map():
     return {
         ('enwiki', 'reverted'): scorers.enwiki_reverted,
@@ -20,7 +18,7 @@ def scorer_map():
 # /
 @app.route("/")
 def index():
-    return "Welcome to the index page"
+    return "Welcome to the index page of the ores flask app."
     
 # /scores/
 @app.route("/scores/")
@@ -35,12 +33,12 @@ def scores():
 
 # /scores/enwiki?models=reverted&revids=456789|4567890
 @app.route("/scores/<wiki>")
-def enwiki_reverted(wiki):
+def score_revisions(wiki):
     
     scorer_models = scorer_map()
     
     try:
-        models = read_bar_split_param(request, "models", str) # Ignored for now
+        models = read_bar_split_param(request, "models", str)
         rev_ids = read_bar_split_param(request, "revids", int)
     except ParamError as e:
         return e.error
