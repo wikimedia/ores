@@ -3,12 +3,15 @@ Trains and tests a classifier.
 
 Usage:
     train_test -h | --help
-    train_test <model> [--feature-scores=<path>]
+    train_test <model> <features> [--language=<module>][--feature-scores=<path>]
 
 Options:
     -h --help                Prints this documentation
-    <model>                  ClassPath to a model
-    --feature-scores=<path>  Path to a file containing features and scores
+    <model>                  Classpath to a MLScorerModel to train
+    <features>               Classpath to the set of features to expect as
+                             input.
+    --language=<module>      Classpath to a Language
+    --value-labels=<path>    Path to a file containing feature values and labels
                              [default: <stdin>]
 """
 import pprint
@@ -40,14 +43,22 @@ def read_feature_scores(f, features):
 def main():
     args = docopt.docopt(__doc__)
     
-    model = import_from_path(args['<model>'])
+    Model = import_from_path(args['<model>'])
+    features = import_from_path(args['<features>'])
     
-    if args['--feature-scores'] == "<stdin>":
-        feature_scores_file = sys.stdin
+    if args['--language'] is not None:
+        language = import_from_path(args['--language'])
     else:
-        feature_scores_file = open(args['--feature-scores'], 'r')
+        language = None
     
-    feature_scores = read_feature_scores(feature_scores_file, model.features)
+    model = Model(features, language=language)
+        
+    if args['--feature-scores'] == "<stdin>":
+        values_labels_file = sys.stdin
+    else:
+        values_labels_file = open(args['--feature-scores'], 'r')
+    
+    feature_scores = read_feature_scores(values_labels_file, features)
     
     run(feature_scores, model)
 
@@ -70,8 +81,9 @@ def run(feature_scores, model):
 
 """
 ./train_test \
-    models/reverts.halfak_mix.model \
-    revscores.scorers.LinearSVCModel \
-    --feature-scores=datasets/enwiki.features_reverted.tsv > \
-models/train_test.log
+    revscoring.scorers.LinearSVCModel \
+    ores.features.enwiki.reverted \
+    --language=revscoring.languages.english \
+    --feature-scores=datasets/enwiki.features_reverted.20k.tsv > \
+models/enwiki.reverted.linear_svc.model
 """
