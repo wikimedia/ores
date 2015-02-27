@@ -3,7 +3,7 @@ Trains and tests a classifier.
 
 Usage:
     train_test -h | --help
-    train_test <model> <features> [--language=<module>][--feature-scores=<path>]
+    train_test <model> <features> [--language=<module>][--values-labels=<path>]
 
 Options:
     -h --help                Prints this documentation
@@ -11,7 +11,7 @@ Options:
     <features>               Classpath to the set of features to expect as
                              input.
     --language=<module>      Classpath to a Language
-    --value-labels=<path>    Path to a file containing feature values and labels
+    --values-labels=<path>    Path to a file containing feature values and labels
                              [default: <stdin>]
 """
 import pprint
@@ -53,10 +53,10 @@ def main():
     
     model = Model(features, language=language)
         
-    if args['--feature-scores'] == "<stdin>":
+    if args['--values-labels'] == "<stdin>":
         values_labels_file = sys.stdin
     else:
-        values_labels_file = open(args['--feature-scores'], 'r')
+        values_labels_file = open(args['--values-labels'], 'r')
     
     feature_scores = read_feature_scores(values_labels_file, features)
     
@@ -82,7 +82,7 @@ def run(feature_scores, model):
 """
 ./train_test \
     revscoring.scorers.LinearSVCModel \
-    ores.features.enwiki.reverted \
+    ores.features.enwiki.damaging \
     --language=revscoring.languages.english \
     --feature-scores=datasets/enwiki.features_reverted.20k.tsv > \
 models/enwiki.reverted.linear_svc.model
