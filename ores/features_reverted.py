@@ -7,7 +7,7 @@ prints a TSV to stdout of the format:
 Usage:
     features_reverted -h | --help
     features_reverted <features> --api=<url> [--language=<module>]
-                      [--rev_pages=<path>]
+                      [--rev-pages=<path>]
 
 Options:
     -h --help             Prints out this documentation
@@ -15,7 +15,7 @@ Options:
     --api=<url>           The url of the API to use to extract features
     --language=<module>   The Classpath of a language module (required if a
                           feature depends on 'language')
-    --rev_pages=<path>    The location of a file containing rev_ids and
+    --rev-pages=<path>    The location of a file containing rev_ids and
                           page_ids to extract. [default: <stdin>]
 """
 import sys
@@ -55,10 +55,10 @@ def import_from_path(path):
 def main():
     args = docopt.docopt(__doc__)
 
-    if args['--rev_pages'] == "<stdin>":
+    if args['--rev-pages'] == "<stdin>":
         rev_pages = read_rev_pages(sys.stdin)
     else:
-        rev_pages = read_rev_pages(open(args['--rev_pages']))
+        rev_pages = read_rev_pages(open(args['--rev-pages']))
     
     features = import_from_path(args['<features>'])
     if args['--language'] is not None:
@@ -87,7 +87,7 @@ def run(rev_pages, features, language, api_url):
             reverted = revert is not None
 
             # Print out row
-            print('\t'.join(str(v) for v in values + [reverted]))
+            print('\t'.join(str(v) for v in (list(values) + [reverted])))
 
         except KeyboardInterrupt:
             sys.stderr.write("\n^C Caught.  Exiting...")
@@ -101,3 +101,12 @@ def run(rev_pages, features, language, api_url):
 
 
 if __name__ == "__main__": main()
+
+"""
+./features_reverted \
+    ores.features.enwiki.damaging \
+    --language=revscoring.languages.english \
+    --api=https://en.wikipedia.org/w/api.php \
+    --rev-pages=datasets/enwiki.rev_pages.5k.tsv > \
+datasets/enwiki.features_reverted.5k.tsv
+"""
