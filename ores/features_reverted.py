@@ -41,6 +41,7 @@ def read_rev_pages(f):
             rev_id, page_id = parts
             yield int(rev_id), int(page_id)
 
+
 def import_from_path(path):
     parts = path.split(".")
     module_path = ".".join(parts[:-1])
@@ -52,6 +53,7 @@ def import_from_path(path):
 
     return attribute
 
+
 def main():
     args = docopt.docopt(__doc__)
 
@@ -59,29 +61,31 @@ def main():
         rev_pages = read_rev_pages(sys.stdin)
     else:
         rev_pages = read_rev_pages(open(args['--rev-pages']))
-    
+
     features = import_from_path(args['<features>'])
     if args['--language'] is not None:
         language = import_from_path(args['--language'])
     else:
         language = None
-    
+
     api_url = args['--api']
-    
+
     run(rev_pages, features, language, api_url)
 
+
 def run(rev_pages, features, language, api_url):
-    
+
     session = api.Session(api_url)
     extractor = APIExtractor(session, language=language)
-    
+
     for rev_id, page_id in rev_pages:
-        sys.stderr.write(".");sys.stderr.flush()
+        sys.stderr.write(".")
+        sys.stderr.flush()
         try:
             # Extract features
 
             values = extractor.extract(rev_id, features)
-            
+
             # Detect reverted status
             revert = reverts.api.check(session, rev_id, page_id, radius=3)
             reverted = revert is not None
@@ -100,7 +104,8 @@ def run(rev_pages, features, language, api_url):
     sys.stderr.write("\n")
 
 
-if __name__ == "__main__": main()
+if __name__ == "__main__":
+    main()
 
 """
 ./features_reverted \
