@@ -20,12 +20,16 @@ from .app import app
 
 def main():
     args = docopt.docopt(__doc__)
-    
-    scorers.configure(open(args['<enwiki_reverts>'], 'rb'),
-                      open(args['<ptwiki_reverts>'], 'rb'),
-                      'https://en.wikipedia.org/w/api.php',
-                      'https://pt.wikipedia.org/w/api.php')
-    
-    app.run(host="0.0.0.0",
-            port=int(args['--port']),
-            debug=True)
+
+    scorers.configure(
+        open(args['<enwiki_reverts>'], 'rb'),
+        open(args['<ptwiki_reverts>'], 'rb'),
+        'https://en.wikipedia.org/w/api.php',
+        'https://pt.wikipedia.org/w/api.php'
+    )
+
+    app.run(
+        host="0.0.0.0",
+        port=int(args['--port']),
+        debug=True
+    )

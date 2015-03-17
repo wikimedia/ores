@@ -11,8 +11,8 @@ Options:
     <features>               Classpath to the set of features to expect as
                              input.
     --language=<module>      Classpath to a Language
-    --values-labels=<path>   Path to a file containing feature values and labels
-                             [default: <stdin>]
+    --values-labels=<path>   Path to a file containing feature values and
+                             labels [default: <stdin>]
 """
 import pprint
 import random
