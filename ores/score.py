@@ -4,7 +4,7 @@ Uses a model to score a revision.
 Usage:
     score -h | --help
     score <model> <revid>... --api=<url> [--print-features]
-    
+
 Options:
     -h --help            Prints out this documentation
     <model>              The path to a trained model file
@@ -28,35 +28,37 @@ def import_from_path(path):
     parts = path.split(".")
     module_path = ".".join(parts[:-1])
     attribute_name = parts[-1]
-    
+
     module = import_module(module_path)
-    
+
     attribute = getattr(module, attribute_name)
-    
+
     return attribute
+
 
 def main():
     args = docopt.docopt(__doc__)
-    
+
     model = MLScorerModel.load(open(args['<model>'], 'rb'))
-    
+
     rev_ids = [int(rev_id) for rev_id in args['<revid>']]
-    
+
     api_url = args['--api']
     print_features = args['--print-features']
-    
+
     run(model, rev_ids, api_url, print_features)
 
+
 def run(model, rev_ids, api_url, print_features):
-    
+
     session = api.Session(api_url, user_agent="Revscores test scoring script")
     extractor = APIExtractor(session, language=model.language)
-    
+
     feature_values = [extractor.extract(rev_id, model.features)
                       for rev_id in rev_ids]
-    
+
     scores = model.score(feature_values)
-    
+
     for rev_id, values, score in zip(rev_ids, feature_values, scores):
         if print_features:
             print(pformat({str(f): v
@@ -64,4 +66,5 @@ def run(model, rev_ids, api_url, print_features):
         print("{0}: {1}".format(rev_id, pformat(score)))
 
 
-if __name__ == "__main__": main()
+if __name__ == "__main__":
+    main()
