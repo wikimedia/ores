@@ -61,8 +61,10 @@ def main():
         rev_pages = read_rev_pages(sys.stdin)
     else:
         rev_pages = read_rev_pages(open(args['--rev-pages']))
-
-    features = import_from_path(args['<features>'])
+    if '<features>' in args:
+        features = import_from_path(args['<features>'])
+    else:
+        features = import_from_path("ores.features.generic.generic")
     if args['--language'] is not None:
         language = import_from_path(args['--language'])
     else:
