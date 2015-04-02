@@ -6,12 +6,12 @@ prints a TSV to stdout of the format:
 
 Usage:
     features_reverted -h | --help
-    features_reverted <features> --api=<url> [--language=<module>]
+    features_reverted [--features=<features>] --api=<url> [--language=<module>]
                       [--rev-pages=<path>]
 
 Options:
     -h --help             Prints out this documentation
-    <features>            Classpath to a list of features to extract
+    --features=<features>            Classpath to a list of features to extract
     --api=<url>           The url of the API to use to extract features
     --language=<module>   The Classpath of a language module (required if a
                           feature depends on 'language')
@@ -61,10 +61,10 @@ def main():
         rev_pages = read_rev_pages(sys.stdin)
     else:
         rev_pages = read_rev_pages(open(args['--rev-pages']))
-    if '<features>' in args:
-        features = import_from_path(args['<features>'])
-    else:
+    if args['--features'] is None:
         features = import_from_path("ores.features.generic.generic")
+    else:
+        features = import_from_path(args['--features'])
     if args['--language'] is not None:
         language = import_from_path(args['--language'])
     else:
