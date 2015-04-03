@@ -11,7 +11,7 @@ Usage:
 
 Options:
     -h --help             Prints out this documentation
-    --features=<features>            Classpath to a list of features to extract
+    --features=<features> Classpath to a list of features to extract
     --api=<url>           The url of the API to use to extract features
     --language=<module>   The Classpath of a language module (required if a
                           feature depends on 'language')
@@ -111,7 +111,7 @@ if __name__ == "__main__":
 
 """
 ./features_reverted \
-    ores.features.enwiki.damaging \
+    --features=ores.features.enwiki.damaging \
     --language=revscoring.languages.english \
     --api=https://en.wikipedia.org/w/api.php \
     --rev-pages=datasets/enwiki.rev_pages.5k.tsv > \
