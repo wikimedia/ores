@@ -37,7 +37,7 @@ generic = [
     page.is_content_namespace,
     log(parent_revision.bytes + 1),
     log(parent_revision.chars + 1),
-    log(parent_revision.markup_chars + parent_revision.markup_chars1),
+    log(parent_revision.markup_chars + parent_revision.markup_chars),
     log(parent_revision.numeric_chars + 1),
     log(parent_revision.proportion_of_markup_chars + 1),
     log(parent_revision.proportion_of_numeric_chars + 1),
