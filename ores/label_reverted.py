@@ -73,12 +73,12 @@ def main():
         rev_reverteds = open(args['--rev-reverteds'], "w")
 
     api_url = args['--api']
-    session = api.Session(api_url)
+    session = api.Session(api_url, user_agent="ORES revert labeling utility")
 
     run(rev_pages, rev_reverteds, session, revert_radius, revert_window)
 
 
-def run(rev_pages, features, session, revert_radius, revert_window):
+def run(rev_pages, rev_reverteds, session, revert_radius, revert_window):
 
 
     for rev_id, page_id in rev_pages:
@@ -97,12 +97,13 @@ def run(rev_pages, features, session, revert_radius, revert_window):
                 sys.stderr.write(".");sys.stderr.flush()
 
             # Print out row
-            print('\t'.join(str(v) for v in [rev_id, reverted]))
+            rev_reverteds.write('\t'.join(str(v) for v in [rev_id, reverted]))
+            rev_reverteds.write("\n")
 
         except KeyboardInterrupt:
             sys.stderr.write("\n^C Caught.  Exiting...")
             break
-            
+
         except:
             sys.stderr.write(traceback.format_exc())
             sys.stderr.write("\n")
