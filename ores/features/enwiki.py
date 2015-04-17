@@ -24,7 +24,8 @@ damaging = generic.damaging + [
     log(max(revision.badwords + 1,1)),
     log(max(revision.misspellings + 1,1)),
     log(max(revision.proportion_of_badwords + 1,1)),
-    log(max(revision.proportion_of_misspellings + 1,1))
+    log(max(revision.proportion_of_misspellings + 1,1)),
+    log(revision.infonoise + 1)
 ]
 
 good_faith = generic.good_faith + [
@@ -47,5 +48,6 @@ good_faith = generic.good_faith + [
     log(max(revision.badwords + 1,1)),
     log(max(revision.misspellings + 1,1)),
     log(max(revision.proportion_of_badwords + 1,1)),
-    log(max(revision.proportion_of_misspellings + 1,1))
+    log(max(revision.proportion_of_misspellings + 1,1)),
+    log(revision.infonoise + 1)
 ]
