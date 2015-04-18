@@ -57,7 +57,6 @@ generic_count = [
     log(parent_revision.symbolic_chars + 1),
     log(parent_revision.uppercase_chars + 1),
     log(parent_revision.words + 1),
-    revision.bytes,
     log(revision.chars + 1),
     log(revision.markup_chars + 1),
     log(revision.numeric_chars + 1),
@@ -69,7 +68,6 @@ generic_count = [
 generic_wikimarkup = [
     page.is_mainspace,
     page.is_content_namespace,
-    log(revision.category_links + 1),
     log(revision.cite_templates + 1),
     log(revision.has_custom_comment + 1),
     log(revision.has_section_comment + 1),
@@ -86,18 +84,65 @@ generic_wikimarkup = [
     log(revision.templates + 1)
 ]
 
-generic = generic_ratio + generic_added + generic_removed + generic_count + generic_wikimarkup + [
+generic_other = [
     diff.bytes_changed,
     log(page.age + 1),
     log(parent_revision.seconds_since + 1),
     parent_revision.was_same_user,
     log(previous_user_revision.seconds_since + 1),
     log(revision.day_of_week + 1),
-    log(revision.hour_of_day + 1),
     log(user.age + 1),
     user.is_anon,
     user.is_bot
 ]
+
+generic_unused = [
+    revision.bytes,
+    log(revision.category_links + 1),
+    log(revision.hour_of_day + 1),
+]
+
+generic_minimalist = [
+    log(diff.added_markup_chars_ratio + 1),
+    log(diff.added_number_chars_ratio + 1),
+    log(diff.added_symbolic_chars_ratio + 1),
+    log(diff.added_uppercase_chars_ratio + 1),
+    log(diff.chars_added + 1),
+    log(diff.chars_removed + 1),
+    log(diff.longest_repeated_char_added + 1),
+    log(diff.longest_token_added + 1),
+    log(diff.markup_chars_added + 1),
+    log(diff.markup_chars_removed + 1),
+    log(diff.numeric_chars_added + 1),
+    log(diff.numeric_chars_removed + 1),
+    log(diff.proportion_of_chars_added + 1),
+    log(diff.proportion_of_chars_removed + 1),
+    log(diff.proportion_of_markup_chars_added + 1),
+    log(diff.proportion_of_numeric_chars_added + 1),
+    log(diff.proportion_of_symbolic_chars_added + 1),
+    log(diff.proportion_of_uppercase_chars_added + 1),
+    log(diff.segments_added + 1),
+    log(diff.segments_removed + 1),
+    log(diff.symbolic_chars_added + 1),
+    log(diff.symbolic_chars_removed + 1),
+    log(diff.uppercase_chars_added + 1),
+    log(diff.uppercase_chars_removed + 1),
+    log(diff.words_added + 1),
+    log(diff.words_removed + 1),
+    diff.bytes_changed + 1,
+    log(diff.bytes_changed_ratio + 1),
+    log(page.age + 1),
+    page.is_content_namespace,
+    parent_revision.was_same_user,
+    log(parent_revision.words + 1),
+    log(previous_user_revision.seconds_since + 1),
+    log(user.age + 1),
+    user.is_anon,
+    user.is_bot
+]
+
+#generic = generic_ratio + generic_added + generic_removed + generic_count + generic_wikimarkup + generic_other
+generic = generic_minimalist
 
 damaging = generic
 
