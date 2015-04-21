@@ -29,4 +29,5 @@ def main(argv=None):
     app = application.configure(config)
     app.run(host="0.0.0.0",
             port=int(args['--port']),
-            debug=True)
+            debug=True,
+            ssl_context="adhoc")
