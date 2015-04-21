@@ -8,12 +8,6 @@ from . import responses
 from .util import ParamError, read_bar_split_param
 
 
-def scorer_map():
-    return {
-        'enwiki': scorers.enwiki,
-        'ptwiki': scorers.ptwiki
-    }
-
 def configure(config, bp, scorer_map):
 
     # /
