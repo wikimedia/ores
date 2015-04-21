@@ -1,7 +1,8 @@
 import traceback
 from collections import defaultdict
 
-from flask import jsonify, render_template, request
+from flask import render_template, request
+from flask.ext.jsonpify import jsonify
 
 from . import errors, scorers
 from .app import app
