@@ -5,11 +5,11 @@ prints a TSV to stdout of the format:
 <rev_id>\t<reverted>
 
 Usage:
-    features_reverted -h | --help
-    features_reverted --api=<url> [--revert-radius=<revs>]
-                                  [--revert-window=<secs>]
-                                  [--rev-pages=<path>]
-                                  [--rev-reverteds=<path>]
+    label_reverted -h | --help
+    label_reverted --api=<url> [--revert-radius=<revs>]
+                               [--revert-window=<secs>]
+                               [--rev-pages=<path>]
+                               [--rev-reverteds=<path>]
 
 Options:
     -h --help               Prints out this documentation
@@ -25,7 +25,6 @@ Options:
 """
 import sys
 import traceback
-from importlib import import_module
 
 import docopt
 from mw import api
@@ -35,29 +34,8 @@ from revscoring.extractors import APIExtractor
 from .util import import_from_path
 
 
-def read_rev_pages(f):
-    first_line_parts = f.readline().split("\t")
-    if first_line_parts[0] == "rev_id":
-        if len(first_line_parts) == 1:
-            rev_id = parts[0]
-            yield int(rev_id), None
-        elif len(parts) == 2:
-            rev_id, page_id = parts
-            yield int(rev_id), int(page_id)
-
-    for line in f:
-        parts = line.strip().split('\t')
-
-        if len(parts) == 1:
-            rev_id = parts[0]
-            yield int(rev_id), None
-        elif len(parts) == 2:
-            rev_id, page_id = parts
-            yield int(rev_id), int(page_id)
-
-
-def main():
-    args = docopt.docopt(__doc__)
+def main(argv=None):
+    args = docopt.docopt(__doc__, argv=argv)
 
     revert_radius = int(args['--revert-radius'])
     revert_window = int(args['--revert-window'])
@@ -77,6 +55,25 @@ def main():
 
     run(rev_pages, rev_reverteds, session, revert_radius, revert_window)
 
+def read_rev_pages(f):
+    first_line_parts = f.readline().split("\t")
+    if first_line_parts[0] != "rev_id":
+        if len(first_line_parts) == 1:
+            rev_id = first_line_parts[0]
+            yield int(rev_id), None
+        elif len(first_line_parts) == 2:
+            rev_id, page_id = first_line_parts
+            yield int(rev_id), int(page_id)
+
+    for line in f:
+        parts = line.strip().split('\t')
+
+        if len(parts) == 1:
+            rev_id = parts[0]
+            yield int(rev_id), None
+        elif len(parts) == 2:
+            rev_id, page_id = parts
+            yield int(rev_id), int(page_id)
 
 def run(rev_pages, rev_reverteds, session, revert_radius, revert_window):
 

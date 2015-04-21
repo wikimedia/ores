@@ -4,61 +4,59 @@ from collections import defaultdict
 from flask import render_template, request
 from flask.ext.jsonpify import jsonify
 
-from . import errors, scorers
-from .app import app
+from . import responses
 from .util import ParamError, read_bar_split_param
 
 
 def scorer_map():
     return {
-        ('enwiki', 'reverted'): scorers.enwiki_reverted,
-        ('ptwiki', 'reverted'): scorers.ptwiki_reverted
+        'enwiki': scorers.enwiki,
+        'ptwiki': scorers.ptwiki
     }
 
+def configure(config, bp, scorer_map):
 
-# /
-@app.route("/")
-def index():
-    return "Welcome to the index page of the ores flask app."
+    # /
+    @bp.route("/", methods=["GET"])
+    def scores():
+        scorers = [wiki for wiki in scorer_map]
+
+        scorers.sort()
+
+        return jsonify({'scorers': scorers})
+
+    # /enwiki?models=reverted&revids=456789|4567890
+    @bp.route("/<wiki>/", methods=["GET"])
+    def score_revisions(wiki):
+
+        try:
+            scorer = scorer_map[wiki]
+        except KeyError:
+            return responses.not_found("No scorers available for {0}" \
+                                       .format(wiki))
 
 
-# /scores/
-@app.route("/scores/")
-def scores():
-    wiki_models = [wiki_model for wiki_model in scorer_map()]
+        if "models" not in request.args:
+            # Return the models that we have
+            return jsonify({"models": list(scorer_map[wiki].model_map.keys())})
+        else:
+            try:
+                model_names = read_bar_split_param(request, "models", str)
+                rev_ids = read_bar_split_param(request, "revids", int)
+            except ParamError as e:
+                return responses.bad_request(str(e))
 
-    wiki_models.sort()
-
-    return "These are the scorers I have: {0}.".format(wiki_models)
-
-
-# /scores/enwiki?models=reverted&revids=456789|4567890
-@app.route("/scores/<wiki>")
-def score_revisions(wiki):
-
-    scorer_models = scorer_map()
-
-    try:
-        model_names = read_bar_split_param(request, "models", str)
-        rev_ids = read_bar_split_param(request, "revids", int)
-    except ParamError as e:
-        return e.error
-
-    for model_name in model_names:
-        if (wiki, model_name) not in scorer_models:
-            return errors.bad_request("Model '{0}' not available for '{1}'"
-                                      .format(model_name, wiki))
-
-    scores = defaultdict(lambda: {})
-    for model_name in model_names:
-        scorer = scorer_models[(wiki, model_name)]
+        scores = {}
         for rev_id in rev_ids:
 
             try:
-                score = next(scorer.score([rev_id]))
+                score = scorer.score(rev_id, models=model_names)
             except Exception as e:
-                score = {"error": {'type': str(type(e)), 'message': str(e)}}
+                score = {"error": {'type': str(type(e)), 'message': str(e),
+                                   'traceback': traceback.format_exc()}}
 
-            scores[rev_id][model_name] = score
+            scores[rev_id] = score
 
-    return jsonify(scores)
+        return jsonify(scores)
+
+    return bp
