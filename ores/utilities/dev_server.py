@@ -2,8 +2,8 @@
 Starts a development web server.
 
 Usage:
-    wsgi_server (-h | --help)
-    wsgi_server [--port=<num>] [--verbose] [--config=<path>]
+    dev_server (-h | --help)
+    dev_server [--port=<num>] [--verbose] [--config=<path>]
 
 Options:
     -h --help        Print this documentation
