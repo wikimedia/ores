@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
-from ores.wsgi import scorers, routes
+import os
 from ores.wsgi import application
 from flask import request
 import yamlconf
 
 directory = os.path.dirname(os.path.realpath(__file__))
-config_path = os.path.join(dir, "config/ores.yaml")
+config_path = os.path.join(directory, "config/ores.yaml")
 config = yamlconf.load(open(config_path))
 
-application.configure(config)
+app = application.configure(config)
 app.debug = True
 
 @app.errorhandler(404)
