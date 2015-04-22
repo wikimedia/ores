@@ -4,7 +4,11 @@ from ores.wsgi import application
 from flask import request
 import yamlconf
 
-application.configure(yamlconf.load(open("config/ores-localdev.yaml")))
+directory = os.path.dirname(os.path.realpath(__file__))
+config_path = os.path.join(dir, "config/ores.yaml")
+config = yamlconf.load(open(config_path))
+
+application.configure(config)
 app.debug = True
 
 @app.errorhandler(404)
