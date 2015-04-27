@@ -1,11 +1,5 @@
-from . import errors
 
-
-class ParamError(Exception):
-
-    def __init__(self, error):
-        super().__init__()
-        self.error = error
+class ParamError(Exception): pass
 
 
 def read_param(request, param, default=None, type=str):
@@ -13,9 +7,8 @@ def read_param(request, param, default=None, type=str):
         value = request.args.get(param, request.form.get(param, default))
         return type(value.strip())
     except (ValueError, TypeError) as e:
-        error = errors.bad_request("Could not interpret {0}. {1}"
-                                   .format(param, str(e)))
-        raise ParamError(error)
+        raise ParamError("Could not interpret {0}. {1}"
+                         .format(param, str(e)))
 
 
 def read_bar_split_param(request, param, default=None, type=str):

@@ -1,4 +1,0 @@
-#!/usr/bin/env python3
-from ores import label_reverted
-
-label_reverted.main()

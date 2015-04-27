@@ -1,0 +1,4 @@
+revscoring
+mediawiki-utilities
+flask
+flask-jsonpify
