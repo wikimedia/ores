@@ -1,6 +1,5 @@
-from revscoring.features import (
-    diff, page, parent_revision, previous_user_revision, revision, user
-)
+from revscoring.features import (diff, page, parent_revision,
+                                 previous_user_revision, revision, user)
 from revscoring.features.modifiers import log
 
 generic_ratio = [
@@ -89,9 +88,11 @@ generic_other = [
     log(page.age + 1),
     log(parent_revision.seconds_since + 1),
     parent_revision.was_same_user,
+    log(parent_revision.words + 1),
     log(previous_user_revision.seconds_since + 1),
     log(revision.day_of_week + 1),
     log(user.age + 1),
+    log(previous_user_revision.seconds_since + 1),
     user.is_anon,
     user.is_bot
 ]
@@ -115,12 +116,12 @@ generic_minimalist = [
     log(diff.markup_chars_removed + 1),
     log(diff.numeric_chars_added + 1),
     log(diff.numeric_chars_removed + 1),
-    log(diff.proportion_of_chars_added + 1),
-    log(diff.proportion_of_chars_removed + 1),
-    log(diff.proportion_of_markup_chars_added + 1),
-    log(diff.proportion_of_numeric_chars_added + 1),
-    log(diff.proportion_of_symbolic_chars_added + 1),
-    log(diff.proportion_of_uppercase_chars_added + 1),
+    diff.proportion_of_chars_added,
+    diff.proportion_of_chars_removed,
+    diff.proportion_of_markup_chars_added,
+    diff.proportion_of_numeric_chars_added,
+    diff.proportion_of_symbolic_chars_added,
+    diff.proportion_of_uppercase_chars_added,
     log(diff.segments_added + 1),
     log(diff.segments_removed + 1),
     log(diff.symbolic_chars_added + 1),
@@ -129,13 +130,10 @@ generic_minimalist = [
     log(diff.uppercase_chars_removed + 1),
     log(diff.words_added + 1),
     log(diff.words_removed + 1),
-    diff.bytes_changed + 1,
-    log(diff.bytes_changed_ratio + 1),
-    log(page.age + 1),
+    diff.bytes_changed,
+    diff.bytes_changed_ratio,
     page.is_content_namespace,
     parent_revision.was_same_user,
-    log(parent_revision.words + 1),
-    log(previous_user_revision.seconds_since + 1),
     log(user.age + 1),
     user.is_anon,
     user.is_bot
