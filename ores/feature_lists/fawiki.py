@@ -36,38 +36,9 @@ damaging = [
     log(user.age + 1),
     user.is_anon,
     user.is_bot,
-    log(diff.added_badwords_ratio + 1),
     log(diff.added_misspellings_ratio + 1),
-    log(diff.badwords_added + 1),
-    log(diff.badwords_removed + 1),
     log(diff.misspellings_added + 1),
     log(diff.misspellings_removed + 1),
-    diff.proportion_of_badwords_added,
-    diff.proportion_of_badwords_removed,
     diff.proportion_of_misspellings_added,
     diff.proportion_of_misspellings_removed
-]
-
-good_faith = generic.good_faith + [
-    log(max(diff.added_badwords_ratio + 1,1)),
-    log(max(diff.added_misspellings_ratio + 1,1)),
-    log(max(diff.badwords_added + 1,1)),
-    log(max(diff.badwords_removed + 1,1)),
-    log(max(diff.misspellings_added + 1,1)),
-    log(max(diff.misspellings_removed + 1,1)),
-    log(max(diff.proportion_of_badwords_added + 1,1)),
-    log(max(diff.proportion_of_badwords_removed + 1,1)),
-    log(max(diff.proportion_of_misspellings_added + 1,1)),
-    log(max(diff.proportion_of_misspellings_removed + 1,1)),
-    log(max(diff.removed_badwords_ratio + 1,1)),
-    log(max(diff.removed_misspellings_ratio + 1,1)),
-    log(max(parent_revision.badwords + 1,1)),
-    log(max(parent_revision.misspellings + 1,1)),
-    log(max(parent_revision.proportion_of_badwords + 1,1)),
-    log(max(parent_revision.proportion_of_misspellings + 1,1)),
-    log(max(revision.badwords + 1,1)),
-    log(max(revision.misspellings + 1,1)),
-    log(max(revision.proportion_of_badwords + 1,1)),
-    log(max(revision.proportion_of_misspellings + 1,1)),
-    log(revision.infonoise + 1)
 ]
