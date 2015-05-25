@@ -1,7 +1,7 @@
 [uwsgi]
 plugins = python3
 vhost = true
-venv = /home/ores/env/ores-3.4
+venv = /home/revscoring.ores/env/3.4
 chdir = /var/www/ores
 wsgi-file = ores.wsgi
 master = True
