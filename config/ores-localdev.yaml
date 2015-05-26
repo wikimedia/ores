@@ -1,5 +1,5 @@
-application_root: "/scores"
-url_prefix: "/scores"
+application_root: ""
+url_prefix: ""
 
 # Scorers
 scorers:
@@ -7,10 +7,6 @@ scorers:
     extractor: enwiki_api
     models:
       reverted: enwiki_revert
-  ptwiki:
-    extractor: ptwiki_api
-    models:
-      reverted: ptwiki_revert
 
 # Feature extractors
 extractors:
@@ -20,9 +16,6 @@ extractors:
   enwiki_api:
     url: http://en.wikipedia.org/w/api.php
     language: english
-  ptwiki_api:
-    url: http://pt.wikipedia.org/w/api.php
-    language: portuguese
 
 # Scorer models
 scorer_models:
@@ -30,12 +23,8 @@ scorer_models:
     class: revscoring.scorers.MLScorerModel
   enwiki_revert:
     model_file: models/enwiki.reverted.linear_svc.model
-  ptwiki_revert:
-    model_file: models/ptwiki.reverted.linear_svc.model
 
 # Languages
 languages:
   english:
     module: revscoring.languages.english
-  portuguese:
-    module: revscoring.languages.portuguese

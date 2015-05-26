@@ -1,17 +1,17 @@
 import traceback
 from collections import defaultdict
 
-from flask import render_template, request
+from flask import request
 from flask.ext.jsonpify import jsonify
 
-from . import responses
-from .util import ParamError, read_bar_split_param
+from .. import responses
+from ..util import ParamError, read_bar_split_param
 
 
 def configure(config, bp, scorer_map):
 
-    # /
-    @bp.route("/", methods=["GET"])
+    # /scores/
+    @bp.route("/scores/", methods=["GET"])
     def scores():
         scorers = [wiki for wiki in scorer_map]
 
@@ -19,9 +19,9 @@ def configure(config, bp, scorer_map):
 
         return jsonify({'scorers': scorers})
 
-    # /enwiki?models=reverted&revids=456789|4567890
-    @bp.route("/<wiki>/", methods=["GET"])
-    def score_revisions(wiki):
+    # /scores/enwiki/?models=reverted&revids=456789|4567890
+    @bp.route("/scores/<wiki>/", methods=["GET"])
+    def scores_wiki(wiki):
 
         try:
             scorer = scorer_map[wiki]
