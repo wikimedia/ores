@@ -8,6 +8,13 @@ scorers:
     models:
       reverted: enwiki_revert
 
+# Cache of scores
+cache:
+  class: ores.cache.Redis
+  host: localhost
+  port: 9999
+  prefix: "ores"
+
 # Feature extractors
 extractors:
   defaults:
