@@ -35,21 +35,13 @@ def configure(config, bp, scorer_map):
             return jsonify({"models": list(scorer_map[wiki].model_map.keys())})
         else:
             try:
-                model_names = read_bar_split_param(request, "models", str)
-                rev_ids = read_bar_split_param(request, "revids", int)
+                model_names = read_bar_split_param(request, "models", type=str)
+                rev_ids = read_bar_split_param(request, "revids", type=int)
             except ParamError as e:
                 return responses.bad_request(str(e))
 
-        scores = {}
-        for rev_id in rev_ids:
-
-            try:
-                score = scorer.score(rev_id, models=model_names)
-            except Exception as e:
-                score = {"error": {'type': str(type(e)), 'message': str(e),
-                                   'traceback': traceback.format_exc()}}
-
-            scores[rev_id] = score
+        scores = {rev_id:score for rev_id, score in
+                  zip(rev_ids, scorer.score_many(rev_ids, models=model_names))}
 
         return jsonify(scores)
 
