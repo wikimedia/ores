@@ -1,0 +1,85 @@
+application_root: "/scores"
+url_prefix: "/scores"
+
+# Scorers
+scorers:
+  enwiki:
+    extractor: enwiki_api
+    models:
+      reverted: enwiki_revert
+  ptwiki:
+    extractor: ptwiki_api
+    models:
+      reverted: ptwiki_revert
+  fawiki:
+    extractor: fawiki_api
+    models:
+      reverted: fawiki_revert
+#  trwiki:
+#    extractor: trwiki_api
+#    models:
+#      reverted: trwiki_revert 
+  frwiki:
+    extractor: frwiki_api
+    models:
+      reverted: frwiki_revert
+#  simplewiki:
+#    extractor: simplewiki_api
+#    models:
+#      reverted: simplewiki_revert
+
+# Feature extractors
+extractors:
+  defaults:
+    class: revscoring.extractors.APIExtractor
+    user_agent: Object Revision Evaluation Service
+  enwiki_api:
+    url: http://en.wikipedia.org/w/api.php
+    language: english
+  ptwiki_api:
+    url: http://pt.wikipedia.org/w/api.php
+    language: portuguese
+  fawiki_api:
+    url: https://fa.wikipedia.org/w/api.php
+    language: persian
+  trwiki_api:
+    url: https://tr.wikipedia.org/w/api.php
+    language: turkish
+  frwiki_api:
+    url: https://fr.wikipedia.org/w/api.php
+    language: french
+  simplewiki_api:
+    url: https://simple.wikipedia.org/w/api.php
+    language: english
+
+# Scorer models
+scorer_models:
+  defaults:
+    class: revscoring.scorers.MLScorerModel
+  enwiki_revert:
+    model_file: models/enwiki.reverted.linear_svc.model
+  ptwiki_revert:
+    model_file: models/ptwiki.reverted.linear_svc.model
+  frwiki_revert:
+    model_file: models/frwiki.reverted.linear_svc.model
+  fawiki_revert:
+    model_file: models/fawiki.reverted.linear_svc.model
+  ptwiki_revert:
+    model_file: models/ptwiki.reverted.linear_svc.model
+  trwiki_revert:
+    model_file: models/trwiki.reverted.linear_svc.model
+  simplewiki_revert:
+    model_file: models/simplewiki.reverted.linear_svc.model
+
+# Languages
+languages:
+  english:
+    module: revscoring.languages.english
+  portuguese:
+    module: revscoring.languages.portuguese
+  turkish:
+    module: revscoring.languages.turkish
+  persian:
+    module: revscoring.languages.persian
+  french:
+    module: revscoring.languages.french
