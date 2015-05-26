@@ -1,4 +1,6 @@
 git+git://github.com/halfak/Revision-Scoring.git#egg=revscoring
-mediawiki-utilities
-flask
-flask-jsonpify
+docopt == 0.6.2
+Flask == 0.10.1
+revscoring == 0.3.0
+setuptools == 15.1
+flask-jsonpify==1.5.0
