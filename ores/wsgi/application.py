@@ -1,13 +1,17 @@
 import json
 import os
 
-from flask import Blueprint, Flask, request
-from revscoring.scorers import Scorer
-
-from . import routes
-
 
 def configure(config):
+    if 'data_path' in config and 'nltk' in config['data_path']:
+        import nltk
+        nltk.data.path.append(config['data_path']['nltk'])
+
+    from flask import Blueprint, Flask, request
+    from revscoring.scorers import Scorer
+
+    from . import routes
+
     app = Flask("ores")
     app.config["APPLICATION_ROOT"] = config['application_root']
 

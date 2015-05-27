@@ -83,3 +83,7 @@ languages:
     module: revscoring.languages.persian
   french:
     module: revscoring.languages.french
+
+# Data path
+data_path:
+  nltk: /srv/ores/data/nltk
