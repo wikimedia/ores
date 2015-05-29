@@ -25,7 +25,7 @@ def requirements(fname):
 
 setup(
     name="ores",
-    version="0.0.1", # Update in ores/__init__.py too.
+    version="0.0.1",  # Update in ores/__init__.py too.
     author="Aaron Halfaker",
     author_email="ahalfaker@wikimedia.org",
     description=("A webserver for hosting scoring services."),
