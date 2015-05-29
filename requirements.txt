@@ -1,4 +1,4 @@
-revscoring
+git+git://github.com/halfak/Revision-Scoring.git#egg=revscoring
 mediawiki-utilities
 flask
 flask-jsonpify
