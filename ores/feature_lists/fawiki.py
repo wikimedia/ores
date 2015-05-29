@@ -1,8 +1,6 @@
 from revscoring.features import (diff, page, parent_revision,
-                                 previous_user_revision, revision, user)
+                                 user)
 from revscoring.features.modifiers import log
-
-from . import generic
 
 damaging = [
     log(diff.added_symbolic_chars_ratio + 1),

@@ -141,7 +141,7 @@ generic_minimalist = [
     user.is_bot
 ]
 
-#generic = generic_ratio + generic_added + generic_removed + generic_count + generic_wikimarkup + generic_other
+# generic = generic_ratio + generic_added + generic_removed + generic_count + generic_wikimarkup + generic_other
 generic = generic_minimalist
 
 damaging = generic

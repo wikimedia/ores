@@ -1,5 +1,5 @@
 from revscoring.features import (diff, page, parent_revision,
-                                 previous_user_revision, revision, user)
+                                 revision, user)
 from revscoring.features.modifiers import log
 
 from . import generic

@@ -29,9 +29,6 @@ import traceback
 import docopt
 from mw import api
 from mw.lib import reverts
-from revscoring.extractors import APIExtractor
-
-from .util import import_from_path
 
 
 def main(argv=None):
@@ -55,6 +52,7 @@ def main(argv=None):
 
     run(rev_pages, rev_reverteds, session, revert_radius, revert_window)
 
+
 def read_rev_pages(f):
     first_line_parts = f.readline().split("\t")
     if first_line_parts[0] != "rev_id":
@@ -75,23 +73,24 @@ def read_rev_pages(f):
             rev_id, page_id = parts
             yield int(rev_id), int(page_id)
 
+
 def run(rev_pages, rev_reverteds, session, revert_radius, revert_window):
-
-
     for rev_id, page_id in rev_pages:
         try:
             # Detect reverted status
             revert = reverts.api.check(session, rev_id,
-                                       page_id=page_id, # Could be None
+                                       page_id=page_id,  # Could be None
                                        radius=revert_radius,
                                        window=revert_window)
 
             reverted = revert is not None
 
             if reverted:
-                sys.stderr.write("r");sys.stderr.flush()
+                sys.stderr.write("r")
+                sys.stderr.flush()
             else:
-                sys.stderr.write(".");sys.stderr.flush()
+                sys.stderr.write(".")
+                sys.stderr.flush()
 
             # Print out row
             rev_reverteds.write('\t'.join(str(v) for v in [rev_id, reverted]))

@@ -1,6 +1,3 @@
-import traceback
-from collections import defaultdict
-
 from flask import request
 from flask.ext.jsonpify import jsonify
 
@@ -26,9 +23,8 @@ def configure(config, bp, scorer_map):
         try:
             scorer = scorer_map[wiki]
         except KeyError:
-            return responses.not_found("No scorers available for {0}" \
+            return responses.not_found("No scorers available for {0}"
                                        .format(wiki))
-
 
         if "models" not in request.args:
             # Return the models that we have
@@ -40,7 +36,7 @@ def configure(config, bp, scorer_map):
             except ParamError as e:
                 return responses.bad_request(str(e))
 
-        scores = {rev_id:score for rev_id, score in
+        scores = {rev_id: score for rev_id, score in
                   zip(rev_ids, scorer.score_many(rev_ids, models=model_names))}
 
         return jsonify(scores)
