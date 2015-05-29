@@ -1,5 +1,6 @@
 
-class ParamError(Exception): pass
+class ParamError(Exception):
+    pass
 
 
 def read_param(request, param, default=None, type=str):
