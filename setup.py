@@ -1,4 +1,5 @@
 import os
+import re
 
 from setuptools import find_packages, setup
 
@@ -8,8 +9,19 @@ def read(fname):
 
 
 def requirements(fname):
-    return [line.strip()
-            for line in open(os.path.join(os.path.dirname(__file__), fname))]
+    """
+    Generator to parse requirements.txt file
+
+    Supports bits of extended pip format (git urls)
+    """
+    with open(fname) as f:
+        for line in f:
+            match = re.search('#egg=(.*)$', line)
+            if match:
+                yield match.groups()[0]
+            else:
+                yield line.strip()
+
 
 setup(
     name="ores",
@@ -26,7 +38,7 @@ setup(
     url="https://github.com/halfak/Objective-Revision-Evaluation-Service",
     packages=find_packages(),
     long_description=read('README.md'),
-    install_requires=requirements("requirements.txt"),
+    install_requires=list(requirements("requirements.txt")),
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Programming Language :: Python",
