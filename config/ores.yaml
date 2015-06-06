@@ -1,5 +1,5 @@
-application_root: "/scores"
-url_prefix: "/scores"
+application_root: ""
+url_prefix: ""
 
 # Scorers
 scorers:
@@ -18,7 +18,7 @@ scorers:
 #  trwiki:
 #    extractor: trwiki_api
 #    models:
-#      reverted: trwiki_revert 
+#      reverted: trwiki_revert
   frwiki:
     extractor: frwiki_api
     models:

@@ -8,7 +8,8 @@ def configure(config):
 
     from . import routes
 
-    app = Flask("ores")
+def configure(config):
+    app = Flask(__name__)
     app.config["APPLICATION_ROOT"] = config['application_root']
 
     bp = Blueprint('ores', __name__)
