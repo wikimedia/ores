@@ -1,4 +1,4 @@
-from .score_cache import ScoreCache, Context
+from .score_cache import ScoreCache
 from .empty import Empty
 
 from .lru import LRU

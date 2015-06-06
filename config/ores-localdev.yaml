@@ -20,7 +20,6 @@ score_caches:
   local_redis:
     class: ores.score_caches.Redis
     host: localhost
-    port: 9999
     prefix: "ores"
 
 # Available feature extractors

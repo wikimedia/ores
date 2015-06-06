@@ -5,8 +5,11 @@ class ParamError(Exception):
 
 def read_param(request, param, default=None, type=str):
     try:
-        value = request.args.get(param, request.form.get(param, default))
-        return type(value.strip())
+        value = request.args.get(param, request.form.get(param))
+        if value is None:
+            return default
+        else:
+            return type(value)
     except (ValueError, TypeError) as e:
         raise ParamError("Could not interpret {0}. {1}"
                          .format(param, str(e)))

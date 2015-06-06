@@ -1,10 +1,14 @@
+import logging
 from collections import defaultdict
 
 from revscoring import dependencies
 from revscoring.datasources import Datasource
+from revscoring.extractors import Extractor
+from revscoring.scorer_models import ScorerModel
 
 from ..score_caches import Empty, ScoreCache
 
+logger = logging.getLogger("ores.scorer.scorer")
 
 class Scorer:
 
@@ -14,10 +18,12 @@ class Scorer:
             wiki : str
                 The wiki that this scorer is being used for
             scorer_models : dict
-                A mapping between names and `ScorerModel` instances
-            extractor : `revscoring.extractors.Extractor`
+                A mapping between names and
+                :class:`~revscoring.scorer_models.scorer_model.ScorerModel`
+                instances
+            extractor : :class:`~revscoring.extractors.extractor.Extractor`
                 An extractor to use for gathering feature values
-            score_cache : `ores.score_caches.Cache`
+            score_cache : :class:`~ores.score_caches.score_cache.ScoreCache`
                 A cache to use for storing scores and looking up scores
         """
         self._check_compatibility(scorer_models, extractor)
@@ -30,6 +36,14 @@ class Scorer:
         """
         Extracts a mapping of root datasources capabile of generating the
         features needed for a particular model.
+
+        :Parameters:
+            rev_ids : int | `iterable`
+                Revision IDs to extract for
+            model : str
+                The name of a
+                :class:`~revscoring.scorer_models.scorer_model.ScorerModel` to
+                extract the roots for
         """
         features = self.scorer_models[model].features
         root_ds = [d for d in dependencies.dig(features)
@@ -43,13 +57,14 @@ class Scorer:
 
     def solve(self, model, cache=None):
         """
-        Solves a feature set for a revision.  Does not attempt to gather
+        Solves a model's features for a revision.  Does not attempt to gather
         new data.
         """
         features = self.scorer_models[model].features
         return self.extractor.solve(features, cache=cache)
 
     def score(self, rev_ids, model, caches=None):
+        logger.debug("Generating {0} scores for {1}".format(model, rev_ids))
         caches = caches or defaultdict(dict)
 
         scores = {}
@@ -61,12 +76,15 @@ class Scorer:
         version = scorer_model.version
         for rev_id in rev_ids:
             try:
-                score = self.score_cache.lookup(self.wiki, model, rev_id, version=version)
+                score = self.score_cache.lookup(self.wiki, model, rev_id,
+                                                version=version)
                 scores[rev_id] = score
+
+                logger.debug("Found cached score for {0}:{1}".format(model, rev_id))
             except KeyError:
                 pass
 
-        missing_ids = rev_ids - scores.keys()
+        missing_ids = list(rev_ids - scores.keys())
 
         # Extract roots into caches
         error_roots = self.extract_roots(missing_ids, model, caches=caches)
@@ -88,12 +106,13 @@ class Scorer:
         # TODO: Farm this out to celery
         for rev_id in missing_ids:
             try:
-                feature_values = next(self.solve(model, cache=caches[rev_id]))
+                feature_values = self.solve(model, cache=caches[rev_id])
                 score = scorer_model.score(feature_values)
                 self.score_cache.store(self.wiki, model, rev_id, score,
                                        version=version)
                 scores[rev_id] = score
             except Exception as e:
+                raise
                 scores[rev_id] = {
                     'error': {
                         'type': str(type(e)),
@@ -137,6 +156,7 @@ class Scorer:
                 enwiki_damaging_2014: ...
                 enwiki_good-faith_2014: ...
         """
+        logger.info("Loading Scorer '{0}' from config.".format(name))
         section = config[section_key][name]
 
         wiki = name
@@ -149,6 +169,10 @@ class Scorer:
         extractor = Extractor.from_config(config, section['extractor'])
 
         if 'score_cache' in section:
-            score_cache = Cache.from_config(config, section['score_cache'])
+            score_cache = ScoreCache.from_config(config, section['score_cache'])
+        else:
+            score_cache = None
 
-        return cls(wiki, scorer_models, extractor)
+        return cls(wiki, scorer_models=scorer_models,
+                         extractor=extractor,
+                         score_cache=score_cache)

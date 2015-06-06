@@ -6,6 +6,7 @@ __pycache__/
 # Datasets & model files
 datasets/
 *.model
+ipython/
 
 # C extensions
 *.so
