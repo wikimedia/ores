@@ -71,3 +71,19 @@ good_faith = generic.good_faith + [
     log(max(revision.proportion_of_misspellings + 1, 1)),
     log(revision.infonoise + 1)
 ]
+
+wp10 = [
+    revision.category_links, 
+    log(revision.content_chars + 1),
+    log(revision.image_links + 1), 
+    log(revision.cite_templates + 1),
+    revision.image_links / revision.content_chars,
+    revision.infobox_templates,
+    revision.infonoise, 
+    log(revision.internal_links + 1), 
+    revision.level_2_headings, 
+    revision.level_3_headings,
+    log(revision.ref_tags + 1),
+    log(max((revision.ref_tags - revision.cite_templates) + 1, 1)), 
+    revision.proportion_of_templated_references
+]
