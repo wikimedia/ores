@@ -1,6 +1,5 @@
 # Top level configuration
 ores:
-  cache: local_redis
   scorers:
     - enwiki
   wsgi:

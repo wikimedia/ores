@@ -2,11 +2,12 @@ def configure(config):
     if 'data_paths' in config['ores'] and \
        'nltk' in config['ores']['data_paths']:
         import nltk
-        nltk.data.path.append(config['data_paths']['nltk'])
+        nltk.data.path.append(config['ores']['data_paths']['nltk'])
 
     from flask import Blueprint, Flask
 
     from . import routes
+    from ..scorer import Scorer
 
     app = Flask(__name__)
     app.config['APPLICATION_ROOT'] = config['ores']['wsgi']['application_root']

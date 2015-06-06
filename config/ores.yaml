@@ -1,6 +1,5 @@
 # Top level configuration
 ores:
-  cache: local_redis
   scorers:
     - enwiki
     #- ptwiki
@@ -24,26 +23,32 @@ score_caches:
 scorers:
   enwiki:
     extractor: enwiki_api
+    score_cache: local_redis
     scorer_models:
       reverted: enwiki_revert
   ptwiki:
     extractor: ptwiki_api
+    score_cache: local_redis
     scorer_models:
       reverted: ptwiki_revert
   fawiki:
     extractor: fawiki_api
+    score_cache: local_redis
     scorer_models:
       reverted: fawiki_revert
   trwiki:
     extractor: trwiki_api
+    score_cache: local_redis
     scorer_models:
       reverted: trwiki_revert
   frwiki:
     extractor: frwiki_api
+    score_cache: local_redis
     scorer_models:
       reverted: frwiki_revert
   simplewiki:
     extractor: simplewiki_api
+    score_cache: local_redis
     scorer_models:
       reverted: simplewiki_revert
 
