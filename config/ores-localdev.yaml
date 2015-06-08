@@ -1,18 +1,31 @@
-application_root: ""
-url_prefix: ""
+# Top level configuration
+ores:
+  scorers:
+    - enwiki
+  wsgi:
+    application_root: ""
+    url_prefix: ""
 
-# Scorers
+# Available scorers
 scorers:
   enwiki:
     extractor: enwiki_api
-    models:
+    score_cache: local_redis
+    scorer_models:
       reverted: enwiki_revert
 
-# Feature extractors
+# Available caches
+score_caches:
+  local_redis:
+    class: ores.score_caches.Redis
+    host: localhost
+    prefix: "ores"
+
+# Available feature extractors
 extractors:
   defaults:
     class: revscoring.extractors.APIExtractor
-    user_agent: Object Revision Evaluation Service
+    user_agent: Object Revision Evaluation Service (local development)
   enwiki_api:
     url: http://en.wikipedia.org/w/api.php
     language: english

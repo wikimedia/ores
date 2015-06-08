@@ -1,4 +1,6 @@
-git+git://github.com/halfak/Revision-Scoring.git#egg=revscoring
-mediawiki-utilities
+docopt
 flask
 flask-jsonpify
+mediawiki-utilities
+pylru
+revscoring

@@ -1,32 +1,56 @@
-application_root: "/scores"
-url_prefix: "/scores"
+# Top level configuration
+ores:
+  scorers:
+    - enwiki
+    #- ptwiki
+    #- fawiki
+    #- trwiki
+    #- simplewiki
+  wsgi:
+    application_root: ""
+    url_prefix: ""
+  data_paths:
+    nltk: /var/www/nltk_data/
+
+# Score caches
+score_caches:
+  local_redis:
+    class: ores.score_caches.Redis
+    host: localhost
+    prefix: "ores"
 
 # Scorers
 scorers:
   enwiki:
     extractor: enwiki_api
-    models:
+    score_cache: local_redis
+    scorer_models:
       reverted: enwiki_revert
   ptwiki:
     extractor: ptwiki_api
-    models:
+    score_cache: local_redis
+    scorer_models:
       reverted: ptwiki_revert
   fawiki:
     extractor: fawiki_api
-    models:
+    score_cache: local_redis
+    scorer_models:
       reverted: fawiki_revert
-#  trwiki:
-#    extractor: trwiki_api
-#    models:
-#      reverted: trwiki_revert 
+  trwiki:
+    extractor: trwiki_api
+    score_cache: local_redis
+    scorer_models:
+      reverted: trwiki_revert
   frwiki:
     extractor: frwiki_api
-    models:
+    score_cache: local_redis
+    scorer_models:
       reverted: frwiki_revert
-#  simplewiki:
-#    extractor: simplewiki_api
-#    models:
-#      reverted: simplewiki_revert
+  simplewiki:
+    extractor: simplewiki_api
+    score_cache: local_redis
+    scorer_models:
+      reverted: simplewiki_revert
 
 # Feature extractors
 extractors:
@@ -83,7 +107,3 @@ languages:
     module: revscoring.languages.persian
   french:
     module: revscoring.languages.french
-
-# Data path
-data_path:
-  nltk: /srv/ores/data/nltk

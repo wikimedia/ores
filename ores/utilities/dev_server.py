@@ -12,11 +12,13 @@ Options:
                      [default: config/ores-localdev.yaml]
     --verbose        Print logging information
 """
+import logging
+
 import docopt
 
 import yamlconf
 
-from ..wsgi import application
+from ..wsgi import server
 
 
 def main(argv=None):
@@ -24,7 +26,13 @@ def main(argv=None):
 
     config = yamlconf.load(open(args['--config']))
 
-    app = application.configure(config)
+    if args['--verbose']:
+        logging.basicConfig(
+            level=logging.DEBUG,
+            format='%(asctime)s %(levelname)s:%(name)s -- %(message)s'
+        )
+
+    app = server.configure(config)
     app.run(host="0.0.0.0",
             port=int(args['--port']),
             debug=True,
