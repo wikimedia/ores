@@ -12,7 +12,7 @@ class ScoreCache:
         """
         raise NotImplementedError()
 
-    def store(self, wiki, model, rev_id, score):
+    def store(self, wiki, model, rev_id, score, version=None):
         """
         Caches a new score
         """
@@ -30,3 +30,20 @@ class ScoreCache:
         elif 'class' in section:
             Class = yamlconf.import_module(section['class'])
             return Class.from_config(config, name)
+
+
+class Context:
+
+    def __init__(self, scorer_cache, wiki, model, version=None):
+        self.scorer_cache = scorer_cache
+        self.wiki = str(wiki)
+        self.model = str(model)
+        self.version = version
+
+    def lookup(self, rev_id):
+        return self.scorer_cache.lookup(self.wiki, self.model, rev_id,
+                                        version=self.version)
+
+    def store(self, rev_id, score):
+        return self.scorer_cache.store(self.wiki, self.model, rev_id, score,
+                                       version=self.version)
