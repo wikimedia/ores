@@ -18,4 +18,4 @@ class LRU(ScoreCache):
     def from_config(cls, config, name, section_key="score_caches"):
         section = config[section_key][name]
 
-        return cls(**{k:v for k,v in section.items() if k != "class"})
+        return cls(**{k: v for k, v in section.items() if k != "class"})

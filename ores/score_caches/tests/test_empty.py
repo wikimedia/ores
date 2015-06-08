@@ -9,6 +9,7 @@ def test_empty():
     context = empty.context("foo", "bar", version="nope")
     context.store(1, "foo")
 
+
 @raises(KeyError)
 def test_key_error():
 

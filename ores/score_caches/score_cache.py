@@ -4,6 +4,7 @@ import yamlconf
 
 logger = logging.getLogger("ores.score_caches.score_cache")
 
+
 class ScoreCache:
 
     def lookup(self, wiki, model, rev_id, version=None):

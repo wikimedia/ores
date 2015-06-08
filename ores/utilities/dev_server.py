@@ -31,7 +31,7 @@ def main(argv=None):
             level=logging.DEBUG,
             format='%(asctime)s %(levelname)s:%(name)s -- %(message)s'
         )
-    
+
     app = server.configure(config)
     app.run(host="0.0.0.0",
             port=int(args['--port']),

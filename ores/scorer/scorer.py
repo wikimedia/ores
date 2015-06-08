@@ -10,6 +10,7 @@ from ..score_caches import Empty, ScoreCache
 
 logger = logging.getLogger("ores.scorer.scorer")
 
+
 class Scorer:
 
     def __init__(self, wiki, scorer_models, extractor, score_cache=None):
@@ -80,7 +81,8 @@ class Scorer:
                                                 version=version)
                 scores[rev_id] = score
 
-                logger.debug("Found cached score for {0}:{1}".format(model, rev_id))
+                logger.debug("Found cached score for {0}:{1}"
+                             .format(model, rev_id))
             except KeyError:
                 pass
 
@@ -127,7 +129,7 @@ class Scorer:
             if scorer_model.language is not None and \
                extractor.language != scorer_model.language:
                 raise ValueError(("Model language {0} does not match " +
-                                  "extractor language {1}") \
+                                  "extractor language {1}")
                                  .format(scorer_model.language.name,
                                          extractor.language.name))
 
@@ -173,6 +175,5 @@ class Scorer:
         else:
             score_cache = None
 
-        return cls(wiki, scorer_models=scorer_models,
-                         extractor=extractor,
-                         score_cache=score_cache)
+        return cls(wiki, scorer_models=scorer_models, extractor=extractor,
+                   score_cache=score_cache)

@@ -7,8 +7,9 @@ from .score_cache import ScoreCache
 
 logger = logging.getLogger("ores.score_caches.redis")
 
-TTL = 60*60*24*365*16 # 16 years
+TTL = 60*60*24*365*16  # 16 years
 PREFIX = "ores"
+
 
 class Redis(ScoreCache):
 
@@ -59,6 +60,6 @@ class Redis(ScoreCache):
         logger.info("Loading Redis '{0}' from config.".format(name))
         section = config[section_key][name]
 
-        kwargs = {k:v for k,v in section.items() if k != "class"}
+        kwargs = {k: v for k, v in section.items() if k != "class"}
 
         return cls.from_parameters(**kwargs)

@@ -14,8 +14,8 @@ def configure(config):
 
     bp = Blueprint('ores', __name__)
 
-    scorers = {wiki:Scorer.from_config(config, wiki)
-                  for wiki in config['ores']['scorers']}
+    scorers = {wiki: Scorer.from_config(config, wiki)
+               for wiki in config['ores']['scorers']}
 
     bp = routes.configure(config, bp, scorers)
 

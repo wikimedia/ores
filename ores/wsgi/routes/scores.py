@@ -26,7 +26,7 @@ def configure(config, bp, scorers):
         if wiki in scorers:
             scorer = scorers[wiki]
         else:
-            return responses.not_found("No scorers available for {0}" \
+            return responses.not_found("No scorers available for {0}"
                                        .format(wiki))
 
         # If no model is specified, return information on available models
@@ -43,9 +43,8 @@ def configure(config, bp, scorers):
         # Check if all the models are available
         missing_models = models - scorer.scorer_models.keys()
         if len(missing_models) > 0:
-            return responses.bad_request("Models '{0}' not available for {1}." \
+            return responses.bad_request("Models '{0}' not available for {1}."
                                          .format(list(missing_models), wiki))
-
 
         # Read the rev_ids
         try:
@@ -62,7 +61,6 @@ def configure(config, bp, scorers):
 
         return jsonify(scores)
 
-
     # /scores/enwiki/reverted/?revids=456789|4567890
     @bp.route("/scores/<wiki>/<model>/", methods=["GET"])
     def score_revisions(wiki, model):
@@ -71,7 +69,7 @@ def configure(config, bp, scorers):
         if wiki in scorers:
             scorer = scorers[wiki]
         else:
-            return responses.not_found("No models available for {0}" \
+            return responses.not_found("No models available for {0}"
                                        .format(wiki))
 
         # Read the rev_ids
@@ -85,11 +83,10 @@ def configure(config, bp, scorers):
 
         # If the model exists, score revisions with it and return the result
         if model not in scorer.scorer_models:
-            return responses.bad_request("Model '{0}' not available for {1}." \
+            return responses.bad_request("Model '{0}' not available for {1}."
                                          .format(model, wiki))
         else:
             return jsonify(scorer.score(rev_ids, model=model))
-
 
     # /scores/enwiki/reverted/4567890
     @bp.route("/scores/<wiki>/<model>/<int:rev_id>/", methods=["GET"])
@@ -99,13 +96,13 @@ def configure(config, bp, scorers):
         if wiki in scorers:
             scorer = scorers[wiki]
         else:
-            return responses.not_found("No models available for {0}" \
+            return responses.not_found("No models available for {0}"
                                        .format(wiki))
 
         # If the model exists, score revisions with it and return the result
         if model not in scorer.scorer_models:
-            return responses.not_found("Model '{0}' not available for {1}." \
-                                         .format(model, wiki))
+            return responses.not_found("Model '{0}' not available for {1}."
+                                       .format(model, wiki))
         else:
             return jsonify(scorer.score([rev_id], model=model))
 

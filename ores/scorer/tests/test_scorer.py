@@ -2,7 +2,6 @@ from collections import defaultdict, namedtuple
 
 from nose.tools import eq_
 from revscoring import dependencies
-from revscoring.datasources import revision
 
 from ..scorer import Scorer
 
@@ -11,6 +10,7 @@ def test_scorer():
     from revscoring.datasources import Datasource
     from revscoring.dependencies import Dependent
     from revscoring.features import Feature
+
     from ...score_caches import LRU
 
     fake_data = Datasource("fake_data", lambda: "fake")
@@ -19,7 +19,7 @@ def test_scorer():
     characters = Feature("characters", lambda word, len: len(word),
                          returns=int,
                          depends_on=[fake_data, len_func])
-    is_fake = Feature("is_fake", lambda word, fake: word==fake,
+    is_fake = Feature("is_fake", lambda word, fake: word == fake,
                       returns=bool,
                       depends_on=[fake_data, literal_fake])
 
@@ -42,7 +42,6 @@ def test_scorer():
         cache.update({len_func: len,
                       literal_fake: "fake"})
         return dependencies.solve(dependents, cache=cache)
-
 
     extractor = FakeExtractor(fake_extract, fake_solve, None)
 

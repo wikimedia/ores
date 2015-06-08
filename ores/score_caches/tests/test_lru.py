@@ -11,13 +11,14 @@ def test_lru():
 
     cache_context.store(1, "foo")
     cache_context.store(2, "bar")
-    cache_context.store(3, "baz") # 1 gets bumped
+    cache_context.store(3, "baz")  # 1 gets bumped
 
-    eq_(cache_context.lookup(2), "bar") # Moves 2 to the front
-    cache_context.store(4, "fez") # 3 gets bumped
+    eq_(cache_context.lookup(2), "bar")  # Moves 2 to the front
+    cache_context.store(4, "fez")  # 3 gets bumped
 
-    eq_(cache_context.lookup(2), "bar") # Moves 2 to the front
-    eq_(cache_context.lookup(4), "fez") # Moves 4 to the front
+    eq_(cache_context.lookup(2), "bar")  # Moves 2 to the front
+    eq_(cache_context.lookup(4), "fez")  # Moves 4 to the front
+
 
 def test_from_config():
     config = {
