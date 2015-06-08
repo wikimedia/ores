@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 from flask import request
 from flask.ext.jsonpify import jsonify
 
@@ -56,7 +58,7 @@ def configure(config, bp, scorers):
         for model in models:
             model_scores = scorer.score(rev_ids, model=model)
             for rev_id in model_scores:
-                scores[rev_id].update(model_scores[rev_id])
+                scores[rev_id][model] = model_scores[rev_id]
 
         return jsonify(scores)
 

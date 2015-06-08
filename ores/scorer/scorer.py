@@ -106,7 +106,7 @@ class Scorer:
         # TODO: Farm this out to celery
         for rev_id in missing_ids:
             try:
-                feature_values = self.solve(model, cache=caches[rev_id])
+                feature_values = list(self.solve(model, cache=caches[rev_id]))
                 score = scorer_model.score(feature_values)
                 self.score_cache.store(self.wiki, model, rev_id, score,
                                        version=version)
