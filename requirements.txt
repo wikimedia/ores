@@ -3,4 +3,4 @@ flask
 flask-jsonpify
 mediawiki-utilities
 pylru
-revscoring
+revscoring == 0.4.0
