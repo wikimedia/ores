@@ -72,8 +72,7 @@ def initialize_server():
     update_git()
     sr('mkdir', '-p', venv_dir)
     sr('virtualenv', '--python', 'python3', '--system-site-packages', venv_dir)
-    sr(venv_dir + '/bin/pip', 'install', '--upgrade',
-       '-r', src_dir + '/requirements.txt')
+    update_virtualenv()
     sr(venv_dir + '/bin/python', '-m', 'nltk.downloader',
        '-d', data_dir + '/nltk',
        'wordnet', 'omw', 'stopwords')
@@ -100,9 +99,16 @@ def deploy_web():
     restart_uwsgi()
 
 
+@roles('web')
+def update_virtualenv():
+    sr(venv_dir + '/bin/pip', 'install', '--upgrade',
+       '-r', src_dir + '/requirements.txt')
+
+
 @roles('staging')
 def stage():
     update_git('staging')
+    update_virtualenv()
     restart_uwsgi()
 
 
