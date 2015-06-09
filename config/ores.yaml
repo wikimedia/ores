@@ -10,7 +10,7 @@ ores:
     application_root: ""
     url_prefix: ""
   data_paths:
-    nltk: /var/www/nltk_data/
+    nltk: /srv/ores/data/nltk/
 
 # Score caches
 score_caches:
