@@ -3,4 +3,5 @@ flask
 flask-jsonpify
 mediawiki-utilities
 pylru
+redis
 revscoring
