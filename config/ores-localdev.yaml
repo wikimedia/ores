@@ -21,6 +21,13 @@ score_caches:
     host: localhost
     prefix: "ores"
 
+# Score processor
+score_processors:
+  local_celery:
+    class ores.score_processors.Celery
+    main: ores
+    backend: redis://localhost
+
 # Available feature extractors
 extractors:
   defaults:
