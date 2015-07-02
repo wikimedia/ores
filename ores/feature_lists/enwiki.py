@@ -75,7 +75,7 @@ wp10 = [
     log(revision.content_chars + 1),
     log(revision.image_links + 1),
     log(revision.cite_templates + 1),
-    log(revision.templates - revision.cite_templates + 1),
+    log((revision.templates - revision.cite_templates) + 1),
     revision.image_links / max(revision.content_chars, 1),
     revision.infobox_templates,
     revision.infonoise,
