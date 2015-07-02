@@ -50,10 +50,11 @@ def test_scorer():
     scorer_model = FakeScorerModel(lambda fvs: {"prediction": "generated"},
                                    "1", None, [characters, is_fake])
 
-    scorer_cache = LRU(128)
-    scorer_cache.store("fakewiki", "fake", 2, {"cached": True}, version="1")
+    score_cache = LRU(128)
+    score_cache.store("fakewiki", "fake", 2, {"cached": True}, version="1")
 
-    scorer = Scorer("fakewiki", {"fake": scorer_model}, extractor, scorer_cache)
+    scorer = Scorer("fakewiki", {"fake": scorer_model}, extractor,
+                    score_cache=score_cache)
 
     rev_ids = list(range(10))
     for rev_id, score in scorer.score(rev_ids, model="fake").items():

@@ -7,13 +7,15 @@ from revscoring.extractors import Extractor
 from revscoring.scorer_models import ScorerModel
 
 from ..score_caches import Empty, ScoreCache
+from ..score_processors import ScoreProcessor, Timeout
 
 logger = logging.getLogger("ores.scorer.scorer")
 
 
 class Scorer:
 
-    def __init__(self, wiki, scorer_models, extractor, score_cache=None):
+    def __init__(self, wiki, scorer_models, extractor, score_processor=None,
+                 score_cache=None):
         """
         :Parameters:
             wiki : str
@@ -24,6 +26,9 @@ class Scorer:
                 instances
             extractor : :class:`~revscoring.extractors.extractor.Extractor`
                 An extractor to use for gathering feature values
+            score_processor : A
+                :class:`~ores.score_processors.score_processor.ScoreProcessor`
+                to use doing the CPU intensive work.
             score_cache : :class:`~ores.score_caches.score_cache.ScoreCache`
                 A cache to use for storing scores and looking up scores
         """
@@ -31,6 +36,7 @@ class Scorer:
         self.wiki = str(wiki)
         self.scorer_models = scorer_models
         self.extractor = extractor
+        self.score_processor = score_processor or Timeout()
         self.score_cache = score_cache or Empty()
 
     def extract_roots(self, rev_ids, model, caches=None):
@@ -71,11 +77,23 @@ class Scorer:
         scores = {}
         scorer_model = self.scorer_models[model]
 
-        # TODO: Lookup already-started celery tasks and get AsyncResults
+        logger.debug("Starting request with ")
+
+        # Lookup in-progress processors
+        results = {}
+        for rev_id in rev_ids:
+            id = (self.wiki, model, rev_id, scorer_model.version)
+            try:
+                result = self.score_processor.in_progress(id)
+                results[rev_id] = result
+            except KeyError:
+                pass
+
+        missing_ids = set(rev_ids) - results.keys()
 
         # Lookup scores that are in the cache
         version = scorer_model.version
-        for rev_id in rev_ids:
+        for rev_id in missing_ids:
             try:
                 score = self.score_cache.lookup(self.wiki, model, rev_id,
                                                 version=version)
@@ -86,7 +104,7 @@ class Scorer:
             except KeyError:
                 pass
 
-        missing_ids = list(rev_ids - scores.keys())
+        missing_ids = list(missing_ids - scores.keys())
 
         # Extract roots into caches
         error_roots = self.extract_roots(missing_ids, model, caches=caches)
@@ -105,22 +123,48 @@ class Scorer:
         # Filters out the errors we just logged.
         missing_ids = missing_ids - scores.keys()
 
-        # TODO: Farm this out to celery
+        # Farm this out to a distributed process
+        for rev_id in missing_ids:
+            id = (self.wiki, model, rev_id, scorer_model.version)
+            results[rev_id] = self.score_processor.process(scorer_model,
+                                                           self.extractor,
+                                                           cache=caches[rev_id],
+                                                           id=id)
+
+        # TODO: Get results
         for rev_id in missing_ids:
             try:
-                feature_values = list(self.solve(model, cache=caches[rev_id]))
-                score = scorer_model.score(feature_values)
-                self.score_cache.store(self.wiki, model, rev_id, score,
-                                       version=version)
-                scores[rev_id] = score
-            except Exception as e:
-                raise
+                id = (self.wiki, model, rev_id, scorer_model.version)
+                result = self.score_processor.process(scorer_model,
+                                                      self.extractor,
+                                                      cache=caches[rev_id],
+                                                      id=id)
+
+                results[rev_id] = result
+            except RuntimeError as e:
                 scores[rev_id] = {
                     'error': {
                         'type': str(type(e)),
                         'message': str(e)
                     }
                 }
+
+        for rev_id, result in results.items():
+            try:
+                score = result.get()
+                self.score_cache.store(self.wiki, model, rev_id, score,
+                                       version=scorer_model.version)
+                scores[rev_id] = score
+            except RuntimeError as e:
+                scores[rev_id] = {
+                    'error': {
+                        'type': str(type(e)),
+                        'message': str(e)
+                    }
+                }
+            finally:
+                if hasattr(result, 'traceback'):
+                    logger.error(result.traceback)
 
         return scores
 
@@ -175,5 +219,11 @@ class Scorer:
         else:
             score_cache = None
 
+        if 'score_processor' in section:
+            score_processor = \
+                ScoreProcessor.from_config(config, section['score_processor'])
+        else:
+            score_processor = None
+
         return cls(wiki, scorer_models=scorer_models, extractor=extractor,
-                   score_cache=score_cache)
+                   score_processor=score_processor, score_cache=score_cache)
