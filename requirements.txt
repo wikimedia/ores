@@ -6,3 +6,4 @@ mediawiki-utilities
 pylru
 redis
 revscoring
+stopit
