@@ -11,6 +11,7 @@ scorers:
   enwiki:
     extractor: enwiki_api
     score_cache: local_redis
+    score_processor: local_celery
     scorer_models:
       reverted: enwiki_revert
 
@@ -19,14 +20,18 @@ score_caches:
   local_redis:
     class: ores.score_caches.Redis
     host: localhost
-    prefix: "ores"
+    prefix: ores
 
 # Score processor
 score_processors:
   local_celery:
-    class ores.score_processors.Celery
-    main: ores
-    backend: redis://localhost
+    class: ores.score_processors.Celery
+    BROKER_URL: amqp://localhost
+    CELERY_RESULT_BACKEND: redis://localhost
+    timeout: 5 # seconds
+  timeout:
+    class: ores.score_processors.Timeout
+    timeout: 5 # seconds
 
 # Available feature extractors
 extractors:
