@@ -46,12 +46,12 @@ class Celery(ScoreProcessor):
         self._process = application.tasks['ores.score_processors.celery.score']
 
     def in_progress(self, id):
-        id_bytes = bytes(":".join(str(v) for v in id), 'utf-8')
+        id_string = ":".join(str(v) for v in id)
 
         # Try to get an async_result for an in_progress task
         logger.debug("Checking if {0} is already being processed"
                      .format(repr(id)))
-        result = self._process.AsyncResult(task_id=id_bytes)
+        result = self._process.AsyncResult(task_id=id_string)
         if result.state not in ("STARTED", "SUCCESS"):
             raise KeyError(id)
         else:
@@ -59,7 +59,7 @@ class Celery(ScoreProcessor):
             return result
 
     def process(self, *args, id=None, **kwargs):
-        id_bytes = bytes(":".join(str(v) for v in id), 'utf-8')
+        id_string = ":".join(str(v) for v in id)
 
         # Tells the _process function to time itself out
         kwargs['timeout'] = self.timeout
@@ -67,7 +67,7 @@ class Celery(ScoreProcessor):
         # Starts a new task and gets async result
         logger.debug("Starting a new task for {0}".format(repr(id)))
         result = self._process.apply_async(args=args, kwargs=kwargs,
-                                           task_id=id_bytes)
+                                           task_id=id_string)
 
         # Wraps the result so the get function implements a timeout
         return CeleryTimeoutResult(result, self.timeout)
