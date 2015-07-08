@@ -36,4 +36,5 @@ def main(argv=None):
     app.run(host="0.0.0.0",
             port=int(args['--port']),
             debug=True,
-            ssl_context="adhoc")
+            ssl_context="adhoc",
+            threaded=True)
