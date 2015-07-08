@@ -2,82 +2,124 @@ import logging
 
 import celery
 
-from .score_processor import ScoreProcessor, ScoreResult, process_score
+from ..score_caches import ScoreCache
+from ..scoring_contexts import ScoringContext
+from .score_processor import ScoreResult
 from .timeout import timeout as timeout_func
+from .timeout import Timeout
 
 logger = logging.getLogger("ores.score_processors.celery")
-
-
-def configure(config, name, section_key="score_processors"):
-    section = config[section_key][name]
-
-    application = celery.Celery("ores")
-    logger.info("Configuring Celery application {0}".format(repr(name)))
-
-    @application.task(track_started=True)
-    def score(*args, timeout=None, **kwargs):
-        return timeout_func(process_score, *args, seconds=timeout, **kwargs)
-
-    application_config_kwargs = {k: v for k, v in section.items()
-                                 if k not in ("class", "timeout")}
-
-    application.conf.update(**application_config_kwargs)
-
-    return application
 
 
 class CeleryTimeoutResult(ScoreResult):
 
     def __init__(self, async_result, timeout):
         self.async_result = async_result
-        self.timeout = float(timeout)
+        self.timeout = timeout
 
     def get(self):
-        return self.async_result.get(self.timeout)
+        return self.async_result.get(timeout=self.timeout)
 
 
-class Celery(ScoreProcessor):
+class Celery(Timeout):
 
-    def __init__(self, application, timeout=None):
+    def __init__(self, *args, application, **kwargs):
+        super().__init__(*args, **kwargs)
         self.application = application
-        self.timeout = float(timeout) if timeout is not None else None
 
-        # This is a bit of a hack, but it works in practice.
-        self._process = application.tasks['ores.score_processors.celery.score']
+        @self.application.task
+        def _process(context, model, cache):
+            scoring_context = self[context]
+            score = scoring_context.score(model, cache)
+            return score
 
-    def in_progress(self, id):
-        id_string = ":".join(str(v) for v in id)
+        self._process = _process
+
+    def _generate_id(self, context, model, rev_id):
+        scorer_model = self[context][model]
+        version = scorer_model.version
+
+        return ":".join(str(v) for v in [context, model, rev_id, version])
+
+    def process(self, context, model, rev_id, cache):
+        id_string = self._generate_id(context, model, rev_id)
+
+        result = self._process.apply_async(args=(context, model, cache),
+                                           task_id=id_string)
+        return CeleryTimeoutResult(result, self.timeout)
+
+    def score(self, context, model, rev_ids):
+        rev_ids = set(rev_ids)
+
+        # Lookup scoring results that are currently in progress
+        results = self._lookup_inprogress_results(context, model, rev_ids)
+        missing_rev_ids = rev_ids - results.keys()
+
+        # Lookup scoring results that are in the cache
+        scores = self._lookup_cached_scores(context, model, missing_rev_ids)
+        missing_rev_ids = missing_rev_ids - scores.keys()
+
+        # Generate scores for missing rev_ids
+        scores.update(self._score(context, model, missing_rev_ids))
+
+        # Gather results
+        for rev_id in results:
+            try:
+                scores[rev_id] = results[rev_id].get()
+            except Exception as e:
+                scores[rev_id] = {
+                    'error': {
+                        'type': str(type(error)),
+                        'message': str(error)
+                    }
+                }
+
+        # Return scores
+        return scores
+
+
+    def _lookup_inprogress_results(self, context, model, rev_ids):
+        scorer_model = self[context][model]
+        version = scorer_model.version
+
+        results = {}
+        for rev_id in rev_ids:
+            id_string = self._generate_id(context, model, rev_id)
+            try:
+                results[rev_id] = self._get_result(id_string)
+            except KeyError:
+                pass
+
+        return results
+
+    def _get_result(self, id_string):
 
         # Try to get an async_result for an in_progress task
         logger.debug("Checking if {0} is already being processed"
-                     .format(repr(id)))
+                     .format(repr(id_string)))
         result = self._process.AsyncResult(task_id=id_string)
         if result.state not in ("STARTED", "SUCCESS"):
-            raise KeyError(id)
+            raise KeyError(id_string)
         else:
-            logger.debug("Found AsyncResult for {0}".format(repr(id)))
+            logger.debug("Found AsyncResult for {0}".format(repr(id_string)))
             return result
-
-    def process(self, *args, id=None, **kwargs):
-        id_string = ":".join(str(v) for v in id)
-
-        # Tells the _process function to time itself out
-        kwargs['timeout'] = self.timeout
-
-        # Starts a new task and gets async result
-        logger.debug("Starting a new task for {0}".format(repr(id)))
-        result = self._process.apply_async(args=args, kwargs=kwargs,
-                                           task_id=id_string)
-
-        # Wraps the result so the get function implements a timeout
-        return CeleryTimeoutResult(result, self.timeout)
 
     @classmethod
     def from_config(cls, config, name, section_key="score_processors"):
         section = config[section_key][name]
 
+        scoring_contexts = {name: ScoringContext.from_config(config, name)
+                            for name in section['scoring_contexts']}
+
+        if 'score_cache' in section:
+            score_cache = ScoreCache.from_config(config, section['score_cache'])
+        else:
+            score_cache = None
+
         timeout = section.get('timeout')
+        application = celery.Celery('ores.score_processors.celery')
+        application.conf.update(**{k: v for k, v in section.items()
+                                   if k not in ('class', 'timeout')})
 
-        application = configure(config, name, section_key=section_key)
-
-        return cls(application, timeout)
+        return cls(scoring_contexts, score_cache=score_cache,
+                   application=application, timeout=timeout)

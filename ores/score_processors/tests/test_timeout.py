@@ -4,38 +4,51 @@ from collections import namedtuple
 from nose.tools import eq_, raises
 from revscoring.dependencies import Context
 from revscoring.features import Feature
+from revscoring.scorer_models import ScorerModel
 
+from ...scoring_contexts import ScoringContext
 from ..timeout import Timeout, TimeoutError
 
 wait_time = Feature("wait_time", returns=float)
 
-FakeSM = namedtuple("ScorerModel", ['score', 'features'])
-waiter = FakeSM(
-    lambda fvs: time.sleep(fvs[0]) or {'score': True},
-    [wait_time]
-)
 
+class FakeSM(ScorerModel):
 
-class FakeExtractor(Context):
-    pass
+    def __init__(self):
+        self.features = [wait_time]
+        self.language = None
+        self.version = None
 
+    def score(self, feature_values):
+        raise NotImplementedError()
 
-extractor = FakeExtractor()
+class FakeSC(ScoringContext):
 
-FakeCache = namedtuple("ScoreCache", ['store'])
-score_cache = FakeCache(lambda *args, **kwargs: None)
+    def solve(self, model, cache):
+        return cache
+
+    def score(self, model, cache):
+        wait_time_value = cache[wait_time]
+        time.sleep(wait_time_value)
+        return {'score': True}
+
+    def extract_roots(self, model, rev_ids, caches=None):
+        return {rev_id: (None, caches[rev_id]) for rev_id in rev_ids}
 
 
 def test_score():
-    score_processor = Timeout(timeout=0.10)
+    fakewiki = FakeSC("fakewiki", {'fake': FakeSM()}, None)
+    score_processor = Timeout({'fakewiki': fakewiki}, timeout=0.10)
 
-    result = score_processor.process(waiter, extractor, cache={wait_time: 0.05})
-    eq_(result.get(), {'score': True})
+    scores = score_processor.score("fakewiki", "fake", [1],
+                                  caches={1: {wait_time: 0.05}})
+    eq_(scores, {1: {'score': True}})
 
-
-@raises(TimeoutError)
 def test_timeout():
-    score_processor = Timeout(timeout=0.05)
+    fakewiki = FakeSC("fakewiki", {'fake': FakeSM()}, None)
+    score_processor = Timeout({'fakewiki': fakewiki}, timeout=0.05)
 
-    result = score_processor.process(waiter, extractor, cache={wait_time: 0.50})
-    eq_(result.get(), {'score': True})
+    scores = score_processor.score("fakewiki", "fake", [1],
+                                  caches={1: {wait_time: 0.10}})
+    assert 'error' in scores[1]
+    assert 'Timed out after' in scores[1]['error']['message']

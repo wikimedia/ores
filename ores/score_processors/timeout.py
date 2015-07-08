@@ -4,26 +4,21 @@ import traceback
 
 import stopit
 
-from .score_processor import ScoreProcessor, SimpleScoreResult, process_score
+from .score_processor import SimpleScoreProcessor, SimpleScoreResult
 
 logger = logging.getLogger("ores.score_processors.timeout")
 
 
-class Timeout(ScoreProcessor):
+class Timeout(SimpleScoreProcessor):
 
-    def __init__(self, timeout=None):
+    def __init__(self, *args, timeout=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.timeout = float(timeout) if timeout is not None else None
 
-        self.timeout = timeout
+    def _process(self, context, model, rev_id, cache):
+        return timeout(super()._process, context, model, rev_id, cache,
+                       seconds=self.timeout)
 
-    def in_progress(self, id):
-        raise KeyError(id)
-
-    def process(self, *args, id=None, **kwargs):
-        try:
-            score = timeout(process_score, *args, seconds=self.timeout, **kwargs)
-            return SimpleScoreResult(score=score)
-        except RuntimeError as error:
-            return SimpleScoreResult(error=error)
 
     @classmethod
     def from_config(cls, config, name, section_key="score_processors"):
