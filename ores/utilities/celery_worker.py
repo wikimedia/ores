@@ -3,11 +3,10 @@ Starts a celery worker for ORES.  Note that
 
 Usage:
     celery_worker -h | --help
-    celery_worker <score_processor> [--config=<path>]
+    celery_worker [--config=<path>]
 
 Options:
     -h --help          Prints this documentation
-    <score_processor>  The name of a score processor to configure
     --config=<path>    The path to a yaml config file
                        [default: config/ores-localdev.yaml]
 """
@@ -17,7 +16,7 @@ import docopt
 
 import yamlconf
 
-from ..score_processors import celery
+from ..score_processors import Celery
 
 
 def main(argv=None):
@@ -26,8 +25,9 @@ def main(argv=None):
 
     config = yamlconf.load(open(args['--config']))
 
-    section_name = args['<score_processor>']
+    name = config['ores']['score_processor']
+    score_processor = Celery.from_config(config, name)
 
-    application = celery.configure(config, section_name)
-
-    application.worker_main(argv=["celery_worker", "--loglevel=INFO"])
+    score_processor.application.worker_main(
+        argv=["celery_worker", "--loglevel=INFO"]
+    )
