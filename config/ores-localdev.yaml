@@ -1,29 +1,25 @@
 # Top level configuration
 ores:
-  scorers:
-    - enwiki
+  score_processor: local_celery
   wsgi:
     application_root: ""
     url_prefix: ""
 
-# Available scorers
-scorers:
-  enwiki:
-    extractor: enwiki_api
-    score_cache: local_redis
-    score_processor: local_celery
-    scorer_models:
-      reverted: enwiki_revert
-
-# Available caches
+# Caching options
 score_caches:
   local_redis:
     class: ores.score_caches.Redis
     host: localhost
     prefix: ores
+  lru:
+    class: ores.score_caches.LRU
 
-# Score processor
+# Score processing options
 score_processors:
+  defaults:
+    score_cache: local_redis
+    scoring_contexts:
+      - enwiki
   local_celery:
     class: ores.score_processors.Celery
     BROKER_URL: redis://localhost
@@ -32,6 +28,13 @@ score_processors:
   timeout:
     class: ores.score_processors.Timeout
     timeout: 5 # seconds
+
+# Scoring contexts
+scoring_contexts:
+  enwiki:
+    extractor: enwiki_api
+    scorer_models:
+      reverted: enwiki_revert
 
 # Available feature extractors
 extractors:
