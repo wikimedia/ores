@@ -13,7 +13,6 @@ Usage:
 
 Options:
     -h --help               Prints out this documentation
-    <features>              Classpath to a list of features to extract
     --api=<url>             The url of the API to use to extract features
     --revert-radius=<revs>  The maximum amount of revisions that a reverting
                             edit can revert [default: 15]
