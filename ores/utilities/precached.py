@@ -54,8 +54,9 @@ def run(stream_url, ores_url, config, verbose):
 
     # Build a mapping of wikis and models from the configuration
     wiki_models = defaultdict(list)
-    for wiki in config['ores']['scorers']:
-        for model in config['scorers'][wiki]['scorer_models']:
+    sp_name = config['ores']['score_processor']
+    for wiki in config['score_processors'][sp_name]['scoring_contexts']:
+        for model in config['scoring_contexts'][wiki]['scorer_models']:
             wiki_models[wiki].append(model)
 
     def get_score(wiki, model, rev_id):
