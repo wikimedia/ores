@@ -7,32 +7,32 @@ from .. import responses
 from ..util import ParamError, read_bar_split_param
 
 
-def configure(config, bp, scorers):
+def configure(config, bp, score_processor):
 
     # /scores/
     @bp.route("/scores/", methods=["GET"])
     def scores():
-        wikis = [wiki for wiki in scorers]
+        contexts = [context for context in score_processor]
 
-        wikis.sort()
+        contexts.sort()
 
-        return jsonify({'wikis': wikis})
+        return jsonify({'contexts': contexts})
 
     # /scores/enwiki/?models=reverted&revids=456789|4567890
-    @bp.route("/scores/<wiki>/", methods=["GET"])
-    def score_model_revisions(wiki):
+    @bp.route("/scores/<context>/", methods=["GET"])
+    def score_model_revisions(context):
 
-        # Check to see if we have the wiki
-        if wiki in scorers:
-            scorer = scorers[wiki]
-        else:
+        # Check to see if we have the context available in our score_processor
+        if context not in score_processor:
             return responses.not_found("No scorers available for {0}"
                                        .format(wiki))
 
         # If no model is specified, return information on available models
         if "models" not in request.args:
             # Return the models that we have
-            return jsonify({"models": list(scorers[wiki].scorer_models.keys())})
+            models = list(score_processor[context].keys())
+            models.sort()
+            return jsonify({"models": models})
 
         # Read the params
         try:
@@ -41,7 +41,7 @@ def configure(config, bp, scorers):
             return responses.bad_request(str(e))
 
         # Check if all the models are available
-        missing_models = models - scorer.scorer_models.keys()
+        missing_models = models - score_processor[context].keys()
         if len(missing_models) > 0:
             return responses.bad_request("Models '{0}' not available for {1}."
                                          .format(list(missing_models), wiki))
@@ -52,23 +52,24 @@ def configure(config, bp, scorers):
         except ParamError as e:
             return responses.bad_request(str(e))
 
+        if len(rev_ids) == 0:
+            return responses.bad_request("No revids provided.")
+
         # Generate scores for each model and merge them together
         scores = defaultdict(dict)
         for model in models:
-            model_scores = scorer.score(rev_ids, model=model)
+            model_scores = score_processor.score(context, model, rev_ids)
             for rev_id in model_scores:
                 scores[rev_id][model] = model_scores[rev_id]
 
         return jsonify(scores)
 
     # /scores/enwiki/reverted/?revids=456789|4567890
-    @bp.route("/scores/<wiki>/<model>/", methods=["GET"])
-    def score_revisions(wiki, model):
+    @bp.route("/scores/<context>/<model>/", methods=["GET"])
+    def score_revisions(context, model):
 
-        # Check to see if we have the wiki available in our scorers
-        if wiki in scorers:
-            scorer = scorers[wiki]
-        else:
+        # Check to see if we have the context available in our score_processor
+        if context not in score_processor:
             return responses.not_found("No models available for {0}"
                                        .format(wiki))
 
@@ -82,28 +83,28 @@ def configure(config, bp, scorers):
             return responses.bad_request("No revids provided.")
 
         # If the model exists, score revisions with it and return the result
-        if model not in scorer.scorer_models:
+        if model not in score_processor[context]:
             return responses.bad_request("Model '{0}' not available for {1}."
                                          .format(model, wiki))
         else:
-            return jsonify(scorer.score(rev_ids, model=model))
+            scores = score_processor.score(context, model, rev_ids)
+            return jsonify(scores)
 
     # /scores/enwiki/reverted/4567890
-    @bp.route("/scores/<wiki>/<model>/<int:rev_id>/", methods=["GET"])
-    def score_revision(wiki, model, rev_id):
+    @bp.route("/scores/<context>/<model>/<int:rev_id>/", methods=["GET"])
+    def score_revision(context, model, rev_id):
 
-        # Check to see if we have the wiki available in our scorers
-        if wiki in scorers:
-            scorer = scorers[wiki]
-        else:
+        # Check to see if we have the context available in our score_processor
+        if context not in score_processor:
             return responses.not_found("No models available for {0}"
                                        .format(wiki))
 
         # If the model exists, score revisions with it and return the result
-        if model not in scorer.scorer_models:
+        if model not in score_processor[context]:
             return responses.not_found("Model '{0}' not available for {1}."
                                        .format(model, wiki))
         else:
-            return jsonify(scorer.score([rev_id], model=model))
+            scores = score_processor.score(context, model, [rev_id])
+            return jsonify(scores)
 
     return bp

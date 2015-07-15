@@ -3,15 +3,13 @@ from collections import defaultdict, namedtuple
 from nose.tools import eq_
 from revscoring import dependencies
 
-from ..scorer import Scorer
+from ..scoring_context import ScoringContext
 
 
-def test_scorer():
+def test_scoring_context():
     from revscoring.datasources import Datasource
     from revscoring.dependencies import Dependent
     from revscoring.features import Feature
-
-    from ...score_caches import LRU
 
     fake_data = Datasource("fake_data", lambda: "fake")
     len_func = Dependent("len_func")
@@ -50,19 +48,15 @@ def test_scorer():
     scorer_model = FakeScorerModel(lambda fvs: {"prediction": "generated"},
                                    "1", None, [characters, is_fake])
 
-    scorer_cache = LRU(128)
-    scorer_cache.store("fakewiki", "fake", 2, {"cached": True}, version="1")
+    scoring_context = ScoringContext("fakewiki", {"fake": scorer_model},
+                                     extractor)
 
-    scorer = Scorer("fakewiki", {"fake": scorer_model}, extractor, scorer_cache)
 
-    rev_ids = list(range(10))
-    for rev_id, score in scorer.score(rev_ids, model="fake").items():
-        print(score)
-        if rev_id % 5 == 0:
-            assert 'error' in score
-            eq_(score['error']['message'], "extract")
-        elif rev_id == 2:
-            assert 'cached' in score
-            eq_(score['cached'], True)
-        else:
-            eq_(score['prediction'], "generated")
+    rev_ids = [1,2,3,4,5]
+    root_ds_caches = scoring_context.extract_roots("fake", rev_ids)
+    eq_(len(root_ds_caches), 5)
+    eq_(root_ds_caches[1][1][fake_data], "fake")
+    assert root_ds_caches[5][0] is not None
+
+    score = scoring_context.score("fake", {characters: 10, is_fake: False})
+    eq_(score['prediction'], "generated")
