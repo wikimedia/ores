@@ -121,5 +121,11 @@ class Celery(Timeout):
         application.conf.update(**{k: v for k, v in section.items()
                                    if k not in ('class', 'timeout')})
 
+
+        if 'data_paths' in config['ores'] and \
+           'nltk' in config['ores']['data_paths']:
+            import nltk
+            nltk.data.path.append(config['ores']['data_paths']['nltk'])
+
         return cls(scoring_contexts, score_cache=score_cache,
                    application=application, timeout=timeout)

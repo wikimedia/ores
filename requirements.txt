@@ -7,3 +7,4 @@ pylru
 redis
 revscoring
 stopit
+yamlconf
