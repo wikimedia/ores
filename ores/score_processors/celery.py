@@ -3,7 +3,6 @@ import logging
 import celery
 
 from ..score_caches import ScoreCache
-from ..scoring_contexts import ScoringContext
 from .score_processor import ScoreResult
 from .timeout import timeout as timeout_func
 from .timeout import Timeout
@@ -106,6 +105,14 @@ class Celery(Timeout):
 
     @classmethod
     def from_config(cls, config, name, section_key="score_processors"):
+
+        if 'data_paths' in config['ores'] and \
+           'nltk' in config['ores']['data_paths']:
+            import nltk
+            nltk.data.path.append(config['ores']['data_paths']['nltk'])
+
+        from ..scoring_contexts import ScoringContext
+
         section = config[section_key][name]
 
         scoring_contexts = {name: ScoringContext.from_config(config, name)
@@ -120,12 +127,6 @@ class Celery(Timeout):
         application = celery.Celery('ores.score_processors.celery')
         application.conf.update(**{k: v for k, v in section.items()
                                    if k not in ('class', 'timeout')})
-
-
-        if 'data_paths' in config['ores'] and \
-           'nltk' in config['ores']['data_paths']:
-            import nltk
-            nltk.data.path.append(config['ores']['data_paths']['nltk'])
 
         return cls(scoring_contexts, score_cache=score_cache,
                    application=application, timeout=timeout)
