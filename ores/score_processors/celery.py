@@ -1,6 +1,7 @@
 import logging
 
 import celery
+from celery.signals import after_task_publish
 
 from ..score_caches import ScoreCache
 from .score_processor import ScoreResult
@@ -25,6 +26,19 @@ class Celery(Timeout):
     def __init__(self, *args, application, **kwargs):
         super().__init__(*args, **kwargs)
         self.application = application
+
+        # This sets up a state updater that will set a state to "SENT" when
+        # a task is actually started.  This allows us to differentate between
+        # async-results that are in-process and those that do not exist.
+        @after_task_publish.connect
+        def update_sent_state(sender=None, body=None, **kwargs):
+            # the task may not exist if sent using `send_task` which
+            # sends tasks by name, so fall back to the default result backend
+            # if that is the case.
+            task = application.tasks.get(sender)
+            backend = task.backend if task else application.backend
+
+            backend.store_result(body['id'], None, "SENT")
 
         @self.application.task
         def _process(context, model, cache):
@@ -97,7 +111,9 @@ class Celery(Timeout):
         logger.debug("Checking if {0} is already being processed"
                      .format(repr(id_string)))
         result = self._process.AsyncResult(task_id=id_string)
-        if result.state not in ("STARTED", "SUCCESS"):
+        logging.info("Found task {0} with state {1}" \
+                      .format(id_string, result.state))
+        if result.state not in ("STARTED", "SUCCESS", "SENT"):
             raise KeyError(id_string)
         else:
             logger.debug("Found AsyncResult for {0}".format(repr(id_string)))
