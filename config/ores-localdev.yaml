@@ -48,7 +48,7 @@ extractors:
 # Scorer models
 scorer_models:
   defaults:
-    class: revscoring.scorers.MLScorerModel
+    class: revscoring.scorer_models.MLScorerModel
   enwiki_revert:
     model_file: models/enwiki.reverted.linear_svc.model
 
