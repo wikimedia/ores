@@ -25,7 +25,7 @@ def configure(config, bp, score_processor):
         # Check to see if we have the context available in our score_processor
         if context not in score_processor:
             return responses.not_found("No scorers available for {0}"
-                                       .format(wiki))
+                                       .format(context))
 
         # If no model is specified, return information on available models
         if "models" not in request.args:
@@ -44,7 +44,7 @@ def configure(config, bp, score_processor):
         missing_models = models - score_processor[context].keys()
         if len(missing_models) > 0:
             return responses.bad_request("Models '{0}' not available for {1}."
-                                         .format(list(missing_models), wiki))
+                                         .format(list(missing_models), context))
 
         # Read the rev_ids
         try:
@@ -71,7 +71,7 @@ def configure(config, bp, score_processor):
         # Check to see if we have the context available in our score_processor
         if context not in score_processor:
             return responses.not_found("No models available for {0}"
-                                       .format(wiki))
+                                       .format(context))
 
         # Read the rev_ids
         try:
@@ -85,7 +85,7 @@ def configure(config, bp, score_processor):
         # If the model exists, score revisions with it and return the result
         if model not in score_processor[context]:
             return responses.bad_request("Model '{0}' not available for {1}."
-                                         .format(model, wiki))
+                                         .format(model, context))
         else:
             scores = score_processor.score(context, model, rev_ids)
             return jsonify(scores)
@@ -97,12 +97,12 @@ def configure(config, bp, score_processor):
         # Check to see if we have the context available in our score_processor
         if context not in score_processor:
             return responses.not_found("No models available for {0}"
-                                       .format(wiki))
+                                       .format(context))
 
         # If the model exists, score revisions with it and return the result
         if model not in score_processor[context]:
             return responses.not_found("Model '{0}' not available for {1}."
-                                       .format(model, wiki))
+                                       .format(model, context))
         else:
             scores = score_processor.score(context, model, [rev_id])
             return jsonify(scores)

@@ -8,4 +8,4 @@ redis
 revscoring
 stopit
 yamlconf
-socketIO-client
+socketIO-client==0.5.6
