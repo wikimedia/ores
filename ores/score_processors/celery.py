@@ -1,6 +1,7 @@
 import logging
 
 import celery
+from celery.signals import before_task_publish
 
 from ..score_caches import ScoreCache
 from .score_processor import ScoreResult
@@ -9,6 +10,17 @@ from .timeout import Timeout
 
 logger = logging.getLogger("ores.score_processors.celery")
 
+APPLICATIONS = []
+
+@before_task_publish.connect
+def update_sent_state(sender=None, body=None, **kwargs):
+
+    for application in APPLICATIONS:
+        task = application.tasks.get(sender)
+        backend = task.backend if task else application.backend
+
+        logger.debug("Setting state to 'SENT' for {0}".format(body['id']))
+        backend.store_result(body['id'], result=None, status="SENT")
 
 class CeleryTimeoutResult(ScoreResult):
 
@@ -31,6 +43,8 @@ class Celery(Timeout):
             scoring_context = self[context]
             score = scoring_context.score(model, cache)
             return score
+
+        APPLICATIONS.append(application)
 
         self._process = _process
 
@@ -94,10 +108,10 @@ class Celery(Timeout):
     def _get_result(self, id_string):
 
         # Try to get an async_result for an in_progress task
-        logger.debug("Checking if {0} is already being processed"
-                     .format(repr(id_string)))
         result = self._process.AsyncResult(task_id=id_string)
-        if result.state not in ("STARTED", "SUCCESS"):
+        logger.debug("Checking if {0} is already being processed [{1}]"
+                .format(repr(id_string), result.state))
+        if result.state not in ("SENT", "STARTED", "SUCCESS"):
             raise KeyError(id_string)
         else:
             logger.debug("Found AsyncResult for {0}".format(repr(id_string)))
