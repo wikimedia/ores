@@ -2,7 +2,7 @@ celery
 docopt
 flask
 flask-jsonpify
-mediawiki-utilities==0.4.15
+mediawiki-utilities
 pylru
 redis
 revscoring
