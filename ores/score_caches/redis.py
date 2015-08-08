@@ -1,8 +1,6 @@
 import json
 import logging
 
-import redis
-
 from .score_cache import ScoreCache
 
 logger = logging.getLogger("ores.score_caches.redis")
@@ -45,6 +43,12 @@ class Redis(ScoreCache):
 
     @classmethod
     def from_parameters(cls, *args, ttl=None, prefix=None, **kwargs):
+        try:
+            import redis
+        except ImportError:
+            raise ImportError("Could not find redis.  This packages is " +
+                              "required when using ores.score_caches.Redis.")
+
         return cls(redis.StrictRedis(*args, **kwargs), ttl=ttl, prefix=prefix)
 
     @classmethod

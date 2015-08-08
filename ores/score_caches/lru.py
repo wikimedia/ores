@@ -1,11 +1,15 @@
-import pylru
-
 from .score_cache import ScoreCache
 
 
 class LRU(ScoreCache):
 
     def __init__(self, size=1024):
+        try:
+            import pylru
+        except ImportError:
+            raise ImportError("Could not find pylru.  This packages is " +
+                              "required when using ores.score_caches.LRU.")
+
         self.lru = pylru.lrucache(size)
 
     def lookup(self, wiki, model, rev_id, version=None):
