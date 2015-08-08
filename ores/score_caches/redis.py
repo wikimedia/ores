@@ -46,7 +46,7 @@ class Redis(ScoreCache):
         try:
             import redis
         except ImportError:
-            raise ImportError("Could not find redis.  This packages is " +
+            raise ImportError("Could not find redis-py.  This packages is " +
                               "required when using ores.score_caches.Redis.")
 
         return cls(redis.StrictRedis(*args, **kwargs), ttl=ttl, prefix=prefix)
