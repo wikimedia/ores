@@ -4,7 +4,6 @@ import celery
 from celery.signals import before_task_publish
 
 from ..score_caches import ScoreCache
-from .score_processor import ScoreResult
 from .timeout import timeout as timeout_func
 from .timeout import Timeout
 
@@ -22,15 +21,6 @@ def update_sent_state(sender=None, body=None, **kwargs):
         logger.debug("Setting state to 'SENT' for {0}".format(body['id']))
         backend.store_result(body['id'], result=None, status="SENT")
 
-class CeleryTimeoutResult(ScoreResult):
-
-    def __init__(self, async_result, timeout):
-        self.async_result = async_result
-        self.timeout = timeout
-
-    def get(self):
-        return self.async_result.get(timeout=self.timeout)
-
 
 class Celery(Timeout):
 
@@ -39,14 +29,72 @@ class Celery(Timeout):
         self.application = application
 
         @self.application.task
-        def _process(context, model, cache):
-            scoring_context = self[context]
-            score = scoring_context.score(model, cache)
-            return score
+        def _process_task(context, model, cache):
+            return Timeout._process(self, context, model, cache)
+
+        @self.application.task
+        def _score_task(context, model, rev_id, cache=None):
+            return Timeout._score(self, context, model, rev_id, cache=cache)
+
 
         APPLICATIONS.append(application)
 
-        self._process = _process
+        self._process_task = _process_task
+
+        self._score_task = _score_task
+
+    def _score_in_celery(self, context, model, rev_ids, caches):
+        scores = {}
+        results = {}
+
+        if len(rev_ids) == 0:
+            return scores
+        if len(rev_ids) == 1: # Special case -- do everything in celery
+            rev_id = rev_ids.pop()
+            id_string = self._generate_id(context, model, rev_id)
+            cache = (caches or {}).get(rev_id, {})
+            result = self._score_task.apply_async(
+                args=(context, model, rev_id), kwargs={'cache': cache},
+                task_id=id_string
+            )
+            results[rev_id] = result
+        else: # Otherwise, try and batch
+            # Get the root datasources for the rest of the batch (IO)
+            root_ds_caches = self._get_root_ds(context, model, rev_ids,
+                                               caches=caches)
+
+            # Extract features and generate scores (CPU)
+            for rev_id, (error, cache) in root_ds_caches.items():
+                if error is not None:
+                    scores[rev_id] = {
+                        'error': {
+                            'type': str(type(error)),
+                            'message': str(error)
+                        }
+                    }
+                else:
+                    id_string = self._generate_id(context, model, rev_id)
+                    result = self._process_task.apply_async(
+                        args=(context, model, cache),
+                        task_id=id_string
+                    )
+                    results[rev_id] = result
+
+        # Process async results
+        for rev_id, result in results.items():
+            try:
+                score = result.get(self.timeout)
+                scores[rev_id] = score
+                self._store(context, model, rev_id, score)
+            except Exception as error:
+                scores[rev_id] = {
+                    'error': {
+                        'type': str(type(error)),
+                        'message': str(error)
+                    }
+                }
+
+        return scores
 
     def _generate_id(self, context, model, rev_id):
         scorer_model = self[context][model]
@@ -54,26 +102,20 @@ class Celery(Timeout):
 
         return ":".join(str(v) for v in [context, model, rev_id, version])
 
-    def process(self, context, model, rev_id, cache):
-        id_string = self._generate_id(context, model, rev_id)
-
-        result = self._process.apply_async(args=(context, model, cache),
-                                           task_id=id_string)
-        return CeleryTimeoutResult(result, self.timeout)
-
-    def score(self, context, model, rev_ids):
+    def score(self, context, model, rev_ids, caches=None):
         rev_ids = set(rev_ids)
 
         # Lookup scoring results that are currently in progress
         results = self._lookup_inprogress_results(context, model, rev_ids)
-        missing_rev_ids = rev_ids - results.keys()
+        missing_ids = rev_ids - results.keys()
 
         # Lookup scoring results that are in the cache
-        scores = self._lookup_cached_scores(context, model, missing_rev_ids)
-        missing_rev_ids = missing_rev_ids - scores.keys()
+        scores = self._lookup_cached_scores(context, model, missing_ids)
+        missing_ids = missing_ids - scores.keys()
 
         # Generate scores for missing rev_ids
-        scores.update(self._score(context, model, missing_rev_ids))
+        scores.update(self._score_in_celery(context, model, missing_ids,
+                                            caches=caches))
 
         # Gather results
         for rev_id in results:
@@ -89,7 +131,6 @@ class Celery(Timeout):
 
         # Return scores
         return scores
-
 
     def _lookup_inprogress_results(self, context, model, rev_ids):
         scorer_model = self[context][model]
@@ -108,7 +149,7 @@ class Celery(Timeout):
     def _get_result(self, id_string):
 
         # Try to get an async_result for an in_progress task
-        result = self._process.AsyncResult(task_id=id_string)
+        result = self._score_task.AsyncResult(task_id=id_string)
         logger.debug("Checking if {0} is already being processed [{1}]"
                 .format(repr(id_string), result.state))
         if result.state not in ("SENT", "STARTED", "SUCCESS"):
