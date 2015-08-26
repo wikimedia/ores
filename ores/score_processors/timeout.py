@@ -4,7 +4,7 @@ import traceback
 
 import stopit
 
-from .score_processor import SimpleScoreProcessor, SimpleScoreResult
+from .score_processor import SimpleScoreProcessor
 
 logger = logging.getLogger("ores.score_processors.timeout")
 
@@ -15,8 +15,8 @@ class Timeout(SimpleScoreProcessor):
         super().__init__(*args, **kwargs)
         self.timeout = float(timeout) if timeout is not None else None
 
-    def _process(self, context, model, rev_id, cache):
-        return timeout(super()._process, context, model, rev_id, cache,
+    def _process(self, context, model, cache):
+        return timeout(super()._process, context, model, cache,
                        seconds=self.timeout)
 
 

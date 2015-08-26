@@ -6,10 +6,6 @@ from ..score_caches import Empty
 logger = logging.getLogger("ores.score_processors.score_processor")
 
 
-class ScoreResult():
-    def get(self, *args, **kwargs):
-        raise NotImplementedError()
-
 class ScoreProcessor(dict):
 
     def __init__(self, scoring_contexts, score_cache=None):
@@ -17,27 +13,48 @@ class ScoreProcessor(dict):
         self.update(scoring_contexts)
         self.score_cache = score_cache or Empty()
 
-    def score(self, context, model, rev_ids, caches=None):
-        # Remove dupes and prepares for set differences
+    def _get_root_ds(self, context, model, rev_ids, caches=None):
+        """
+        Pure IO.  Batch extract root datasources for a set of features that the
+        model needs.
+        """
         rev_ids = set(rev_ids)
+        scoring_context = self[context]
+        return scoring_context.extract_roots(model, rev_ids, caches=caches)
 
-        # Lookup cached scores
-        scores = self._lookup_cached_scores(context, model, rev_ids)
-        missing_rev_ids = rev_ids - scores.keys()
+    def _process(self, context, model, cache):
+        """
+        Pure CPU.  Extract features from datasources in the cache and apply the
+        model to arrive at a score.
+        """
+        scoring_context = self[context]
+        score = scoring_context.score(model, cache)
+        return score
 
-        # Generate scores for the rest
-        scores.update(self._score(context, model, missing_rev_ids,
-                                  caches=caches))
+    def _score(self, context, model, rev_id, cache=None):
+        """
+        Both IO and CPU.  Generates a single score or an error.
+        """
+        error, process_cache = self._get_root_ds(context, model, [rev_id],
+                                                 caches={rev_id: cache})[rev_id]
 
-        return scores
+        if error is not None:
+            raise error
+
+        return self._process(context, model, process_cache)
+
+    def _store(self, context, model, rev_id, score):
+        scorer_model = self[context][model]
+        version = scorer_model.version
+
+        self.score_cache.store(context, model, rev_id, score, version=version)
+
 
     def _lookup_cached_scores(self, context, model, rev_ids):
-        scores = {}
-
         scorer_model = self[context][model]
-
-        # Lookup scores that are in the cache
         version = scorer_model.version
+
+        scores = {}
         for rev_id in rev_ids:
             try:
                 score = self.score_cache.lookup(context, model, rev_id,
@@ -51,45 +68,6 @@ class ScoreProcessor(dict):
                 pass
 
         return scores
-
-    def _score(self, context, model, rev_ids, caches=None):
-        scores = {}
-
-        # Batch extract root datasources for features of the missing ids
-        scoring_context = self[context]
-        root_ds_caches = scoring_context.extract_roots(model, rev_ids,
-                                                       caches=caches)
-
-        # Process scores for each revision using the cached data
-        results = {}
-        for rev_id in rev_ids:
-            error, cache = root_ds_caches[rev_id]
-
-            if error is None:
-                results[rev_id] = self.process(context, model, rev_id, cache)
-            else:
-                scores[rev_id] = {
-                    'error': {
-                        'type': str(type(error)),
-                        'message': str(error)
-                    }
-                }
-
-        for rev_id in results:
-            try:
-                scores[rev_id] = results[rev_id].get()
-            except Exception as error:
-                scores[rev_id] = {
-                    'error': {
-                        'type': str(type(error)),
-                        'message': str(error)
-                    }
-                }
-
-        return scores
-
-    def process(self, context, model, rev_id, cache):
-        raise NotImplementedError()
 
     @classmethod
     def from_config(cls, config, name, section_key="score_processors"):
@@ -109,25 +87,37 @@ class ScoreProcessor(dict):
 
 class SimpleScoreProcessor(ScoreProcessor):
 
-    def _process(self, context, model, rev_id, cache):
-        scoring_context = self[context]
-        return scoring_context.score(model, cache)
+    def score(self, context, model, rev_ids, caches=None):
+        rev_ids = set(rev_ids)
 
-    def process(self, context, model, rev_id, cache):
-        try:
-            score = self._process(context, model, rev_id, cache)
-            return SimpleScoreResult(score=score)
-        except Exception as e:
-            return SimpleScoreResult(error=e)
+        # Look in the cache
+        scores = self._lookup_cached_scores(context, model, rev_ids)
+        missing_ids = rev_ids - scores.keys()
 
-class SimpleScoreResult(ScoreResult):
+        # Get the root datasources for the rest of the batch (IO)
+        root_ds_caches = self._get_root_ds(context, model, missing_ids,
+                                           caches=caches)
 
-    def __init__(self, *, score=None, error=None):
-        self.score = score
-        self.error = error
+        # Extract features and generate scores (CPU)
+        for rev_id, (error, cache) in root_ds_caches.items():
+            if error is not None:
+                scores[rev_id] = {
+                    'error': {
+                        'type': str(type(error)),
+                        'message': str(error)
+                    }
+                }
+            else:
+                try:
+                    score = self._process(context, model, cache)
+                    scores[rev_id] = score
+                    self._store(context, model, rev_id, score)
+                except Exception as error:
+                    scores[rev_id] = {
+                        'error': {
+                            'type': str(type(error)),
+                            'message': str(error)
+                        }
+                    }
 
-    def get(self):
-        if self.error is not None:
-            raise self.error
-        else:
-            return self.score
+        return scores
