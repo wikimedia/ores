@@ -1,8 +1,6 @@
 import logging
 import time
 
-import yamlconf
-
 from ..score_caches import Empty
 
 logger = logging.getLogger("ores.score_processors.score_processor")
@@ -95,6 +93,11 @@ class ScoreProcessor(dict):
 
     @classmethod
     def from_config(cls, config, name, section_key="score_processors"):
+        try:
+            import yamlconf
+        except ImportError:
+            raise ImportError("Could not find yamlconf.  This packages is " +
+                              "required when using yaml config files.")
         logger.info("Loading ScoreProcessor '{0}' from config.".format(name))
         section = config[section_key][name]
         if 'module' in section:

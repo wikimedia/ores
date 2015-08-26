@@ -105,7 +105,7 @@ class Celery(Timeout):
 
     @classmethod
     def from_config(cls, config, name, section_key="score_processors"):
-
+        # TODO: this is a weird place to have this set.
         if 'data_paths' in config['ores'] and \
            'nltk' in config['ores']['data_paths']:
             import nltk

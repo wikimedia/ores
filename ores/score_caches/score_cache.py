@@ -1,9 +1,6 @@
 import logging
 
-import yamlconf
-
 logger = logging.getLogger("ores.score_caches.score_cache")
-
 
 class ScoreCache:
 
@@ -24,6 +21,11 @@ class ScoreCache:
 
     @classmethod
     def from_config(cls, config, name, section_key="score_caches"):
+        try:
+            import yamlconf
+        except ImportError:
+            raise ImportError("Could not find yamlconf.  This packages is " +
+                              "required when using yaml config files.")
         logger.info("Loading ScoreCache '{0}' from config.".format(name))
         section = config[section_key][name]
         if 'module' in section:
