@@ -4,6 +4,7 @@ import traceback
 
 import stopit
 
+from ..score_caches import ScoreCache
 from .score_processor import SimpleScoreProcessor
 
 logger = logging.getLogger("ores.score_processors.timeout")
@@ -23,7 +24,28 @@ class Timeout(SimpleScoreProcessor):
     @classmethod
     def from_config(cls, config, name, section_key="score_processors"):
         section = config[section_key][name]
-        return cls(**{k: v for k, v in section.items() if k != "class"})
+
+        # TODO: this is a weird place to have this set.
+        if 'data_paths' in config['ores'] and \
+           'nltk' in config['ores']['data_paths']:
+            import nltk
+            nltk.data.path.append(config['ores']['data_paths']['nltk'])
+
+        from ..scoring_contexts import ScoringContext
+
+        section = config[section_key][name]
+
+        scoring_contexts = {name: ScoringContext.from_config(config, name)
+                            for name in section['scoring_contexts']}
+
+        if 'score_cache' in section:
+            score_cache = ScoreCache.from_config(config, section['score_cache'])
+        else:
+            score_cache = None
+
+        timeout = section.get('timeout')
+
+        return cls(scoring_contexts, score_cache=score_cache, timeout=timeout)
 
 
 class TimeoutError(Exception):

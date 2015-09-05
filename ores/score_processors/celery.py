@@ -2,10 +2,11 @@ import logging
 
 import celery
 from celery.signals import before_task_publish
+from revscoring.errors import RevisionNotFound
 
 from ..score_caches import ScoreCache
-from .timeout import timeout as timeout_func
-from .timeout import Timeout
+from ..util import jsonify_error
+from .timeout import Timeout, TimeoutError
 
 logger = logging.getLogger("ores.score_processors.celery")
 
@@ -28,11 +29,11 @@ class Celery(Timeout):
         super().__init__(*args, **kwargs)
         self.application = application
 
-        @self.application.task
+        @self.application.task(throws=(RevisionNotFound, TimeoutError))
         def _process_task(context, model, cache):
             return Timeout._process(self, context, model, cache)
 
-        @self.application.task
+        @self.application.task(throws=(RevisionNotFound, TimeoutError))
         def _score_task(context, model, rev_id, cache=None):
             return Timeout._score(self, context, model, rev_id, cache=cache)
 
@@ -66,12 +67,7 @@ class Celery(Timeout):
             # Extract features and generate scores (CPU)
             for rev_id, (error, cache) in root_ds_caches.items():
                 if error is not None:
-                    scores[rev_id] = {
-                        'error': {
-                            'type': str(type(error)),
-                            'message': str(error)
-                        }
-                    }
+                    scores[rev_id] = {'error': jsonify_error(error)}
                 else:
                     id_string = self._generate_id(context, model, rev_id)
                     result = self._process_task.apply_async(
@@ -87,12 +83,7 @@ class Celery(Timeout):
                 scores[rev_id] = score
                 self._store(context, model, rev_id, score)
             except Exception as error:
-                scores[rev_id] = {
-                    'error': {
-                        'type': str(type(error)),
-                        'message': str(error)
-                    }
-                }
+                scores[rev_id] = {'error': jsonify_error(error)}
 
         return scores
 
@@ -121,13 +112,8 @@ class Celery(Timeout):
         for rev_id in results:
             try:
                 scores[rev_id] = results[rev_id].get()
-            except Exception as e:
-                scores[rev_id] = {
-                    'error': {
-                        'type': str(type(error)),
-                        'message': str(error)
-                    }
-                }
+            except Exception as error:
+                scores[rev_id] = {'error': jsonify_error(error)}
 
         # Return scores
         return scores
@@ -151,7 +137,7 @@ class Celery(Timeout):
         # Try to get an async_result for an in_progress task
         result = self._score_task.AsyncResult(task_id=id_string)
         logger.debug("Checking if {0} is already being processed [{1}]"
-                .format(repr(id_string), result.state))
+                     .format(repr(id_string), result.state))
         if result.state not in ("SENT", "STARTED", "SUCCESS"):
             raise KeyError(id_string)
         else:

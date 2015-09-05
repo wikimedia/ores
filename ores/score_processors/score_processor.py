@@ -1,7 +1,7 @@
 import logging
-import time
 
 from ..score_caches import Empty
+from ..util import jsonify_error
 
 logger = logging.getLogger("ores.score_processors.score_processor")
 
@@ -101,23 +101,13 @@ class SimpleScoreProcessor(ScoreProcessor):
         # Extract features and generate scores (CPU)
         for rev_id, (error, cache) in root_ds_caches.items():
             if error is not None:
-                scores[rev_id] = {
-                    'error': {
-                        'type': str(type(error)),
-                        'message': str(error)
-                    }
-                }
+                scores[rev_id] = {'error': jsonify_error(error)}
             else:
                 try:
                     score = self._process(context, model, cache)
                     scores[rev_id] = score
                     self._store(context, model, rev_id, score)
                 except Exception as error:
-                    scores[rev_id] = {
-                        'error': {
-                            'type': str(type(error)),
-                            'message': str(error)
-                        }
-                    }
+                    scores[rev_id] = {'error': jsonify_error(error)}
 
         return scores
