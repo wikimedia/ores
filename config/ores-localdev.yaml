@@ -43,7 +43,6 @@ extractors:
     user_agent: Object Revision Evaluation Service (local development)
   enwiki_api:
     url: http://en.wikipedia.org/w/api.php
-    language: english
 
 # Scorer models
 scorer_models:
@@ -51,8 +50,3 @@ scorer_models:
     class: revscoring.scorer_models.MLScorerModel
   enwiki_revert:
     model_file: models/enwiki.reverted.linear_svc.model
-
-# Languages
-languages:
-  english:
-    module: revscoring.languages.english

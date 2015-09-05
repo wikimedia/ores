@@ -26,7 +26,6 @@ class ScoringContext(dict):
             extractor : :class:`~revscoring.extractors.extractor.Extractor`
                An extractor to use for gathering feature values
         """
-        self._check_compatibility(scorer_models, extractor)
         super().__init__()
         self.name = str(name)
         self.update(scorer_models)
@@ -82,16 +81,6 @@ class ScoringContext(dict):
                 root_ds_caches[rev_id] = (error, None)
 
         return root_ds_caches
-
-    @staticmethod
-    def _check_compatibility(scorer_models, extractor):
-        for scorer_model in scorer_models.values():
-            if scorer_model.language is not None and \
-               extractor.language != scorer_model.language:
-                raise ValueError(("Model language {0} does not match " +
-                                  "extractor language {1}")
-                                 .format(scorer_model.language.name,
-                                         extractor.language.name))
 
     @classmethod
     def from_config(cls, config, name, section_key="scoring_contexts"):
