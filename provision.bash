@@ -1,5 +1,6 @@
 #!/bin/bash
 
+apt-get update
 apt-get install -q -y git-core
 apt-get install -q -y redis-server
 apt-get install -q -y python3-scipy
