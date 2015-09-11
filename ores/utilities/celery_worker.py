@@ -13,7 +13,6 @@ Options:
 import logging
 
 import docopt
-
 import yamlconf
 
 from ..score_processors import Celery

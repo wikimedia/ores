@@ -46,7 +46,6 @@ class Celery(Timeout):
         def _score_task(context, model, rev_id, cache=None):
             return Timeout._score(self, context, model, rev_id, cache=cache)
 
-
         APPLICATIONS.append(application)
 
         self._process_task = _process_task
@@ -59,7 +58,7 @@ class Celery(Timeout):
 
         if len(rev_ids) == 0:
             return scores
-        if len(rev_ids) == 1: # Special case -- do everything in celery
+        if len(rev_ids) == 1:  # Special case -- do everything in celery
             rev_id = rev_ids.pop()
             id_string = self._generate_id(context, model, rev_id)
             cache = (caches or {}).get(rev_id, {})
