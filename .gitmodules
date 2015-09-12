@@ -1,0 +1,3 @@
+[submodule "revscoring"]
+	path = revscoring
+	url = https://github.com/wiki-ai/revscoring.git
