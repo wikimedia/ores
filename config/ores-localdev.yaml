@@ -42,7 +42,8 @@ extractors:
     class: revscoring.extractors.APIExtractor
     user_agent: Object Revision Evaluation Service (local development)
   enwiki_api:
-    url: http://en.wikipedia.org/w/api.php
+    host: https://en.wikipedia.org/
+    timeout: 0.5 # seconds
 
 # Scorer models
 scorer_models:

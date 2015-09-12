@@ -1,8 +1,10 @@
 import logging
 
 import celery
+import revscoring.errors
 from celery.signals import before_task_publish
-from revscoring.errors import RevisionNotFound
+
+import mwapi.errors
 
 from ..score_caches import ScoreCache
 from ..util import jsonify_error
@@ -11,6 +13,7 @@ from .timeout import Timeout, TimeoutError
 logger = logging.getLogger("ores.score_processors.celery")
 
 APPLICATIONS = []
+
 
 @before_task_publish.connect
 def update_sent_state(sender=None, body=None, **kwargs):
@@ -29,14 +32,19 @@ class Celery(Timeout):
         super().__init__(*args, **kwargs)
         self.application = application
 
-        @self.application.task(throws=(RevisionNotFound, TimeoutError))
+        expected_errors = (revscoring.errors.RevisionNotFound,
+                           revscoring.errors.DependencyError,
+                           mwapi.errors.RequestError,
+                           mwapi.errors.TimeoutError,
+                           TimeoutError)
+
+        @self.application.task(throws=expected_errors)
         def _process_task(context, model, cache):
             return Timeout._process(self, context, model, cache)
 
-        @self.application.task(throws=(RevisionNotFound, TimeoutError))
+        @self.application.task(throws=expected_errors)
         def _score_task(context, model, rev_id, cache=None):
             return Timeout._score(self, context, model, rev_id, cache=cache)
-
 
         APPLICATIONS.append(application)
 
@@ -50,7 +58,7 @@ class Celery(Timeout):
 
         if len(rev_ids) == 0:
             return scores
-        if len(rev_ids) == 1: # Special case -- do everything in celery
+        if len(rev_ids) == 1:  # Special case -- do everything in celery
             rev_id = rev_ids.pop()
             id_string = self._generate_id(context, model, rev_id)
             cache = (caches or {}).get(rev_id, {})
@@ -59,7 +67,7 @@ class Celery(Timeout):
                 task_id=id_string
             )
             results[rev_id] = result
-        else: # Otherwise, try and batch
+        else:  # Otherwise, try and batch
             # Get the root datasources for the rest of the batch (IO)
             root_ds_caches = self._get_root_ds(context, model, rev_ids,
                                                caches=caches)
@@ -111,7 +119,7 @@ class Celery(Timeout):
         # Gather results
         for rev_id in results:
             try:
-                scores[rev_id] = results[rev_id].get()
+                scores[rev_id] = results[rev_id].get(self.timeout)
             except Exception as error:
                 scores[rev_id] = {'error': jsonify_error(error)}
 
