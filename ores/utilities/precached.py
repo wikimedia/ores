@@ -5,12 +5,15 @@ happens.
 
 :Usage:
     precached -h | --help
-    precached <stream-url> <ores-url> [--config=<path>] [--verbose]
+    precached <stream-url> <ores-url> [--config=<path>] [--delay=<secs>]
+                                      [--verbose]
 
 :Options:
     -h --help        Prints this documentation
     <stream-url>     URL of an RCStream
     <ores-url>       URL of base ORES webserver
+    --delay=<secs>   The delay between when an event is received and when the
+                     request is sent to ORES. [default: 0]
     --config=<path>  The path to a yaml config file
                      [default: config/ores-localdev.yaml]
     --verbose        Print debugging information
@@ -24,7 +27,6 @@ from collections import defaultdict
 import docopt
 import requests
 import socketIO_client
-
 import yamlconf
 
 logger = logging.getLogger("ores.utilities.precached")
@@ -32,10 +34,15 @@ logger = logging.getLogger("ores.utilities.precached")
 def main(argv=None):
     args = docopt.docopt(__doc__, argv=argv)
 
+    stream_url = args['<stream-url>']
+    ores_url = args['<ores-url>']
     config = yamlconf.load(open(args['--config']))
-    run(args['<stream-url>'], args['<ores-url>'], config, args['--verbose'])
+    delay = float(args['--delay'])
+    verbose = bool(args['--verbose'])
+    run(stream_url, ores_url, config, delay,
+        verbose)
 
-def run(stream_url, ores_url, config, verbose):
+def run(stream_url, ores_url, config, delay, verbose):
 
     if verbose:
         log_level = logging.DEBUG
@@ -63,6 +70,7 @@ def run(stream_url, ores_url, config, verbose):
         url = ores_url + "/scores/" + wiki + "/" + model + \
               "/" + str(rev_id) + "/"
         try:
+            time.sleep(delay)
             start = time.time()
             requests.get(url, timeout=20, verify=False)
             logger.debug("GET {0} completed in {1} seconds."
