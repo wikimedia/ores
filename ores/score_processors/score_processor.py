@@ -1,4 +1,5 @@
 import logging
+import time
 
 from ..score_caches import Empty
 from ..util import jsonify_error
@@ -20,7 +21,13 @@ class ScoreProcessor(dict):
         """
         rev_ids = set(rev_ids)
         scoring_context = self[context]
-        return scoring_context.extract_roots(model, rev_ids, caches=caches)
+
+        start = time.time()
+        roots = scoring_context.extract_roots(model, rev_ids, caches=caches)
+        logger.debug("Extracted root Datasources for {0} in {1} seconds"
+                     .format(rev_ids, time.time() - start))
+
+        return roots
 
     def _process(self, context, model, cache):
         """
@@ -28,20 +35,24 @@ class ScoreProcessor(dict):
         model to arrive at a score.
         """
         scoring_context = self[context]
+
+        start = time.time()
         score = scoring_context.score(model, cache)
+        logger.debug("Scoring took {0} seconds".format(time.time() - start))
+
         return score
 
     def _score(self, context, model, rev_id, cache=None):
         """
         Both IO and CPU.  Generates a single score or an error.
         """
-        error, process_cache = self._get_root_ds(context, model, [rev_id],
-                                                 caches={rev_id: cache})[rev_id]
+        error, score_cache = self._get_root_ds(context, model, [rev_id],
+                                               caches={rev_id: cache})[rev_id]
 
         if error is not None:
             raise error
 
-        return self._process(context, model, process_cache)
+        return self._process(context, model, score_cache)
 
     def _store(self, context, model, rev_id, score):
         scorer_model = self[context][model]
