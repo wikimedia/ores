@@ -11,6 +11,7 @@ score_caches:
     class: ores.score_caches.Redis
     host: localhost
     prefix: ores
+    socket_timeout: 15 # seconds
   lru:
     class: ores.score_caches.LRU
 
@@ -23,8 +24,13 @@ score_processors:
   local_celery:
     class: ores.score_processors.Celery
     BROKER_URL: redis://localhost
+    BROKER_TRANSPORT_OPTIONS: {'socket_timeout': 15} # seconds
     CELERY_RESULT_BACKEND: redis://localhost
-    timeout: 5 # seconds
+    CELERY_ACCEPT_CONTENT: ['pickle']
+    CELERY_TASK_SERIALIZER: 'pickle'
+    CELERY_RESULT_SERIALIZER: 'pickle'
+    CELERYD_CONCURRENCY: 16
+    timeout: 15 # seconds
   timeout:
     class: ores.score_processors.Timeout
     timeout: 5 # seconds
@@ -43,7 +49,7 @@ extractors:
     user_agent: Object Revision Evaluation Service (local development)
   enwiki_api:
     host: https://en.wikipedia.org/
-    timeout: 0.5 # seconds
+    timeout: 2 # seconds
 
 # Scorer models
 scorer_models:
