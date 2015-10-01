@@ -68,7 +68,7 @@ def run(stream_url, ores_url, config, delay, verbose):
 
     def get_score(wiki, model, rev_id):
         url = ores_url + "/scores/" + wiki + "/" + model + \
-              "/" + str(rev_id) + "/"
+              "/" + str(rev_id) + "/?precache=true"
         try:
             time.sleep(delay)
             start = time.time()

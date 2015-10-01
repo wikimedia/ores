@@ -7,10 +7,11 @@ from celery.signals import before_task_publish
 import mwapi.errors
 
 from ..score_caches import ScoreCache
+from ..metrics_collectors import MetricsCollector
 from ..util import jsonify_error
 from .timeout import Timeout, TimeoutError
 
-logger = logging.getLogger("ores.score_processors.celery")
+logger = logging.getLogger(__name__)
 
 APPLICATIONS = []
 
@@ -43,14 +44,14 @@ class Celery(Timeout):
             return Timeout._process(self, context, model, cache)
 
         @self.application.task(throws=expected_errors)
-        def _score_task(context, model, rev_id, cache=None):
-            return Timeout._score(self, context, model, rev_id, cache=cache)
+        def _score_revision_task(context, model, rev_id, cache=None):
+            return Timeout._score_revision(self, context, model, rev_id, cache=cache)
 
         APPLICATIONS.append(application)
 
         self._process_task = _process_task
 
-        self._score_task = _score_task
+        self._score_revision_task = _score_revision_task
 
     def _score_in_celery(self, context, model, rev_ids, caches):
         scores = {}
@@ -62,7 +63,7 @@ class Celery(Timeout):
             rev_id = rev_ids.pop()
             id_string = self._generate_id(context, model, rev_id)
             cache = (caches or {}).get(rev_id, {})
-            result = self._score_task.apply_async(
+            result = self._score_revision_task.apply_async(
                 args=(context, model, rev_id), kwargs={'cache': cache},
                 task_id=id_string
             )
@@ -101,7 +102,7 @@ class Celery(Timeout):
 
         return ":".join(str(v) for v in [context, model, rev_id, version])
 
-    def score(self, context, model, rev_ids, caches=None):
+    def _score(self, context, model, rev_ids, caches=None):
         rev_ids = set(rev_ids)
 
         # Lookup scoring results that are currently in progress
@@ -143,7 +144,7 @@ class Celery(Timeout):
     def _get_result(self, id_string):
 
         # Try to get an async_result for an in_progress task
-        result = self._score_task.AsyncResult(task_id=id_string)
+        result = self._score_revision_task.AsyncResult(task_id=id_string)
         logger.debug("Checking if {0} is already being processed [{1}]"
                      .format(repr(id_string), result.state))
         if result.state not in ("SENT", "STARTED", "SUCCESS"):
@@ -154,12 +155,7 @@ class Celery(Timeout):
 
     @classmethod
     def from_config(cls, config, name, section_key="score_processors"):
-        # TODO: this is a weird place to have this set.
-        if 'data_paths' in config['ores'] and \
-           'nltk' in config['ores']['data_paths']:
-            import nltk
-            nltk.data.path.append(config['ores']['data_paths']['nltk'])
-
+        logger.info("Loading Celery '{0}' from config.".format(name))
         from ..scoring_contexts import ScoringContext
 
         section = config[section_key][name]
@@ -172,10 +168,18 @@ class Celery(Timeout):
         else:
             score_cache = None
 
+        if 'metrics_collector' in section:
+            metrics_collector = \
+                MetricsCollector.from_config(config,
+                                             section['metrics_collector'])
+        else:
+            metrics_collector = None
+
         timeout = section.get('timeout')
         application = celery.Celery('ores.score_processors.celery')
         application.conf.update(**{k: v for k, v in section.items()
                                    if k not in ('class', 'timeout')})
 
-        return cls(scoring_contexts, score_cache=score_cache,
-                   application=application, timeout=timeout)
+        return cls(scoring_contexts, application=application, timeout=timeout,
+                   score_cache=score_cache,
+                   metrics_collector=metrics_collector)

@@ -1,8 +1,4 @@
 def configure(config):
-    if 'data_paths' in config['ores'] and \
-       'nltk' in config['ores']['data_paths']:
-        import nltk
-        nltk.data.path.append(config['ores']['data_paths']['nltk'])
 
     from flask import Blueprint, Flask
 
