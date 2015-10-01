@@ -6,14 +6,15 @@ prints a TSV to stdout of the format:
 
 Usage:
     label_reverted -h | --help
-    label_reverted --api=<url> [--revert-radius=<revs>]
+    label_reverted --host=<url> [--revert-radius=<revs>]
                                [--revert-window=<secs>]
                                [--rev-pages=<path>]
                                [--rev-reverteds=<path>]
 
 Options:
     -h --help               Prints out this documentation
-    --api=<url>             The url of the API to use to extract features
+    --host=<url>            The host URL of the MediaWiki install where an API
+                            can be found.
     --revert-radius=<revs>  The maximum amount of revisions that a reverting
                             edit can revert [default: 15]
     --revert-window=<secs>  The maximum amount of time to wait for a revision to
@@ -26,8 +27,9 @@ import sys
 import traceback
 
 import docopt
-from mw import api
-from mw.lib import reverts
+import mwapi
+
+import mwreverts.api
 
 
 def main(argv=None):
@@ -46,8 +48,8 @@ def main(argv=None):
     else:
         rev_reverteds = open(args['--rev-reverteds'], "w")
 
-    api_url = args['--api']
-    session = api.Session(api_url, user_agent="ORES revert labeling utility")
+    host = args['--host']
+    session = mwapi.Session(host, user_agent="ORES revert labeling utility")
 
     run(rev_pages, rev_reverteds, session, revert_radius, revert_window)
 
@@ -77,12 +79,12 @@ def run(rev_pages, rev_reverteds, session, revert_radius, revert_window):
     for rev_id, page_id in rev_pages:
         try:
             # Detect reverted status
-            revert = reverts.api.check(session, rev_id,
-                                       page_id=page_id,  # Could be None
-                                       radius=revert_radius,
-                                       window=revert_window)
+            _, reverted, _ = mwreverts.api.check(session, rev_id,
+                                                 page_id=page_id,
+                                                 radius=revert_radius,
+                                                 window=revert_window)
 
-            reverted = revert is not None
+            reverted = reverted is not None
 
             if reverted:
                 sys.stderr.write("r")
