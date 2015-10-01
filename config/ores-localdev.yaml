@@ -1,6 +1,6 @@
 # Top level configuration
 ores:
-  score_processor: local_celery
+  score_processor: local_timeout
   wsgi:
     application_root: ""
     url_prefix: ""
@@ -12,15 +12,24 @@ score_caches:
     host: localhost
     prefix: ores
     socket_timeout: 15 # seconds
-  lru:
+  memory_lru:
     class: ores.score_caches.LRU
+
+# Metrics collection options
+metrics_collectors:
+  local_logging:
+    class: ores.metrics_collectors.Logger
 
 # Score processing options
 score_processors:
   defaults:
-    score_cache: local_redis
+    score_cache: memory_lru
+    metrics_collector: local_logging
     scoring_contexts:
       - enwiki
+  local_timeout:
+    class: ores.score_processors.Timeout
+    timeout: 15 # seconds
   local_celery:
     class: ores.score_processors.Celery
     BROKER_URL: redis://localhost
