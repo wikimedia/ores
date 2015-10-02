@@ -14,8 +14,11 @@ class Statsd(MetricsCollector):
     def __init__(self, statsd_client):
         self.statsd_client = statsd_client
 
-    def precache_request(self, context, model, duration):
+    def precache_request(self, context, model, version, duration):
         with self.statsd_client.pipeline() as pipe:
+            pipe.timing("precache_request.{0}.{1}.{2}"
+                        .format(context, model, version),
+                        duration * 1000)
             pipe.timing("precache_request.{0}.{1}".format(context, model),
                         duration * 1000)
             pipe.timing("precache_request.{0}".format(context),
@@ -23,10 +26,13 @@ class Statsd(MetricsCollector):
             pipe.timing("precache_request",
                         duration * 1000)
 
-    def scores_request(self, context, model, rev_id_count, duration):
+    def scores_request(self, context, model, version, rev_id_count, duration):
         with self.statsd_client.pipeline() as pipe:
+            pipe.timing("scores_request.{0}.{1}.{2}.{3}"
+                        .format(context, model, version, rev_id_count),
+                        duration * 1000)
             pipe.timing("scores_request.{0}.{1}.{2}"
-                        .format(context, model, rev_id_count),
+                        .format(context, model, version),
                         duration * 1000)
             pipe.timing("scores_request.{0}.{1}".format(context, model),
                         duration * 1000)
@@ -34,17 +40,23 @@ class Statsd(MetricsCollector):
                         duration * 1000)
             pipe.timing("scores_request",
                         duration * 1000)
+            pipe.incr("revision_scored.{0}.{1}.{2}"
+                        .format(context, model, version),
+                      incr=rev_id_count)
             pipe.incr("revision_scored.{0}.{1}".format(context, model),
                       incr=rev_id_count)
             pipe.incr("revision_scored.{0}".format(context),
                       incr=rev_id_count)
-            pipe.incr("revision_scored".format(context),
-                      incr=rev_id_count)
+            pipe.incr("revision_scored", incr=rev_id_count)
 
-    def datasources_extracted(self, context, model, rev_id_count, duration):
+    def datasources_extracted(self, context, model, version, rev_id_count,
+                              duration):
         with self.statsd_client.pipeline() as pipe:
+            pipe.timing("datasources_extracted.{0}.{1}.{2}.{3}"
+                        .format(context, model, version, rev_id_count),
+                        duration * 1000)
             pipe.timing("datasources_extracted.{0}.{1}.{2}"
-                        .format(context, model, rev_id_count),
+                        .format(context, model, version),
                         duration * 1000)
             pipe.timing("datasources_extracted.{0}.{1}"
                         .format(context, model),
@@ -54,25 +66,36 @@ class Statsd(MetricsCollector):
             pipe.timing("datasources_extracted",
                         duration * 1000)
 
-    def score_processed(self, context, model, duration):
+    def score_processed(self, context, model, version, duration):
         with self.statsd_client.pipeline() as pipe:
+            pipe.timing("score_processed.{0}.{1}.{2}"
+                        .format(context, model, version),
+                        duration * 1000)
             pipe.timing("score_processed.{0}.{1}".format(context, model),
                         duration * 1000)
             pipe.timing("score_processed.{0}".format(context),
                         duration * 1000)
             pipe.timing("score_processed", duration * 1000)
 
-    def score_cache_hit(self, context, model, incr=1):
+    def score_cache_hit(self, context, model, version, incr=1):
         with self.statsd_client.pipeline() as pipe:
-            pipe.incr("score_cache_hit.{0}.{1}".format(context, model), incr)
-            pipe.incr("score_cache_hit.{0}".format(context), incr)
-            pipe.incr("score_cache_hit".format(context), incr)
+            pipe.incr("score_cache_hit.{0}.{1}.{2}"
+                      .format(context, model, version),
+                      incr=incr)
+            pipe.incr("score_cache_hit.{0}.{1}".format(context, model),
+                      incr=incr)
+            pipe.incr("score_cache_hit.{0}".format(context), incr=incr)
+            pipe.incr("score_cache_hit".format(context), incr=incr)
 
-    def score_errored(self, context, model, incr=1):
+    def score_errored(self, context, model, version, incr=1):
         with self.statsd_client.pipeline() as pipe:
-            pipe.incr("score_errored.{0}.{1}".format(context, model), incr)
-            pipe.incr("score_errored.{0}".format(context), incr)
-            pipe.incr("score_errored".format(context), incr)
+            pipe.incr("score_errored.{0}.{1}.{2}"
+                      .format(context, model, version),
+                      incr=incr)
+            pipe.incr("score_errored.{0}.{1}".format(context, model),
+                      incr=incr)
+            pipe.incr("score_errored.{0}".format(context), incr=incr)
+            pipe.incr("score_errored".format(context), incr=incr)
 
     @classmethod
     def from_parameters(cls, *args, **kwargs):

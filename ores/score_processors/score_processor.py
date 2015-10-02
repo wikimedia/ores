@@ -18,16 +18,17 @@ class ScoreProcessor(dict):
         self.metrics_collector = metrics_collector or Null()
 
     def score(self, context, model, rev_ids, caches=None, precache=False):
+        version = self[context].version(model)
         start = time.time()
-
         scores = self._score(context, model, rev_ids, caches=caches)
 
         duration = time.time() - start
         if not precache:
-            self.metrics_collector.scores_request(context, model, len(rev_ids),
-                                                  duration)
+            self.metrics_collector.scores_request(context, model, version,
+                                                  len(rev_ids), duration)
         else:
-            self.metrics_collector.precache_request(context, model, duration)
+            self.metrics_collector.precache_request(context, model, version,
+                                                    duration)
 
         return scores
 
@@ -36,8 +37,11 @@ class ScoreProcessor(dict):
         Pure IO.  Batch extract root datasources for a set of features that the
         model needs.
         """
+        if len(rev_ids) == 0:
+            return {}
         rev_ids = set(rev_ids)
         scoring_context = self[context]
+        version = scoring_context.version(model)
 
         start = time.time()
         roots = scoring_context.extract_roots(model, rev_ids, caches=caches)
@@ -46,11 +50,12 @@ class ScoreProcessor(dict):
                      .format(rev_ids, duration))
 
         self.metrics_collector.datasources_extracted(context, model,
-                                                     len(rev_ids), duration)
+                                                     version, len(rev_ids),
+                                                     duration)
 
         for error, cache in roots.values():
             if error is not None:
-                self.metrics_collector.score_errored(context, model)
+                self.metrics_collector.score_errored(context, model, version)
 
         return roots
 
@@ -60,15 +65,17 @@ class ScoreProcessor(dict):
         model to arrive at a score.
         """
         scoring_context = self[context]
+        version = scoring_context.version(model)
 
         try:
             start = time.time()
             score = scoring_context.score(model, cache)
             duration = time.time() - start
             logger.debug("Scoring took {0} seconds".format(duration))
-            self.metrics_collector.score_processed(context, model, duration)
+            self.metrics_collector.score_processed(context, model, version,
+                                                   duration)
         except:
-            self.metrics_collector.score_errored(context, model)
+            self.metrics_collector.score_errored(context, model, version)
             raise
 
         return score
@@ -86,14 +93,12 @@ class ScoreProcessor(dict):
         return self._process(context, model, score_cache)
 
     def _store(self, context, model, rev_id, score):
-        scorer_model = self[context][model]
-        version = scorer_model.version
+        version = self[context].version(model)
 
         self.score_cache.store(context, model, rev_id, score, version=version)
 
     def _lookup_cached_scores(self, context, model, rev_ids):
-        scorer_model = self[context][model]
-        version = scorer_model.version
+        version = self[context].version(model)
 
         scores = {}
         for rev_id in rev_ids:
@@ -104,7 +109,7 @@ class ScoreProcessor(dict):
                 logger.debug("Found cached score for {0}:{1}:{2}"
                              .format(context, model, rev_id))
 
-                self.metrics_collector.score_cache_hit(context, model)
+                self.metrics_collector.score_cache_hit(context, model, version)
                 scores[rev_id] = score
             except KeyError:
                 pass

@@ -7,22 +7,23 @@ class MetricsCollector:
     """
     Collects metrics about usage of ORES.
     """
-    def precache_request(self, context, model, duration):
+    def precache_request(self, context, model, version, duration):
         raise NotImplementedError()
 
-    def scores_request(self, context, model, rev_id_count, duration):
+    def scores_request(self, context, model, version, rev_id_count, duration):
         raise NotImplementedError()
 
-    def datasources_extracted(self, context, model, rev_id_count, duration):
+    def datasources_extracted(self, context, model, version, rev_id_count,
+                              duration):
         raise NotImplementedError()
 
-    def score_processed(self, context, model, duration):
+    def score_processed(self, context, model, version, duration):
         raise NotImplementedError()
 
-    def score_cache_hit(self, context, model, inc=1):
+    def score_cache_hit(self, context, model, version, inc=1):
         raise NotImplementedError()
 
-    def score_errored(self, context, model, inc=1):
+    def score_errored(self, context, model, version, inc=1):
         raise NotImplementedError()
 
     @classmethod

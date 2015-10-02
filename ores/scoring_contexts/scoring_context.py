@@ -36,6 +36,9 @@ class ScoringContext(dict):
         features = self[model].features
         return self.extractor.solve(features, cache=cache)
 
+    def version(self, model):
+        return self[model].version
+
     def score(self, model, cache):
         # TODO: record time spend computing features
         start = time.time()
