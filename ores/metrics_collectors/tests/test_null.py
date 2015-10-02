@@ -7,11 +7,8 @@ def test_null():
     collector = Null()
 
     collector.precache_request("foo", "bar", 100)
-
     collector.scores_request("foo", "bar", 50, 150)
-
-    collector.score_processed("foo", "bar", 1)
-
+    collector.datasources_extracted("foo", "bar", 10, 25)
+    collector.score_processed("foo", "bar", 1.1)
     collector.score_cache_hit("foo", "bar", 2)
-
     collector.score_errored("foo", "bar")

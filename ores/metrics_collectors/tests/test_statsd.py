@@ -22,17 +22,11 @@ def test_statsd():
 
     fake_client = StatsClient()
     collector = Statsd(fake_client)
-
     collector.precache_request("foo", "bar", 100)
-
     collector.scores_request("foo", "bar", 50, 150)
-
     collector.datasources_extracted("foo", "bar", 10, 25)
-
-    collector.score_processed("foo", "bar", 1)
-
+    collector.score_processed("foo", "bar", 1.1)
     collector.score_cache_hit("foo", "bar", 2)
-
     collector.score_errored("foo", "bar")
 
     eq_(fake_client.messages,
@@ -50,9 +44,9 @@ def test_statsd():
          ('TIMING', 'datasources_extracted.foo.bar', 25000),
          ('TIMING', 'datasources_extracted.foo', 25000),
          ('TIMING', 'datasources_extracted', 25000),
-         ('TIMING', 'score_processed.foo.bar', 1000),
-         ('TIMING', 'score_processed.foo', 1000),
-         ('TIMING', 'score_processed', 1000),
+         ('TIMING', 'score_processed.foo.bar', 1100),
+         ('TIMING', 'score_processed.foo', 1100),
+         ('TIMING', 'score_processed', 1100),
          ('INCR', 'score_cache_hit.foo.bar', 2),
          ('INCR', 'score_cache_hit.foo', 2),
          ('INCR', 'score_cache_hit', 2),
