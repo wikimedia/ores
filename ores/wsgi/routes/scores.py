@@ -30,8 +30,8 @@ def configure(config, bp, score_processor):
         # If no model is specified, return information on available models
         if "models" not in request.args:
             # Return the models that we have
-            models = list(score_processor[context].keys())
-            models.sort()
+            models = {name: model.info()
+                      for name, model in score_processor[context].items()}
             return jsonify({"models": models})
 
         # Read the params
@@ -73,22 +73,25 @@ def configure(config, bp, score_processor):
             return responses.not_found("No models available for {0}"
                                        .format(context))
 
-        # Read the rev_ids
-        try:
-            rev_ids = set(read_bar_split_param(request, "revids", type=int))
-        except ParamError as e:
-            return responses.bad_request(str(e))
-
-        if len(rev_ids) == 0:
-            return responses.bad_request("No revids provided.")
-
-        # If the model exists, score revisions with it and return the result
         if model not in score_processor[context]:
             return responses.bad_request("Model '{0}' not available for {1}."
                                          .format(model, context))
+
+        # Read the rev_ids
+        if 'revids' in request.args:
+            try:
+                rev_ids = set(read_bar_split_param(request, "revids", type=int))
+            except ParamError as e:
+                return responses.bad_request(str(e))
+
+            if len(rev_ids) == 0:
+                return responses.bad_request("No revids provided.")
         else:
-            scores = score_processor.score(context, model, rev_ids)
-            return jsonify(scores)
+            return jsonify(score_processor[context][model].info())
+
+        
+        scores = score_processor.score(context, model, rev_ids)
+        return jsonify(scores)
 
     # /scores/enwiki/reverted/4567890
     @bp.route("/scores/<context>/<model>/<int:rev_id>/", methods=["GET"])
