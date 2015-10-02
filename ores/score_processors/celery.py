@@ -128,8 +128,6 @@ class Celery(Timeout):
         return scores
 
     def _lookup_inprogress_results(self, context, model, rev_ids):
-        scorer_model = self[context][model]
-        version = scorer_model.version
 
         results = {}
         for rev_id in rev_ids:

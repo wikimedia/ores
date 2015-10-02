@@ -21,7 +21,6 @@ class Timeout(SimpleScoreProcessor):
         return timeout(super()._process, context, model, cache,
                        seconds=self.timeout)
 
-
     @classmethod
     def from_config(cls, config, name, section_key="score_processors"):
         logger.info("Loading Timeout '{0}' from config.".format(name))

@@ -29,7 +29,8 @@ import requests
 import socketIO_client
 import yamlconf
 
-logger = logging.getLogger("ores.utilities.precached")
+logger = logging.getLogger(__name__)
+
 
 def main(argv=None):
     args = docopt.docopt(__doc__, argv=argv)
@@ -41,6 +42,7 @@ def main(argv=None):
     verbose = bool(args['--verbose'])
     run(stream_url, ores_url, config, delay,
         verbose)
+
 
 def run(stream_url, ores_url, config, delay, verbose):
 

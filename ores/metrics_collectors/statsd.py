@@ -25,7 +25,7 @@ class Statsd(MetricsCollector):
 
     def scores_request(self, context, model, rev_id_count, duration):
         with self.statsd_client.pipeline() as pipe:
-            pipe.timing("scores_request.{0}.{1}.{2}" \
+            pipe.timing("scores_request.{0}.{1}.{2}"
                         .format(context, model, rev_id_count),
                         duration * 1000)
             pipe.timing("scores_request.{0}.{1}".format(context, model),
@@ -43,10 +43,10 @@ class Statsd(MetricsCollector):
 
     def datasources_extracted(self, context, model, rev_id_count, duration):
         with self.statsd_client.pipeline() as pipe:
-            pipe.timing("datasources_extracted.{0}.{1}.{2}" \
+            pipe.timing("datasources_extracted.{0}.{1}.{2}"
                         .format(context, model, rev_id_count),
                         duration * 1000)
-            pipe.timing("datasources_extracted.{0}.{1}" \
+            pipe.timing("datasources_extracted.{0}.{1}"
                         .format(context, model),
                         duration * 1000)
             pipe.timing("datasources_extracted.{0}".format(context),

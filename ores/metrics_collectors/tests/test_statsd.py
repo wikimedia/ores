@@ -3,6 +3,7 @@ from contextlib import contextmanager
 
 from ..statsd import Statsd
 
+
 def test_statsd():
     class StatsClient:
 

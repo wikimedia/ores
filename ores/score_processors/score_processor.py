@@ -91,7 +91,6 @@ class ScoreProcessor(dict):
 
         self.score_cache.store(context, model, rev_id, score, version=version)
 
-
     def _lookup_cached_scores(self, context, model, rev_ids):
         scorer_model = self[context][model]
         version = scorer_model.version

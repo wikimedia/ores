@@ -1,13 +1,11 @@
 import time
-from collections import namedtuple
 
-from nose.tools import eq_, raises
-from revscoring.dependencies import Context
+from nose.tools import eq_
 from revscoring.features import Feature
 from revscoring.scorer_models import ScorerModel
 
 from ...scoring_contexts import ScoringContext
-from ..timeout import Timeout, TimeoutError
+from ..timeout import Timeout
 
 wait_time = Feature("wait_time", returns=float)
 
@@ -21,6 +19,7 @@ class FakeSM(ScorerModel):
 
     def score(self, feature_values):
         raise NotImplementedError()
+
 
 class FakeSC(ScoringContext):
 
@@ -41,14 +40,15 @@ def test_score():
     score_processor = Timeout({'fakewiki': fakewiki}, timeout=0.10)
 
     scores = score_processor.score("fakewiki", "fake", [1],
-                                  caches={1: {wait_time: 0.05}})
+                                   caches={1: {wait_time: 0.05}})
     eq_(scores, {1: {'score': True}})
+
 
 def test_timeout():
     fakewiki = FakeSC("fakewiki", {'fake': FakeSM()}, None)
     score_processor = Timeout({'fakewiki': fakewiki}, timeout=0.05)
 
     scores = score_processor.score("fakewiki", "fake", [1],
-                                  caches={1: {wait_time: 0.10}})
+                                   caches={1: {wait_time: 0.10}})
     assert 'error' in scores[1]
     assert 'Timed out after' in scores[1]['error']['message']
