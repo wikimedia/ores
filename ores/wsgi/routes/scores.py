@@ -76,7 +76,6 @@ def configure(config, bp, score_processor):
             return responses.not_found("No models available for {0}"
                                        .format(context))
 
-        precache = "precache" in request.args
 
         if model not in score_processor[context]:
             return responses.bad_request("Model '{0}' not available for {1}."
@@ -94,8 +93,9 @@ def configure(config, bp, score_processor):
         else:
             return jsonify(score_processor[context][model].info())
 
-        
-        scores = score_processor.score(context, model, rev_ids)
+        precache = "precache" in request.args
+        scores = score_processor.score(context, model, rev_ids,
+                                       precache=precache)
         return jsonify(scores)
 
     # /scores/enwiki/reverted/4567890
