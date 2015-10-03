@@ -1,5 +1,6 @@
-from nose.tools import eq_
 from collections import namedtuple
+
+from nose.tools import eq_
 
 from ..logger import Logger
 
@@ -25,3 +26,15 @@ def test_logger():
          'score_cache_hit: foo.bar.0.0.1',
          'score_cache_hit: foo.bar.0.0.1',
          'score_errored: foo.bar.0.0.1'])
+
+
+def test_from_config():
+    # Should throw a socket connection error and no others
+    config = {
+        'metrics_collectors': {
+            'logger': {
+                'class': 'ores.metrics_collectors.Logger'
+            }
+        }
+    }
+    Logger.from_config(config, 'logger')
