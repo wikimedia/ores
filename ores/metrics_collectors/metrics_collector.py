@@ -20,10 +20,10 @@ class MetricsCollector:
     def score_processed(self, context, model, version, duration):
         raise NotImplementedError()
 
-    def score_cache_hit(self, context, model, version, inc=1):
+    def score_cache_hit(self, context, model, version, count=1):
         raise NotImplementedError()
 
-    def score_errored(self, context, model, version, inc=1):
+    def score_errored(self, context, model, version, count=1):
         raise NotImplementedError()
 
     @classmethod

@@ -30,13 +30,13 @@ class Logger(MetricsCollector):
         self.logger.debug("score_processed: {0}.{1}.{2} in {3} seconds"
                           .format(context, model, version, duration))
 
-    def score_cache_hit(self, context, model, version, incr=1):
-        for i in range(incr):
+    def score_cache_hit(self, context, model, version, count=1):
+        for i in range(count):
             self.logger.debug("score_cache_hit: {0}.{1}.{2}"
                               .format(context, model, version))
 
-    def score_errored(self, context, model, version, incr=1):
-        for i in range(incr):
+    def score_errored(self, context, model, version, count=1):
+        for i in range(count):
             self.logger.debug("score_errored: {0}.{1}.{2}"
                               .format(context, model, version))
 
