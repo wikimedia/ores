@@ -1,5 +1,7 @@
-from nose.tools import eq_
+import socket
 from contextlib import contextmanager
+
+from nose.tools import eq_, raises
 
 from ..statsd import Statsd
 
@@ -61,3 +63,19 @@ def test_statsd():
          ('INCR', 'score_errored.foo.bar', 1),
          ('INCR', 'score_errored.foo', 1),
          ('INCR', 'score_errored', 1)])
+
+
+@raises(socket.gaierror)
+def test_from_config():
+    # Should throw a socket connection error and no others
+    config = {
+        'metrics_collectors': {
+            'wmflabs_statsd': {
+                'class': 'ores.metrics_collectors.Statsd',
+                'host': 'totally.doesnt.exists.OMG',
+                'prefix': 'ores.{hostname}',
+                'maxudpsize': 512
+            }
+        }
+    }
+    Statsd.from_config(config, 'wmflabs_statsd')

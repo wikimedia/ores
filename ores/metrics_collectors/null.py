@@ -25,7 +25,7 @@ class Null(MetricsCollector):
         pass
 
     @classmethod
-    def from_config(cls, config, name, section_key="metrics_collector"):
+    def from_config(cls, config, name, section_key="metrics_collectors"):
         """
         metrics_collectors:
         local_logging:

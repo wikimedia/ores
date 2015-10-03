@@ -1,5 +1,6 @@
-import socket
 import logging
+import socket
+
 from .metrics_collector import MetricsCollector
 
 logger = logging.getLogger(__name__)
@@ -104,7 +105,7 @@ class Statsd(MetricsCollector):
         return cls(statsd_client)
 
     @classmethod
-    def from_config(cls, config, name, section_key="metrics_collector"):
+    def from_config(cls, config, name, section_key="metrics_collectors"):
         """
         metrics_collectors:
             wmflabs_statsd:
