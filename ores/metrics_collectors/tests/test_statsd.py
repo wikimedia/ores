@@ -12,8 +12,8 @@ def test_statsd():
         def __init__(self):
             self.messages = []
 
-        def incr(self, name, incr=1):
-            self.messages.append(("INCR", name, incr))
+        def incr(self, name, count=1):
+            self.messages.append(("INCR", name, count))
 
         def timing(self, name, duration):
             self.messages.append(("TIMING", name, duration))
