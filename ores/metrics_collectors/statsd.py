@@ -43,12 +43,12 @@ class Statsd(MetricsCollector):
                         duration * 1000)
             pipe.incr("revision_scored.{0}.{1}.{2}"
                         .format(context, model, version),
-                      incr=rev_id_count)
+                      count=rev_id_count)
             pipe.incr("revision_scored.{0}.{1}".format(context, model),
-                      incr=rev_id_count)
+                      count=rev_id_count)
             pipe.incr("revision_scored.{0}".format(context),
-                      incr=rev_id_count)
-            pipe.incr("revision_scored", incr=rev_id_count)
+                      count=rev_id_count)
+            pipe.incr("revision_scored", count=rev_id_count)
 
     def datasources_extracted(self, context, model, version, rev_id_count,
                               duration):
@@ -78,25 +78,25 @@ class Statsd(MetricsCollector):
                         duration * 1000)
             pipe.timing("score_processed", duration * 1000)
 
-    def score_cache_hit(self, context, model, version, incr=1):
+    def score_cache_hit(self, context, model, version, count=1):
         with self.statsd_client.pipeline() as pipe:
             pipe.incr("score_cache_hit.{0}.{1}.{2}"
                       .format(context, model, version),
-                      incr=incr)
+                      count=count)
             pipe.incr("score_cache_hit.{0}.{1}".format(context, model),
-                      incr=incr)
-            pipe.incr("score_cache_hit.{0}".format(context), incr=incr)
-            pipe.incr("score_cache_hit".format(context), incr=incr)
+                      count=count)
+            pipe.incr("score_cache_hit.{0}".format(context), count=count)
+            pipe.incr("score_cache_hit".format(context), count=count)
 
-    def score_errored(self, context, model, version, incr=1):
+    def score_errored(self, context, model, version, count=1):
         with self.statsd_client.pipeline() as pipe:
             pipe.incr("score_errored.{0}.{1}.{2}"
                       .format(context, model, version),
-                      incr=incr)
+                      count=count)
             pipe.incr("score_errored.{0}.{1}".format(context, model),
-                      incr=incr)
-            pipe.incr("score_errored.{0}".format(context), incr=incr)
-            pipe.incr("score_errored".format(context), incr=incr)
+                      count=count)
+            pipe.incr("score_errored.{0}".format(context), count=count)
+            pipe.incr("score_errored".format(context), count=count)
 
     @classmethod
     def from_parameters(cls, *args, **kwargs):

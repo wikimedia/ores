@@ -15,13 +15,13 @@ class Null(MetricsCollector):
                               duration):
         pass
 
-    def score_processed(self, context, model, version, incr=1):
+    def score_processed(self, context, model, version, duration):
         pass
 
-    def score_cache_hit(self, context, model, version, incr=1):
+    def score_cache_hit(self, context, model, version, count=1):
         pass
 
-    def score_errored(self, context, model, version, incr=1):
+    def score_errored(self, context, model, version, count=1):
         pass
 
     @classmethod

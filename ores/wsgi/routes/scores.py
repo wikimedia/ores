@@ -76,7 +76,6 @@ def configure(config, bp, score_processor):
             return responses.not_found("No models available for {0}"
                                        .format(context))
 
-
         if model not in score_processor[context]:
             return responses.bad_request("Model '{0}' not available for {1}."
                                          .format(model, context))
