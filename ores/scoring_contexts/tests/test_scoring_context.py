@@ -51,8 +51,7 @@ def test_scoring_context():
     scoring_context = ScoringContext("fakewiki", {"fake": scorer_model},
                                      extractor)
 
-
-    rev_ids = [1,2,3,4,5]
+    rev_ids = [1, 2, 3, 4, 5]
     root_ds_caches = scoring_context.extract_roots("fake", rev_ids)
     eq_(len(root_ds_caches), 5)
     eq_(root_ds_caches[1][1][fake_data], "fake")

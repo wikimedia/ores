@@ -5,9 +5,10 @@ import traceback
 import stopit
 
 from ..score_caches import ScoreCache
+from ..metrics_collectors import MetricsCollector
 from .score_processor import SimpleScoreProcessor
 
-logger = logging.getLogger("ores.score_processors.timeout")
+logger = logging.getLogger(__name__)
 
 
 class Timeout(SimpleScoreProcessor):
@@ -20,16 +21,10 @@ class Timeout(SimpleScoreProcessor):
         return timeout(super()._process, context, model, cache,
                        seconds=self.timeout)
 
-
     @classmethod
     def from_config(cls, config, name, section_key="score_processors"):
+        logger.info("Loading Timeout '{0}' from config.".format(name))
         section = config[section_key][name]
-
-        # TODO: this is a weird place to have this set.
-        if 'data_paths' in config['ores'] and \
-           'nltk' in config['ores']['data_paths']:
-            import nltk
-            nltk.data.path.append(config['ores']['data_paths']['nltk'])
 
         from ..scoring_contexts import ScoringContext
 
@@ -43,9 +38,17 @@ class Timeout(SimpleScoreProcessor):
         else:
             score_cache = None
 
+        if 'metrics_collector' in section:
+            metrics_collector = \
+                MetricsCollector.from_config(config,
+                                             section['metrics_collector'])
+        else:
+            metrics_collector = None
+
         timeout = section.get('timeout')
 
-        return cls(scoring_contexts, score_cache=score_cache, timeout=timeout)
+        return cls(scoring_contexts, score_cache=score_cache,
+                   metrics_collector=metrics_collector, timeout=timeout)
 
 
 class TimeoutError(Exception):

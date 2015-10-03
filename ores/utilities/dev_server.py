@@ -26,11 +26,12 @@ def main(argv=None):
 
     config = yamlconf.load(open(args['--config']))
 
-    if args['--verbose']:
-        logging.basicConfig(
-            level=logging.DEBUG,
-            format='%(asctime)s %(levelname)s:%(name)s -- %(message)s'
-        )
+    logging.basicConfig(
+        level=logging.INFO if not args['--verbose'] else logging.DEBUG,
+        format='%(asctime)s %(levelname)s:%(name)s -- %(message)s'
+    )
+
+    logging.getLogger("ores.metrics_collectors.logger").setLevel(logging.DEBUG)
 
     app = server.configure(config)
     app.run(host="0.0.0.0",

@@ -5,7 +5,7 @@ from .score_cache import ScoreCache
 
 logger = logging.getLogger("ores.score_caches.redis")
 
-TTL = 60*60*24*365*16  # 16 years
+TTL = 60 * 60 * 24 * 365 * 16  # 16 years
 PREFIX = "ores"
 
 

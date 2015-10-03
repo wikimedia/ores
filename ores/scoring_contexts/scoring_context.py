@@ -1,16 +1,13 @@
 import logging
 import time
-from collections import defaultdict
 
 from revscoring import dependencies
 from revscoring.datasources import Datasource
 from revscoring.extractors import Extractor
 from revscoring.scorer_models import ScorerModel
 
-from ..score_caches import Empty, ScoreCache
-from ..score_processors import ScoreProcessor, Timeout
-
 logger = logging.getLogger("ores.scorer.scorer")
+
 
 class ScoringContext(dict):
 
@@ -38,6 +35,9 @@ class ScoringContext(dict):
         """
         features = self[model].features
         return self.extractor.solve(features, cache=cache)
+
+    def version(self, model):
+        return self[model].version
 
     def score(self, model, cache):
         # TODO: record time spend computing features

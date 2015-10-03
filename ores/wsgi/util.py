@@ -19,7 +19,7 @@ def read_bar_split_param(request, param, default=None, type=str):
     values = read_param(request, param, default=default)
     if values is None:
         return []
-    
+
     try:
         return [type(value) for value in values.split("|")]
     except (ValueError, TypeError) as e:

@@ -55,10 +55,13 @@ def configure(config, bp, score_processor):
         if len(rev_ids) == 0:
             return responses.bad_request("No revids provided.")
 
+        precache = "precache" in request.args
+
         # Generate scores for each model and merge them together
         scores = defaultdict(dict)
         for model in models:
-            model_scores = score_processor.score(context, model, rev_ids)
+            model_scores = score_processor.score(context, model, rev_ids,
+                                                 precache=precache)
             for rev_id in model_scores:
                 scores[rev_id][model] = model_scores[rev_id]
 
@@ -73,11 +76,13 @@ def configure(config, bp, score_processor):
             return responses.not_found("No models available for {0}"
                                        .format(context))
 
+        precache = "precache" in request.args
+
         if model not in score_processor[context]:
             return responses.bad_request("Model '{0}' not available for {1}."
                                          .format(model, context))
 
-        # Read the rev_ids
+        # Try to read the rev_ids
         if 'revids' in request.args:
             try:
                 rev_ids = set(read_bar_split_param(request, "revids", type=int))
@@ -102,12 +107,15 @@ def configure(config, bp, score_processor):
             return responses.not_found("No models available for {0}"
                                        .format(context))
 
+        precache = "precache" in request.args
+
         # If the model exists, score revisions with it and return the result
         if model not in score_processor[context]:
             return responses.not_found("Model '{0}' not available for {1}."
                                        .format(model, context))
         else:
-            scores = score_processor.score(context, model, [rev_id])
+            scores = score_processor.score(context, model, [rev_id],
+                                           precache=precache)
             return jsonify(scores)
 
     return bp

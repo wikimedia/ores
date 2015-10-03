@@ -2,30 +2,60 @@ import logging
 import time
 
 from ..score_caches import Empty
+from ..metrics_collectors import Null
 from ..util import jsonify_error
 
-logger = logging.getLogger("ores.score_processors.score_processor")
+logger = logging.getLogger(__name__)
 
 
 class ScoreProcessor(dict):
 
-    def __init__(self, scoring_contexts, score_cache=None):
+    def __init__(self, scoring_contexts, score_cache=None,
+                       metrics_collector=None):
         super().__init__()
         self.update(scoring_contexts)
         self.score_cache = score_cache or Empty()
+        self.metrics_collector = metrics_collector or Null()
+
+    def score(self, context, model, rev_ids, caches=None, precache=False):
+        version = self[context].version(model)
+        start = time.time()
+        scores = self._score(context, model, rev_ids, caches=caches)
+
+        duration = time.time() - start
+        if not precache:
+            self.metrics_collector.scores_request(context, model, version,
+                                                  len(rev_ids), duration)
+        else:
+            self.metrics_collector.precache_request(context, model, version,
+                                                    duration)
+
+        return scores
 
     def _get_root_ds(self, context, model, rev_ids, caches=None):
         """
         Pure IO.  Batch extract root datasources for a set of features that the
         model needs.
         """
+        if len(rev_ids) == 0:
+            return {}
         rev_ids = set(rev_ids)
         scoring_context = self[context]
+        version = scoring_context.version(model)
 
         start = time.time()
         roots = scoring_context.extract_roots(model, rev_ids, caches=caches)
+        duration = time.time() - start
         logger.debug("Extracted root Datasources for {0} in {1} seconds"
-                     .format(rev_ids, time.time() - start))
+                     .format(rev_ids, duration))
+
+        self.metrics_collector.datasources_extracted(context, model,
+                                                     version, len(rev_ids),
+                                                     duration)
+
+        for error, cache in roots.values():
+            if error is not None:
+                self.metrics_collector.score_errored(context, model, version)
 
         return roots
 
@@ -35,14 +65,22 @@ class ScoreProcessor(dict):
         model to arrive at a score.
         """
         scoring_context = self[context]
+        version = scoring_context.version(model)
 
-        start = time.time()
-        score = scoring_context.score(model, cache)
-        logger.debug("Scoring took {0} seconds".format(time.time() - start))
+        try:
+            start = time.time()
+            score = scoring_context.score(model, cache)
+            duration = time.time() - start
+            logger.debug("Scoring took {0} seconds".format(duration))
+            self.metrics_collector.score_processed(context, model, version,
+                                                   duration)
+        except:
+            self.metrics_collector.score_errored(context, model, version)
+            raise
 
         return score
 
-    def _score(self, context, model, rev_id, cache=None):
+    def _score_revision(self, context, model, rev_id, cache=None):
         """
         Both IO and CPU.  Generates a single score or an error.
         """
@@ -55,15 +93,12 @@ class ScoreProcessor(dict):
         return self._process(context, model, score_cache)
 
     def _store(self, context, model, rev_id, score):
-        scorer_model = self[context][model]
-        version = scorer_model.version
+        version = self[context].version(model)
 
         self.score_cache.store(context, model, rev_id, score, version=version)
 
-
     def _lookup_cached_scores(self, context, model, rev_ids):
-        scorer_model = self[context][model]
-        version = scorer_model.version
+        version = self[context].version(model)
 
         scores = {}
         for rev_id in rev_ids:
@@ -71,9 +106,10 @@ class ScoreProcessor(dict):
                 score = self.score_cache.lookup(context, model, rev_id,
                                                 version=version)
 
-                logger.debug("Found cached score for {0}:{1}"
-                             .format(model, rev_id))
+                logger.debug("Found cached score for {0}:{1}:{2}"
+                             .format(context, model, rev_id))
 
+                self.metrics_collector.score_cache_hit(context, model, version)
                 scores[rev_id] = score
             except KeyError:
                 pass
@@ -94,11 +130,13 @@ class ScoreProcessor(dict):
         elif 'class' in section:
             Class = yamlconf.import_module(section['class'])
             return Class.from_config(config, name)
+        else:
+            raise RuntimeError("No module or class to load.")
 
 
 class SimpleScoreProcessor(ScoreProcessor):
 
-    def score(self, context, model, rev_ids, caches=None):
+    def _score(self, context, model, rev_ids, caches=None):
         rev_ids = set(rev_ids)
 
         # Look in the cache
