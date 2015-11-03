@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 APPLICATIONS = []
 
+DEFAULT_CELERY_QUEUE = "celery"
 
 @before_task_publish.connect
 def update_sent_state(sender=None, body=None, **kwargs):
@@ -49,11 +50,13 @@ class Celery(Timeout):
                            mwapi.errors.TimeoutError,
                            TimeoutError)
 
-        @self.application.task(throws=expected_errors)
+        @self.application.task(throws=expected_errors,
+                               queue=DEFAULT_CELERY_QUEUE)
         def _process_task(context, model, cache):
             return Timeout._process(self, context, model, cache)
 
-        @self.application.task(throws=expected_errors)
+        @self.application.task(throws=expected_errors,
+                               queue=DEFAULT_CELERY_QUEUE)
         def _score_revision_task(context, model, rev_id, cache=None):
             return Timeout._score_revision(self, context, model, rev_id, cache=cache)
 
@@ -119,7 +122,7 @@ class Celery(Timeout):
         # This will result in a race condition, but it should have OK
         # properties.
         if self.redis is not None:
-            queue_size = self.redis.llen("celery")
+            queue_size = self.redis.llen(DEFAULT_CELERY_QUEUE)
             if queue_size > self.queue_maxsize:
                 message = "Queue size is too full {0}".format(queue_size)
                 logger.warning(message)
