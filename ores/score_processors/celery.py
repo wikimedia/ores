@@ -1,13 +1,16 @@
 import logging
+import queue
+import re
+import time
 
 import celery
+import mwapi.errors
+import redis
 import revscoring.errors
 from celery.signals import before_task_publish
 
-import mwapi.errors
-
-from ..score_caches import ScoreCache
 from ..metrics_collectors import MetricsCollector
+from ..score_caches import ScoreCache
 from ..util import jsonify_error
 from .timeout import Timeout, TimeoutError
 
@@ -29,9 +32,16 @@ def update_sent_state(sender=None, body=None, **kwargs):
 
 class Celery(Timeout):
 
-    def __init__(self, *args, application, **kwargs):
+    def __init__(self, *args, application, queue_maxsize=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.application = application
+        self.queue_maxsize = int(queue_maxsize) if queue_maxsize is not None \
+                             else None
+
+        self.redis = redis_from_url(self.application.conf.BROKER_URL)
+
+        if self.queue_maxsize is not None and self.redis is None:
+            logger.warning("No redis connection.  Can't check queue size")
 
         expected_errors = (revscoring.errors.RevisionNotFound,
                            revscoring.errors.DependencyError,
@@ -102,7 +112,21 @@ class Celery(Timeout):
 
         return ":".join(str(v) for v in [context, model, rev_id, version])
 
+    def _queue_full(self):
+        # Check redis to see if the queue is too big.  If not, lump it on!
+        # This will result in a race condition, but it should have OK
+        # properties
+        if self.redis is not None:
+            queue_size = self.redis.llen("celery")
+            logger.warning("Queue size is too full {0}".format(queue_size))
+            return queue_size > self.queue_maxsize
+        else:
+            return False
+
     def _score(self, context, model, rev_ids, caches=None):
+        if self._queue_full():
+            raise queue.Full()
+
         rev_ids = set(rev_ids)
 
         # Lookup scoring results that are currently in progress
@@ -174,10 +198,42 @@ class Celery(Timeout):
             metrics_collector = None
 
         timeout = section.get('timeout')
+        queue_maxsize = section.get('queue_maxsize')
         application = celery.Celery('ores.score_processors.celery')
         application.conf.update(**{k: v for k, v in section.items()
-                                   if k not in ('class', 'timeout')})
+                                   if k not in ('class', 'timeout',
+                                                'queue_maxsize')})
 
         return cls(scoring_contexts, application=application, timeout=timeout,
-                   score_cache=score_cache,
+                   score_cache=score_cache, queue_maxsize=queue_maxsize,
                    metrics_collector=metrics_collector)
+
+
+REDIS_URL_RE = re.compile(
+    r"redis://" +
+    r"((?P<password>[^@]+)@)?" +
+    r"(?P<host>[^:/]+)?" +
+    r"(:(?P<port>[0-9]+))?" +
+    r"(/(?P<db>[0-9]+))?"
+)
+
+
+def redis_from_url(url):
+    """
+    Converts a redis URL used by celery into a `redis.Redis` object.
+    """
+    match = REDIS_URL_RE.match(url)
+    if match is None:
+        return None
+
+    kwargs = {}
+    if match.group('password') is not None:
+        kwargs['password'] = match.group('password')
+    if match.group('host') is not None:
+        kwargs['host'] = match.group('host')
+    if match.group('port') is not None:
+        kwargs['port'] = int(match.group('port'))
+    if match.group('db') is not None:
+        kwargs['db'] = int(match.group('db'))
+
+    return redis.StrictRedis(**kwargs)
