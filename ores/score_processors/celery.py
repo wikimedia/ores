@@ -218,6 +218,9 @@ REDIS_URL_RE = re.compile(
     r"(:(?P<port>[0-9]+))?" +
     r"(/(?P<db>[0-9]+))?"
 )
+"""
+Extracts the components of a redis URL as groups.
+"""
 
 
 def redis_from_url(url):
