@@ -15,6 +15,9 @@ class Null(MetricsCollector):
                               duration):
         pass
 
+    def score_processor_overloaded(self, context, model, version, count=1):
+        pass
+
     def score_processed(self, context, model, version, duration):
         pass
 

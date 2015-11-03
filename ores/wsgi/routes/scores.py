@@ -4,6 +4,7 @@ from flask import request
 from flask.ext.jsonpify import jsonify
 
 from .. import responses
+from ... import errors
 from ..util import ParamError, read_bar_split_param
 
 
@@ -58,12 +59,15 @@ def configure(config, bp, score_processor):
         precache = "precache" in request.args
 
         # Generate scores for each model and merge them together
-        scores = defaultdict(dict)
-        for model in models:
-            model_scores = score_processor.score(context, model, rev_ids,
-                                                 precache=precache)
-            for rev_id in model_scores:
-                scores[rev_id][model] = model_scores[rev_id]
+        try:
+            scores = defaultdict(dict)
+            for model in models:
+                model_scores = score_processor.score(context, model, rev_ids,
+                                                     precache=precache)
+                for rev_id in model_scores:
+                    scores[rev_id][model] = model_scores[rev_id]
+        except errors.ScoreProcessorOverloaded:
+            return responses.server_overloaded()
 
         return jsonify(scores)
 
@@ -93,8 +97,11 @@ def configure(config, bp, score_processor):
             return jsonify(score_processor[context][model].info())
 
         precache = "precache" in request.args
-        scores = score_processor.score(context, model, rev_ids,
-                                       precache=precache)
+        try:
+            scores = score_processor.score(context, model, rev_ids,
+                                           precache=precache)
+        except errors.ScoreProcessorOverloaded:
+            return responses.server_overloaded()
         return jsonify(scores)
 
     # /scores/enwiki/reverted/4567890
@@ -113,8 +120,12 @@ def configure(config, bp, score_processor):
             return responses.not_found("Model '{0}' not available for {1}."
                                        .format(model, context))
         else:
-            scores = score_processor.score(context, model, [rev_id],
-                                           precache=precache)
+            try:
+                scores = score_processor.score(context, model, [rev_id],
+                                               precache=precache)
+            except errors.ScoreProcessorOverloaded:
+                return responses.server_overloaded()
+
             return jsonify(scores)
 
     return bp

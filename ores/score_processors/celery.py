@@ -1,13 +1,16 @@
 import logging
+import re
+from urllib.parse import urlparse
 
 import celery
+import mwapi.errors
+import redis
 import revscoring.errors
 from celery.signals import before_task_publish
 
-import mwapi.errors
-
-from ..score_caches import ScoreCache
+from .. import errors
 from ..metrics_collectors import MetricsCollector
+from ..score_caches import ScoreCache
 from ..util import jsonify_error
 from .timeout import Timeout, TimeoutError
 
@@ -15,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 APPLICATIONS = []
 
+DEFAULT_CELERY_QUEUE = "celery"
 
 @before_task_publish.connect
 def update_sent_state(sender=None, body=None, **kwargs):
@@ -29,9 +33,16 @@ def update_sent_state(sender=None, body=None, **kwargs):
 
 class Celery(Timeout):
 
-    def __init__(self, *args, application, **kwargs):
+    def __init__(self, *args, application, queue_maxsize=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.application = application
+        self.queue_maxsize = int(queue_maxsize) if queue_maxsize is not None \
+                             else None
+
+        self.redis = redis_from_url(self.application.conf.BROKER_URL)
+
+        if self.queue_maxsize is not None and self.redis is None:
+            logger.warning("No redis connection.  Can't check queue size")
 
         expected_errors = (revscoring.errors.RevisionNotFound,
                            revscoring.errors.DependencyError,
@@ -39,11 +50,13 @@ class Celery(Timeout):
                            mwapi.errors.TimeoutError,
                            TimeoutError)
 
-        @self.application.task(throws=expected_errors)
+        @self.application.task(throws=expected_errors,
+                               queue=DEFAULT_CELERY_QUEUE)
         def _process_task(context, model, cache):
             return Timeout._process(self, context, model, cache)
 
-        @self.application.task(throws=expected_errors)
+        @self.application.task(throws=expected_errors,
+                               queue=DEFAULT_CELERY_QUEUE)
         def _score_revision_task(context, model, rev_id, cache=None):
             return Timeout._score_revision(self, context, model, rev_id, cache=cache)
 
@@ -102,7 +115,22 @@ class Celery(Timeout):
 
         return ":".join(str(v) for v in [context, model, rev_id, version])
 
+    def _check_queue_full(self):
+        # Check redis to see if the queue of waiting tasks is too big.
+        # This is a hack to implement backpressure because celery doesn't
+        # support it natively.
+        # This will result in a race condition, but it should have OK
+        # properties.
+        if self.redis is not None:
+            queue_size = self.redis.llen(DEFAULT_CELERY_QUEUE)
+            if queue_size > self.queue_maxsize:
+                message = "Queue size is too full {0}".format(queue_size)
+                logger.warning(message)
+                raise errors.ScoreProcessorOverloaded(message)
+
     def _score(self, context, model, rev_ids, caches=None):
+        self._check_queue_full()  # Raises ScoreProcessorOverloaded
+
         rev_ids = set(rev_ids)
 
         # Lookup scoring results that are currently in progress
@@ -174,10 +202,47 @@ class Celery(Timeout):
             metrics_collector = None
 
         timeout = section.get('timeout')
+        queue_maxsize = section.get('queue_maxsize')
         application = celery.Celery('ores.score_processors.celery')
         application.conf.update(**{k: v for k, v in section.items()
-                                   if k not in ('class', 'timeout')})
+                                   if k not in ('class', 'timeout',
+                                                'queue_maxsize')})
 
         return cls(scoring_contexts, application=application, timeout=timeout,
-                   score_cache=score_cache,
+                   score_cache=score_cache, queue_maxsize=queue_maxsize,
                    metrics_collector=metrics_collector)
+
+
+PASS_HOST_PORT = re.compile(
+    r"((?P<password>[^@]+)@)?" +
+    r"(?P<host>[^:]+)?" +
+    r"(:(?P<port>[0-9]+))?"
+)
+"""
+Matches <password>@<host>:<port>
+"""
+
+
+def redis_from_url(url):
+    """
+    Converts a redis URL used by celery into a `redis.Redis` object.
+    """
+    url = url or ""
+    parsed_url = urlparse(url)
+    if parsed_url.scheme != "redis":
+        return None
+
+    kwargs = {}
+    match = PASS_HOST_PORT.match(parsed_url.netloc)
+    if match.group('password') is not None:
+        kwargs['password'] = match.group('password')
+    if match.group('host') is not None:
+        kwargs['host'] = match.group('host')
+    if match.group('port') is not None:
+        kwargs['port'] = int(match.group('port'))
+
+    if len(parsed_url.path) > 1:
+        # Removes "/" from the beginning
+        kwargs['db'] = int(parsed_url.path[1:])
+
+    return redis.StrictRedis(**kwargs)

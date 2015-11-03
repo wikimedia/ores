@@ -22,3 +22,9 @@ def forbidden(message=None):
 def not_found(message=None):
     return error(404, 'not found',
                  message or "Nothing found at this location.")
+
+
+def server_overloaded(message=None):
+    return error(503, 'server overloaded',
+                 "Cannot process your request because the server is " + \
+                 "overloaded.  Try again in a few minutes.")

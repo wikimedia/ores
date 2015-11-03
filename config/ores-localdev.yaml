@@ -40,6 +40,7 @@ score_processors:
     CELERY_RESULT_SERIALIZER: 'pickle'
     CELERYD_CONCURRENCY: 16
     timeout: 15 # seconds
+    queue_maxsize: 100 # pending tasks
   timeout:
     class: ores.score_processors.Timeout
     timeout: 5 # seconds

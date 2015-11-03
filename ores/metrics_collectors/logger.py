@@ -26,6 +26,10 @@ class Logger(MetricsCollector):
                           .format(context, model, version, rev_id_count,
                                   duration))
 
+    def score_processor_overloaded(self, context, model, version, count=1):
+        self.logger.debug("score_processor_overloaded: " +
+                          "{0}.{1}.{2}".format(context, model, version))
+
     def score_processed(self, context, model, version, duration):
         self.logger.debug("score_processed: {0}.{1}.{2} in {3} seconds"
                           .format(context, model, version, duration))

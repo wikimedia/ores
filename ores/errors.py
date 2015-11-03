@@ -1,0 +1,3 @@
+
+class ScoreProcessorOverloaded(RuntimeError):
+    pass
