@@ -118,8 +118,11 @@ class Celery(Timeout):
         # properties
         if self.redis is not None:
             queue_size = self.redis.llen("celery")
-            logger.warning("Queue size is too full {0}".format(queue_size))
-            return queue_size > self.queue_maxsize
+            if queue_size > self.queue_maxsize:
+                logger.warning("Queue size is too full {0}".format(queue_size))
+                return True
+            else:
+                return False
         else:
             return False
 
