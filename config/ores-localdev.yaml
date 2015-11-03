@@ -1,6 +1,6 @@
 # Top level configuration
 ores:
-  score_processor: local_celery
+  score_processor: local_timeout
   wsgi:
     application_root: ""
     url_prefix: ""
