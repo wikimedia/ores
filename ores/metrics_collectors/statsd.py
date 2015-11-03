@@ -78,6 +78,19 @@ class Statsd(MetricsCollector):
                         duration * 1000)
             pipe.timing("score_processed", duration * 1000)
 
+    def score_processor_overloaded(self, context, model, version, count=1):
+        with self.statsd_client.pipeline() as pipe:
+            pipe.incr("score_processor_overloaded.{0}.{1}.{2}"
+                      .format(context, model, version),
+                      count=count)
+            pipe.incr("score_processor_overloaded.{0}.{1}"
+                      .format(context, model),
+                      count=count)
+            pipe.incr("score_processor_overloaded.{0}".format(context),
+                      count=count)
+            pipe.incr("score_processor_overloaded",
+                      count=count)
+
     def score_cache_hit(self, context, model, version, count=1):
         with self.statsd_client.pipeline() as pipe:
             pipe.incr("score_cache_hit.{0}.{1}.{2}"

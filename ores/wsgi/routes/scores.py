@@ -1,10 +1,10 @@
-import queue
 from collections import defaultdict
 
 from flask import request
 from flask.ext.jsonpify import jsonify
 
 from .. import responses
+from ... import errors
 from ..util import ParamError, read_bar_split_param
 
 
@@ -66,7 +66,7 @@ def configure(config, bp, score_processor):
                                                      precache=precache)
                 for rev_id in model_scores:
                     scores[rev_id][model] = model_scores[rev_id]
-        except queue.Full:
+        except errors.ScoreProcessorOverloaded:
             return responses.server_overloaded()
 
         return jsonify(scores)
@@ -100,7 +100,7 @@ def configure(config, bp, score_processor):
         try:
             scores = score_processor.score(context, model, rev_ids,
                                            precache=precache)
-        except queue.Full:
+        except errors.ScoreProcessorOverloaded:
             return responses.server_overloaded()
         return jsonify(scores)
 
@@ -123,7 +123,7 @@ def configure(config, bp, score_processor):
             try:
                 scores = score_processor.score(context, model, [rev_id],
                                                precache=precache)
-            except queue.Full:
+            except errors.ScoreProcessorOverloaded:
                 return responses.server_overloaded()
 
             return jsonify(scores)

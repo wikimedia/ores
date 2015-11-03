@@ -9,6 +9,7 @@ import redis
 import revscoring.errors
 from celery.signals import before_task_publish
 
+from .. import errors
 from ..metrics_collectors import MetricsCollector
 from ..score_caches import ScoreCache
 from ..util import jsonify_error
@@ -112,23 +113,21 @@ class Celery(Timeout):
 
         return ":".join(str(v) for v in [context, model, rev_id, version])
 
-    def _queue_full(self):
-        # Check redis to see if the queue is too big.  If not, lump it on!
+    def _check_queue_full(self):
+        # Check redis to see if the queue of waiting tasks is too big.
+        # This is a hack to implement backpressure because celery doesn't
+        # support it natively.
         # This will result in a race condition, but it should have OK
-        # properties
+        # properties.
         if self.redis is not None:
             queue_size = self.redis.llen("celery")
             if queue_size > self.queue_maxsize:
-                logger.warning("Queue size is too full {0}".format(queue_size))
-                return True
-            else:
-                return False
-        else:
-            return False
+                message = "Queue size is too full {0}".format(queue_size)
+                logger.warning(message)
+                raise errors.ScoreProcessorOverloaded(message)
 
     def _score(self, context, model, rev_ids, caches=None):
-        if self._queue_full():
-            raise queue.Full()
+        self._check_queue_full()  # Raises ScoreProcessorOverloaded
 
         rev_ids = set(rev_ids)
 

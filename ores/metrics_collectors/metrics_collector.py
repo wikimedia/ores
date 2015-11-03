@@ -17,6 +17,9 @@ class MetricsCollector:
                               duration):
         raise NotImplementedError()
 
+    def score_processor_overloaded(self, context, model, version, count=1):
+        raise NotImplementedError()
+
     def score_processed(self, context, model, version, duration):
         raise NotImplementedError()
 

@@ -1,8 +1,9 @@
 import logging
 import time
 
-from ..score_caches import Empty
+from .. import errors
 from ..metrics_collectors import Null
+from ..score_caches import Empty
 from ..util import jsonify_error
 
 logger = logging.getLogger(__name__)
@@ -20,7 +21,12 @@ class ScoreProcessor(dict):
     def score(self, context, model, rev_ids, caches=None, precache=False):
         version = self[context].version(model)
         start = time.time()
-        scores = self._score(context, model, rev_ids, caches=caches)
+        try:
+            scores = self._score(context, model, rev_ids, caches=caches)
+        except errors.ScoreProcessorOverloaded:
+            self.metrics_collector.score_processor_overloaded(
+                context, model, version)
+            raise
 
         duration = time.time() - start
         if not precache:
