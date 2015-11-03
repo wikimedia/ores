@@ -1,7 +1,6 @@
 import logging
-import queue
 import re
-import time
+from urllib.parse import urlparse
 
 import celery
 import mwapi.errors
@@ -211,15 +210,13 @@ class Celery(Timeout):
                    metrics_collector=metrics_collector)
 
 
-REDIS_URL_RE = re.compile(
-    r"redis://" +
+PASS_HOST_PORT = re.compile(
     r"((?P<password>[^@]+)@)?" +
-    r"(?P<host>[^:/]+)?" +
-    r"(:(?P<port>[0-9]+))?" +
-    r"(/(?P<db>[0-9]+))?"
+    r"(?P<host>[^:]+)?" +
+    r"(:(?P<port>[0-9]+))?"
 )
 """
-Extracts the components of a redis URL as groups.
+Matches <password>@<host>:<port>
 """
 
 
@@ -227,18 +224,22 @@ def redis_from_url(url):
     """
     Converts a redis URL used by celery into a `redis.Redis` object.
     """
-    match = REDIS_URL_RE.match(url)
-    if match is None:
+    url = url or ""
+    parsed_url = urlparse(url)
+    if parsed_url.scheme != "redis":
         return None
 
     kwargs = {}
+    match = PASS_HOST_PORT.match(parsed_url.netloc)
     if match.group('password') is not None:
         kwargs['password'] = match.group('password')
     if match.group('host') is not None:
         kwargs['host'] = match.group('host')
     if match.group('port') is not None:
         kwargs['port'] = int(match.group('port'))
-    if match.group('db') is not None:
-        kwargs['db'] = int(match.group('db'))
+
+    if len(parsed_url.path) > 1:
+        # Removes "/" from the beginning
+        kwargs['db'] = int(parsed_url.path[1:])
 
     return redis.StrictRedis(**kwargs)
