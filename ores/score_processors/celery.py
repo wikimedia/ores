@@ -207,6 +207,7 @@ class Celery(Timeout):
         application.conf.update(**{k: v for k, v in section.items()
                                    if k not in ('class', 'timeout',
                                                 'queue_maxsize')})
+        application.conf.CELERY_CREATE_MISSING_QUEUES = True
 
         return cls(scoring_contexts, application=application, timeout=timeout,
                    score_cache=score_cache, queue_maxsize=queue_maxsize,

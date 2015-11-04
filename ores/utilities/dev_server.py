@@ -3,19 +3,19 @@ Starts a development web server.
 
 Usage:
     dev_server (-h | --help)
-    dev_server [--port=<num>] [--verbose] [--config=<path>]
+    dev_server [--port=<num>] [--config=<path>] [--processes=<num>] [--verbose]
 
 Options:
-    -h --help        Print this documentation
-    --port=<num>     The port number to start the server on [default: 8080]
-    --config=<path>  The path to a yaml config file
-                     [default: config/ores-localdev.yaml]
-    --verbose        Print logging information
+    -h --help          Print this documentation
+    --port=<num>       The port number to start the server on [default: 8080]
+    --config=<path>    The path to a yaml config file
+                       [default: config/ores-localdev.yaml]
+    --processes=<num>  The number of parallel processes to handle [default: 32]
+    --verbose          Print logging information
 """
 import logging
 
 import docopt
-
 import yamlconf
 
 from ..wsgi import server
@@ -25,6 +25,8 @@ def main(argv=None):
     args = docopt.docopt(__doc__, argv=argv)
 
     config = yamlconf.load(open(args['--config']))
+
+    processes = int(args['--processes'])
 
     logging.basicConfig(
         level=logging.INFO if not args['--verbose'] else logging.DEBUG,
@@ -37,4 +39,4 @@ def main(argv=None):
     app.run(host="0.0.0.0",
             port=int(args['--port']),
             debug=True,
-            threaded=True)
+            processes=processes)
