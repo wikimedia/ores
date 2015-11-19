@@ -74,7 +74,7 @@ def run(stream_url, ores_url, config, delay, verbose):
         try:
             time.sleep(delay)
             start = time.time()
-            requests.get(url, timeout=20, verify=False)
+            requests.get(url, timeout=20, verify=True)
             logger.debug("GET {0} completed in {1} seconds."
                          .format(url, time.time() - start))
         except Exception as e:
