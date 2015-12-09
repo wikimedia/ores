@@ -7,13 +7,13 @@ ores:
 
 # Caching options
 score_caches:
+  memory_lru:
+    class: ores.score_caches.LRU
   local_redis:
     class: ores.score_caches.Redis
     host: localhost
     prefix: ores
     socket_timeout: 15 # seconds
-  memory_lru:
-    class: ores.score_caches.LRU
 
 # Metrics collection options
 metrics_collectors:
@@ -26,7 +26,7 @@ score_processors:
     score_cache: memory_lru
     metrics_collector: local_logging
     scoring_contexts:
-      - enwiki
+      - testwiki
   local_timeout:
     class: ores.score_processors.Timeout
     timeout: 15 # seconds
@@ -41,29 +41,25 @@ score_processors:
     CELERYD_CONCURRENCY: 16
     timeout: 15 # seconds
     queue_maxsize: 100 # pending tasks
-  timeout:
-    class: ores.score_processors.Timeout
-    timeout: 5 # seconds
 
 # Scoring contexts
 scoring_contexts:
-  enwiki:
-    extractor: enwiki_api
+  testwiki:
+    extractor: testwiki_api
     scorer_models:
-      reverted: enwiki_revert
+      revid: testwiki_revid
 
 # Available feature extractors
 extractors:
   defaults:
     class: revscoring.extractors.APIExtractor
     user_agent: Object Revision Evaluation Service (local development)
-  enwiki_api:
-    host: https://en.wikipedia.org/
+  testwiki_api:
+    host: https://test.wikipedia.org/
     timeout: 2 # seconds
 
 # Scorer models
 scorer_models:
-  defaults:
-    class: revscoring.scorer_models.MLScorerModel
-  enwiki_revert:
-    model_file: models/enwiki.reverted.linear_svc.model
+  testwiki_revid:
+    class: ores.scorer_models.RevIdScorer
+    version: test version

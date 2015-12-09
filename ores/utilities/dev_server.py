@@ -3,13 +3,15 @@ Starts a development web server.
 
 Usage:
     dev_server (-h | --help)
-    dev_server [--port=<num>] [--config=<path>] [--processes=<num>] [--verbose]
+    dev_server [--host=<name>] [--port=<num>] [--config=<path>]
+               [--processes=<num>] [--verbose]
 
 Options:
     -h --help          Print this documentation
+    --host=<name>      The hostname to listen on [default: 0.0.0.0]
     --port=<num>       The port number to start the server on [default: 8080]
     --config=<path>    The path to a yaml config file
-                       [default: config/ores-localdev.yaml]
+                       [default: config/ores-testwiki.yaml]
     --processes=<num>  The number of parallel processes to handle [default: 32]
     --verbose          Print logging information
 """
@@ -36,7 +38,7 @@ def main(argv=None):
     logging.getLogger("ores.metrics_collectors.logger").setLevel(logging.DEBUG)
 
     app = server.configure(config)
-    app.run(host="0.0.0.0",
+    app.run(host=args['--host'],
             port=int(args['--port']),
             debug=True,
             processes=processes)
