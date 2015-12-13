@@ -7,4 +7,4 @@ mwreverts >= 0.0.5, < 0.0.999
 socketIO-client == 0.5.6
 stopit >= 1.1.1, < 1.1.999
 yamlconf >= 0.0.3, < 0.0.999
-revscoring >= 0.7.2
+revscoring >= 0.7.9
