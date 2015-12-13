@@ -23,7 +23,6 @@ metrics_collectors:
 # Score processing options
 score_processors:
   defaults:
-    score_cache: memory_lru
     metrics_collector: local_logging
     scoring_contexts:
       - testwiki
@@ -45,18 +44,14 @@ score_processors:
 # Scoring contexts
 scoring_contexts:
   testwiki:
-    extractor: testwiki_api
+    extractor: testwiki_offline
     scorer_models:
       revid: testwiki_revid
 
 # Available feature extractors
 extractors:
-  defaults:
-    class: revscoring.extractors.APIExtractor
-    user_agent: Object Revision Evaluation Service (local development)
-  testwiki_api:
-    host: https://test.wikipedia.org/
-    timeout: 2 # seconds
+  testwiki_offline:
+    class: revscoring.extractors.OfflineExtractor
 
 # Scorer models
 scorer_models:
