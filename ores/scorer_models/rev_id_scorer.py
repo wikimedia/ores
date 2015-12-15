@@ -38,7 +38,7 @@ class RevIdScorer(ScorerModel):
 
         return {
             'prediction': prediction,
-            'probabilities': {
+            'probability': {
                 True: probability,
                 False: 1 - probability
             }
