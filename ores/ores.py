@@ -6,7 +6,7 @@ This script provides access to a set of utilities for ORES
 * celery_worker -- Starts a "ScoreProcessor" celery worker
 * precached -- Starts a daemon that requests scores for revisions as they happen
 
-%(usage)s
+{usage}
 Options:
     -h | --help  Shows this documentation
     <utility>    The name of the utility to run
@@ -17,9 +17,9 @@ from importlib import import_module
 
 
 USAGE = """Usage:
-    %(progname)s (-h | --help)
-    %(progname)s <utility> [-h | --help]
-""" % { "progname": sys.argv[0] }
+    {progname} (-h | --help)
+    {progname} <utility> [-h | --help]
+""".format(progname=sys.argv[0])
 
 
 def main():
@@ -28,7 +28,7 @@ def main():
         sys.stderr.write(USAGE)
         sys.exit(1)
     elif sys.argv[1] in ("-h", "--help"):
-        sys.stderr.write(__doc__ % { "usage": USAGE })
+        sys.stderr.write(__doc__.format(usage=USAGE))
         sys.exit(1)
     elif sys.argv[1][:1] == "-":
         sys.stderr.write(USAGE)
