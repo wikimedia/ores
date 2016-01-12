@@ -4,7 +4,6 @@ from urllib.parse import urlparse
 
 import celery
 import mwapi.errors
-import redis
 import revscoring.errors
 from celery.signals import before_task_publish
 
@@ -19,6 +18,7 @@ logger = logging.getLogger(__name__)
 APPLICATIONS = []
 
 DEFAULT_CELERY_QUEUE = "celery"
+
 
 @before_task_publish.connect
 def update_sent_state(sender=None, body=None, **kwargs):
@@ -228,6 +228,10 @@ def redis_from_url(url):
     """
     Converts a redis URL used by celery into a `redis.Redis` object.
     """
+    # Makes sure that we only try to import redis when we need
+    # to use it
+    import redis
+
     url = url or ""
     parsed_url = urlparse(url)
     if parsed_url.scheme != "redis":
