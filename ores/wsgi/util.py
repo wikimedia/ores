@@ -2,6 +2,8 @@ from collections import defaultdict
 
 from flask.ext.jsonpify import jsonify
 
+import json
+
 
 class ParamError(Exception):
     pass
@@ -61,3 +63,18 @@ def format_output(context, scores, model_info, warning=None, notice=None):
         for rev_id in scores[model]:
             output['scores'][context][model]['scores'][rev_id] = scores[model][rev_id]
     return jsonify(output)
+
+
+def parse_features(request):
+    """Parse values for features / datasources of interest."""
+    caches = {}
+    try:
+        for k, v in request.values.items():
+            if k == "caches":
+                caches = json.loads(v)
+                break
+            elif k.startswith(("feature.", "datasource.")):
+                caches[k] = json.loads(v)
+    except Exception as e:
+        return e, None
+    return None, caches

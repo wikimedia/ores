@@ -161,7 +161,8 @@ class SimpleScoreProcessor(ScoreProcessor):
                 try:
                     score = self._process(context, model, cache)
                     scores[rev_id] = score
-                    self._store(context, model, rev_id, score)
+                    if caches is None:
+                        self._store(context, model, rev_id, score)
                 except Exception as error:
                     scores[rev_id] = {'error': jsonify_error(error)}
 
