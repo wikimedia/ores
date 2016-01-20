@@ -70,7 +70,7 @@ function getResults() {
 	$('.ui.input input').each(function( index ) {
 		revs += $(this).val() + '|';
 	});
-	revs = revs.slice(1, -1);
+	revs = revs.slice(0, -1);
 	var models_url = $('#modelDropDownInput').attr('value').replace(/,/g,'|');
 	var url = "/scores/" + $('#wikiDropDownInput').attr('value') + "/?models=" + models_url + "&revids=" + revs;
 	$.get(url, function (data) {
