@@ -1,3 +1,6 @@
+import os
+
+
 def configure(config):
 
     from flask import Blueprint, Flask
@@ -5,10 +8,16 @@ def configure(config):
     from . import routes
     from ..score_processors import ScoreProcessor
 
-    app = Flask(__name__)
+    directory = os.path.dirname(os.path.realpath(__file__))
+
+    app = Flask(__name__,
+                static_url_path="/BASE_STATIC",
+                template_folder=os.path.join(directory, 'templates'))
+
     app.config['APPLICATION_ROOT'] = config['ores']['wsgi']['application_root']
 
-    bp = Blueprint('ores', __name__)
+    bp = Blueprint('ores', __name__,
+                   static_folder=os.path.join(directory, 'static'))
 
     sp_name = config['ores']['score_processor']
     score_processor = ScoreProcessor.from_config(config, sp_name)
