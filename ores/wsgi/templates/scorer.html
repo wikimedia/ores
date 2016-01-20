@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+
+    <title>ORES</title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="Keywords" content="ores, wikipedia, wikidata, ai">
+    <meta name="Description" content="A simple ORES GUI for scoring revisions">
+
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.1.8/semantic.min.css">
+    <script src="https://code.jquery.com/jquery-2.2.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tablesort/4.0.0/tablesort.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.1.8/semantic.min.js"></script>
+</head>
+<body>
+    <div style="padding: 3em;">
+    <div class="ui active dimmer" style="display: block;" id="loading_div">
+        <div class="ui text loader">Getting data</div>
+    </div>
+    <div class="ui selection dropdown" id="wikiDropDown">
+        <input type="hidden" id="wikiDropDownInput" name="wiki">
+        <i class="dropdown icon"></i>
+        <div class="default text" id="defaultWiki">Select Wiki</div>
+        <div class="menu" id="wikis">
+    </div>
+    </div>
+    <br />
+    <br />
+    <div class="ui disabled fluid multiple selection dropdown" id="modelDropDown" style="width: 30em;">
+        <input type="hidden" id="modelDropDownInput" name="model">
+        <i class="dropdown icon"></i>
+        <div class="default text" id="modelInputValue">Select Model(s)</div><i class="dropdown icon"></i>
+    </div>
+    <br />
+    <br />
+    <div class="ui disabled input", id="revIds">
+        <input type="text" placeholder="Insert revid...">
+    </div>
+    <button class="ui disabled button", id="addMore">
+        Add More
+    </button>
+    <br />
+    <br />
+    <button class="positive ui disabled button" id="resultButton">Give me results!</button>
+    <script src="/static/js/scorer.js"></script>
+</body>
+</html>
