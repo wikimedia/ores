@@ -1,49 +1,58 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-
-    <title>ORES</title>
-
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="Keywords" content="ores, wikipedia, wikidata, ai">
-    <meta name="Description" content="A simple ORES GUI for scoring revisions">
-
-    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.1.8/semantic.min.css">
-    <script src="https://code.jquery.com/jquery-2.2.0.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tablesort/4.0.0/tablesort.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.1.8/semantic.min.js"></script>
+	<meta charset="utf-8">
+	<title>ORES</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+	<link rel="stylesheet" href="https://wikimedia-ui.wmflabs.org/MW/mediawiki.min.css">
+	<link rel="import" href="https://munmay.github.io/WikimediaUI/MW/elements.html">
+<style>
+.checkbox{
+      display: inline;
+    }
+    .checkbox label{
+      padding-right: 20px;
+    }
+</style>
 </head>
-<body>
-    <div style="padding: 3em;">
-    <div class="ui active dimmer" style="display: block;" id="loading_div">
-        <div class="ui text loader">Getting data</div>
-    </div>
-    <div class="ui selection dropdown" id="wikiDropDown">
-        <input type="hidden" id="wikiDropDownInput" name="wiki">
-        <i class="dropdown icon"></i>
-        <div class="default text" id="defaultWiki">Select Wiki</div>
-        <div class="menu" id="wikis">
-    </div>
-    </div>
-    <br />
-    <br />
-    <div class="ui disabled fluid multiple selection dropdown" id="modelDropDown" style="width: 30em;">
-        <input type="hidden" id="modelDropDownInput" name="model">
-        <i class="dropdown icon"></i>
-        <div class="default text" id="modelInputValue">Select Model(s)</div><i class="dropdown icon"></i>
-    </div>
-    <br />
-    <br />
-    <div class="ui disabled input", id="revIds">
-        <input type="text" placeholder="Insert revid...">
-    </div>
-    <button class="ui disabled button", id="addMore">
-        Add More
-    </button>
-    <br />
-    <br />
-    <button class="positive ui disabled button" id="resultButton">Give me results!</button>
-    <script src="/static/js/scorer.js"></script>
+<body style="background-color: #f9f9f9">
+<div class="col-md-4 col-md-offset-4" style="padding-top: 3em;">
+
+<div style="text-align: center; color: #555;">
+<h1 style="margin-bottom: 0;">ORES</h1>
+<p style="font-size: 95%; padding-bottom: 2em; letter-spacing: 1px;">
+  Objective Revision Evaluation Service
+</p>
+</div>
+
+	<div class="btn-group" id="wikisList">
+		<a class="btn btn-default dropdown-toggle" data-toggle="dropdown" id="wikiDropDownInput" disabled="disabled">Select a wiki<wiki-icon icon="caret-down"></wiki-icon>
+		</a>
+		<ul class="dropdown-menu" id="wikis">
+		</ul>
+	</div>
+
+ <div style="padding-top: 10px">
+<h5>Insert RevID</h5>
+  <div class="form-group">
+  <textarea class="form-control" rows="5" placeholder="Insert up to 50 RevIDs separated by a comma" disabled="disabled" id="revIds"></textarea>
+</div>
+</div>
+
+
+<button is='wiki-Button' type="submit" button-type="primary" style="float: right;" disabled="disabled" id="resultButton">Give me results!</button><br clear="all" />
+
+</div><br id="afterThis"/>
+
 </body>
-</html>
+
+<!-- ================================================== --> 
+<!-- Placed at the end of the document so the pages load faster -->
+<script src="https://fontastic.s3.amazonaws.com/Sr6GbqfKhL8VvZWw23WzLN/icons.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/js/bootstrap.min.js"></script>
+<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+<script src="https://wikimedia-ui.wmflabs.org/bootstrap-3.3.5-dist/js/ie10-viewport-bug-workaround.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tablesort/4.0.0/tablesort.min.js"></script>
+<script src="/static/js/scorer.js"></script>
