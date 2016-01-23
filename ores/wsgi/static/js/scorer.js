@@ -6,7 +6,7 @@ function getParameterByName(name) {
 }
 
 function error(msg) {
-	var htm = '<div class="ui negative message"><div class="header">We\'re sorry. ORES returned the following error:</div><p>' + msg +'</p></div>';
+	var htm = '<div class="alert alert-danger" style="padding-top: 15px"><div class="header">We\'re sorry. ORES returned the following error:</div><p>' + msg +'</p></div>';
 	return htm;
 }
 
@@ -14,16 +14,22 @@ function wikis() {
 	$.get('/scores/', function (data) {
 		var wikis = data.contexts;
 		for (i = 0; i < wikis.length; i++) {
-			$('#wikis').append('<div class="item">' + wikis[i] + '</div>');
+			$('#wikis').append('<li><a>' + wikis[i] + '</a></li>');
 		}
+		$('#wikiDropDownInput').removeAttr('disabled');
+		$('#wikisList li > a').click(function(e){
+    			loadModels(this.innerHTML);
+		});
 	});
 }
 
 function enableResult() {
-	$('#resultButton').attr('class', 'positive ui button');
+	$('#resultButton').removeAttr('disabled');
 }
 function createTable(data) {
-	var htm = '<table class="ui sortable celled table"><thead><tr><th>Wiki</th><th>Model</th><th>Revision ID</th><th>Value</th><th>Score</th></tr></thead>';
+	var htm = '<div class="col-md-6 col-md-offset-3" style="margin-top: 3em; margin-bottom: 3em;">';
+	htm += '<table class="celled table sortable"><thead><tr><th>Wiki</th><th>Model</th><th>Revision ID</th>';
+	htm += '<th>Value</th><th>Score</th></tr></thead>';
 	var revids = Object.keys(data);
         if (data.error) {
             return error(data.error.message);
@@ -43,97 +49,73 @@ function createTable(data) {
 			}
 		}
 	}
-	htm += '</tbody></table>';
+	htm += '</tbody></table></div>';
 	return htm;
 }
-function loadModels() {
-	$('#loading_div').show();
-	$.get('/scores/' +  $('#wikiDropDownInput').attr('value') + '/', function(data) {
-		$('#modelDropDown').attr('class', 'ui fluid multiple selection dropdown');
+function loadModels(wiki) {
+	$.get('/scores/' +  wiki + '/', function(data) {
+		var htm = '<ul style="padding-top: 15px; padding-left: 0px" id="modelSelection"><h5>Select models</h5>';
 		var models = Object.keys(data.models);
-		var htm = '<div class="menu">';
 		for (i = 0; i < models.length; i++) {
-			htm += '<div class="item">' + models[i] + '</div>';
+			htm += '<li class="checkbox"><label><input type="checkbox" value="' + models[i] + '">' + models[i] + '</label></li>\n\n';
 		}
-		htm += '</div>';
-		$('#modelDropDown').html($('#modelDropDown').html() + htm);
-		$('#modelDropDown').dropdown();
-		$('#revIds').attr('class', "ui input");
-		$('#addMore').attr('class', "ui button");
-		$('#loading_div').hide();
+		htm += '</ul>';
+		if ($('#modelSelection').length) {
+			$('#modelSelection').replaceWith(htm);
+		} else {
+			$('#wikisList').after(htm);
+		}
+		$('#revIds').removeAttr('disabled');
 	}, "json");
+	$('#wikiDropDownInput').html(wiki + '<wiki-icon icon="caret-down"></wiki-icon>');
+	$('#wikiDropDownInput').attr('value', wiki);
 }
 
 function getResults() {
-	$('#loading_div').show();
-	var revs = '';
-	$('.ui.input input').each(function( index ) {
-		revs += $(this).val() + '|';
+	var revs = $('#revIds').val().replace(',', '|');
+	var models_url = '';
+	$('input:checked').each(function() {
+		models_url += $(this).val() + '|';
 	});
-	revs = revs.slice(0, -1);
-	var models_url = $('#modelDropDownInput').attr('value').replace(/,/g,'|');
+	models_url = models_url.slice(0, -1);
 	var url = "/scores/" + $('#wikiDropDownInput').attr('value') + "/?models=" + models_url + "&revids=" + revs;
 	$.get(url, function (data) {
 		if ($('.table').length) {
 			$('.table').html(createTable(data));
 		} else {
-			$('#resultButton').after(createTable(data));
+			$('#afterThis').after(createTable(data));
 		}
-		$('#loading_div').hide();
 		$('.sortable.table').tablesort();
-	});
+	}, datatype='jsonp');
 }
 
 wikis();
-$('#loading_div').hide();
-$('.ui.dropdown').dropdown();
-$('#wikiDropDown').change(function() {
-	loadModels();
-});
-$('#addMore').click(function() {
-	$('#addMore').last().before('<div class="ui input" id="revIds"><input type="text" placeholder="Insert revid..."></div>');
-});
-$('#modelDropDown').change( function() {
-	$('.ui.input input').change( function() {
-		enableResult();
-	});
-});
-$('.ui.input input').change( function() {
-	$('#modelDropDown').change( function() {
-		enableResult();
-	});
+$('#revIds').click( function() {
+	enableResult();
 });
 $('#resultButton').click(function() {
 	getResults();
 });
 if (getParameterByName('wiki')) {
 	$(function(){
-		var wiki = getParameterByName('wiki');
-		$('#wikiDropDownInput').attr('value', wiki);
-		$('#defaultWiki').attr('class', 'text');
-		$('#defaultWiki').html(wiki);
-		loadModels();
+		loadModels(getParameterByName('wiki'));
 	});
 }
 
 if (getParameterByName('revids')) {
 	$(function(){ setTimeout( function() {
-		$('#revIds').remove();
-		var htm = '';
-		var rev_ids = getParameterByName('revids').split('|');
-		for (i = 0; i < rev_ids.length; i++) {
-			htm += '<div class="ui input\", id="revIds"><input type="text" placeholder="Insert revid..." value="';
-			htm += rev_ids[i] + '"></div>';
-		}
-		$('#addMore').before(htm)}, 3000);
+			$('#revIds').val(getParameterByName('revids').replace('|', ','));
+		}, 3000);
 	});
 }
 
 if (getParameterByName('models')) {
 	var url_models = getParameterByName('models').split('|');
 	$(function(){ setTimeout( function() {
-		$('.ui.fluid.dropdown').dropdown('set selected', url_models) }, 3000);
-	});
+		for (i = 0; i < url_models.length; i++) {
+			$(':input[value="'+ url_models[i] + '"]').prop('checked', true);
+		}
+	}, 3000)});
 }
 
 if (getParameterByName('wiki') && getParameterByName('revids') && getParameterByName('models')) {
@@ -141,6 +123,6 @@ if (getParameterByName('wiki') && getParameterByName('revids') && getParameterBy
 		$(function(){ setTimeout( function() { getResults() }, 3000) });
 	}
 	$(function(){ setTimeout( function() {
-		$('#resultButton').attr('class','positive ui button') }, 3000);
-	});
+		enableResult();
+	}, 3000)});
 }
