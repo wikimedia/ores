@@ -41,6 +41,12 @@ def configure(config, bp, score_processor):
         except ParamError as e:
             return responses.bad_request(str(e))
 
+        # Get model info
+        try:
+            model_info_req = set(read_bar_split_param(request, "model_info", type=str))
+        except ParamError as e:
+            return responses.bad_request(str(e))
+
         # Check if all the models are available
         missing_models = models - score_processor[context].keys()
         if len(missing_models) > 0:
@@ -58,13 +64,21 @@ def configure(config, bp, score_processor):
 
         precache = "precache" in request.args
 
-        # Generate scores for each model and merge them together
+        # Get model info for each model and merge them togethe
         scores = defaultdict(dict)
         model_info = {}
         try:
             for model in models:
-                info = score_processor[context][model].info()
-                model_info[model] = {'version': info['version']}
+                model_object = score_processor[context][model]
+                model_info[model] = {'version': model_object.version}
+                if model_info_req:
+                    try:
+                        for req in model_info_req:
+                            model_info[model][req] = model_object.info()[req]
+                    except KeyError:
+                        return responses.bad_request(
+                            "Model '{0}' has not attribute {1}.".format(
+                                model, req))
                 model_scores = score_processor.score(
                     context, model, rev_ids, precache=precache)
                 scores[model] = model_scores
@@ -97,10 +111,24 @@ def configure(config, bp, score_processor):
         else:
             return jsonify(score_processor[context][model].info())
 
+        # Get model info
+        try:
+            model_info_req = set(read_bar_split_param(request, "model_info", type=str))
+        except ParamError as e:
+            return responses.bad_request(str(e))
+
         precache = "precache" in request.args
         try:
-            version = score_processor[context][model].info()['version']
-            model_info = {model: {'version': version}}
+            model_object = score_processor[context][model]
+            model_info = {model: {'version': model_object.version}}
+            if model_info_req:
+                for req in model_info_req:
+                    try:
+                        model_info[model][req] = model_object.info()[req]
+                    except KeyError:
+                        return responses.bad_request(
+                            "Model '{0}' has not attribute {1}.".format(
+                                model, req))
             scores = {model: score_processor.score(context, model, rev_ids,
                                                    precache=precache)}
         except errors.ScoreProcessorOverloaded:
@@ -117,19 +145,34 @@ def configure(config, bp, score_processor):
                                        .format(context))
 
         precache = "precache" in request.args
-        model_info = {model: {'version': score_processor[context][model].info()['version']}}
+        model_object = score_processor[context][model]
+        model_info = {model: {'version': model_object.version}}
         scores = {}
         # If the model exists, score revisions with it and return the result
         if model not in score_processor[context]:
             return responses.not_found("Model '{0}' not available for {1}."
                                        .format(model, context))
-        else:
-            try:
-                scores = {model: score_processor.score(
-                    context, model, [rev_id], precache=precache)}
-            except errors.ScoreProcessorOverloaded:
-                return responses.server_overloaded()
 
-            return format_output(context, scores, model_info)
+        # Get model info
+        try:
+            model_info_req = set(read_bar_split_param(
+                request, "model_info", type=str))
+        except ParamError as e:
+            return responses.bad_request(str(e))
+        if model_info_req:
+            for req in model_info_req:
+                try:
+                    model_info[model][req] = model_object.info()[req]
+                except KeyError:
+                    return responses.bad_request(
+                        "Model '{0}' has not attribute {1}.".format(
+                            model, req))
+        try:
+            scores = {model: score_processor.score(
+                context, model, [rev_id], precache=precache)}
+        except errors.ScoreProcessorOverloaded:
+            return responses.server_overloaded()
+
+        return format_output(context, scores, model_info)
 
     return bp
