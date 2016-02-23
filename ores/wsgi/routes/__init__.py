@@ -7,7 +7,7 @@ def configure(config, bp, score_processor):
 
     @bp.route("/", methods=["GET"])
     def index():
-        return "Hi!  I'm ORES.  :D"
+        return render_template("home.html")
 
     bp = scores.configure(config, bp, score_processor)
     bp = ui.configure(config, bp)
