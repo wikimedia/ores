@@ -18,9 +18,9 @@ class ScoringContext(dict):
                The  that this scorer is being used for
             scorer_models : dict
                A mapping between names and
-               :class:`~revscoring.scorer_models.scorer_model.ScorerModel`
+               :class:`revscoring.ScorerModel`
                instances
-            extractor : :class:`~revscoring.extractors.extractor.Extractor`
+            extractor : :class:`revscoring.Extractor`
                An extractor to use for gathering feature values
         """
         super().__init__()
@@ -63,15 +63,14 @@ class ScoringContext(dict):
             rev_ids : int | `iterable`
                 Revision IDs to extract for
             model : str
-                The name of a
-                :class:`~revscoring.scorer_models.scorer_model.ScorerModel` to
+                The name of a :class:`~revscoring.ScorerModel` to
                 extract the roots for
         """
         features = self[model].features
         root_ds = [d for d in dependencies.dig(features)
                    if isinstance(d, Datasource)]
         error_root_vals = self.extractor.extract(rev_ids, root_ds,
-                                                 caches=caches)
+                                                 cache=caches)
         root_ds_caches = {}
         for rev_id, (error, root_vals) in zip(rev_ids, error_root_vals):
             if error is None:

@@ -3,9 +3,9 @@ from collections import defaultdict
 from flask import request
 from flask.ext.jsonpify import jsonify
 
-from .. import responses
-from ... import errors
-from ..util import ParamError, read_bar_split_param, format_output
+from ... import responses
+from .... import errors
+from ...util import ParamError, format_output, read_bar_split_param
 
 
 def configure(config, bp, score_processor):
@@ -31,7 +31,7 @@ def configure(config, bp, score_processor):
         # If no model is specified, return information on available models
         if "models" not in request.args:
             # Return the models that we have
-            models = {name: model.info()
+            models = {name: model.format_info(format="json")
                       for name, model in score_processor[context].items()}
             return jsonify({"models": models})
 
@@ -74,7 +74,7 @@ def configure(config, bp, score_processor):
                 if model_info_req:
                     try:
                         for req in model_info_req:
-                            model_info[model][req] = model_object.info()[req]
+                            model_info[model][req] = model_object.format_info(format="json")[req]
                     except KeyError:
                         return responses.bad_request(
                             "Model '{0}' has not attribute {1}.".format(
@@ -109,7 +109,7 @@ def configure(config, bp, score_processor):
             if len(rev_ids) == 0:
                 return responses.bad_request("No revids provided.")
         else:
-            return jsonify(score_processor[context][model].info())
+            return jsonify(score_processor[context][model].format_info(format="json"))
 
         # Get model info
         try:
@@ -124,7 +124,7 @@ def configure(config, bp, score_processor):
             if model_info_req:
                 for req in model_info_req:
                     try:
-                        model_info[model][req] = model_object.info()[req]
+                        model_info[model][req] = model_object.format_info(format="json")[req]
                     except KeyError:
                         return responses.bad_request(
                             "Model '{0}' has not attribute {1}.".format(
@@ -162,10 +162,10 @@ def configure(config, bp, score_processor):
         if model_info_req:
             for req in model_info_req:
                 try:
-                    model_info[model][req] = model_object.info()[req]
+                    model_info[model][req] = model_object.format_info(format="json")[req]
                 except KeyError:
                     return responses.bad_request(
-                        "Model '{0}' has not attribute {1}.".format(
+                        "Model '{0}' has no attribute {1}.".format(
                             model, req))
         try:
             scores = {model: score_processor.score(

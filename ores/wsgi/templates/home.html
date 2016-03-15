@@ -12,6 +12,25 @@
   <p>
     The Objective Revision Evaluation Service (ORES) is a web service running in Wikimedia Labs that provides machine learning as a service for Wikimedia Projects. The system is designed to help automate critical wiki-work -- for example, vandalism detection and removal. This service is developed as part of the <a href="https://meta.wikimedia.org/wiki/Research:Revision_scoring_as_a_service">Revision scoring as a service</a> research project.
   </p>
+  <h2>Scores API</h2>
+  <p>
+    There are two versions of the scoring API that differ slightly in their
+    behavior.  Version 2 provides access to model info in a scoring request.
+    Version 1 is preserved for backwards compatibiltiy.
+  </p>
+  <dl>
+    <dt>Version 1</dt>
+    <dd style="padding-left: 1em;">
+      Accessible via
+      <a href="/scores/">/scores/</a> and
+      <a href="/v1/scores/">/v1/scores/</a>
+    </dd>
+    <dt>Version 2</dt>
+    <dd style="padding-left: 1em;">
+      Accessible via
+      <a href="/v2/scores/">/v2/scores/</a>
+    </dd>
+  </dl>
   <h2>User interface</h2>
   <p>
     ORES provides a simple user interface. See <a href="/ui/">/ui/</a>.
