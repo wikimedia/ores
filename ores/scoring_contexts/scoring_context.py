@@ -70,7 +70,7 @@ class ScoringContext(dict):
         root_ds = [d for d in dependencies.dig(features)
                    if isinstance(d, Datasource)]
         error_root_vals = self.extractor.extract(rev_ids, root_ds,
-                                                 cache=caches)
+                                                 caches=caches)
         root_ds_caches = {}
         for rev_id, (error, root_vals) in zip(rev_ids, error_root_vals):
             if error is None:
