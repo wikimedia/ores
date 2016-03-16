@@ -3,15 +3,16 @@ from collections import defaultdict
 from flask import request
 from flask.ext.jsonpify import jsonify
 
-from .. import responses
-from ... import errors
-from ..util import ParamError, read_bar_split_param
+from ... import responses
+from .... import errors
+from ...util import ParamError, read_bar_split_param
 
 
 def configure(config, bp, score_processor):
 
     # /scores/
     @bp.route("/scores/", methods=["GET"])
+    @bp.route("/v1/scores/", methods=["GET"])
     def scores():
         contexts = [context for context in score_processor]
 
@@ -21,6 +22,7 @@ def configure(config, bp, score_processor):
 
     # /scores/enwiki/?models=reverted&revids=456789|4567890
     @bp.route("/scores/<context>/", methods=["GET"])
+    @bp.route("/v1/scores/<context>/", methods=["GET"])
     def score_model_revisions(context):
 
         # Check to see if we have the context available in our score_processor
@@ -73,6 +75,7 @@ def configure(config, bp, score_processor):
 
     # /scores/enwiki/reverted/?revids=456789|4567890
     @bp.route("/scores/<context>/<model>/", methods=["GET"])
+    @bp.route("/v1/scores/<context>/<model>/", methods=["GET"])
     def score_revisions(context, model):
 
         # Check to see if we have the context available in our score_processor
@@ -106,6 +109,7 @@ def configure(config, bp, score_processor):
 
     # /scores/enwiki/reverted/4567890
     @bp.route("/scores/<context>/<model>/<int:rev_id>/", methods=["GET"])
+    @bp.route("/v1/scores/<context>/<model>/<int:rev_id>/", methods=["GET"])
     def score_revision(context, model, rev_id):
 
         # Check to see if we have the context available in our score_processor
