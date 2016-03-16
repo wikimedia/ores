@@ -3,7 +3,6 @@ docopt >= 0.6.2, < 0.6.999
 flask >= 0.10.1, < 0.10.999
 flask-jsonpify >= 1.5.0, < 1.5.999
 mwapi >= 0.3.0, < 0.3.999
-mwreverts >= 0.0.5, < 0.0.999
 socketIO-client == 0.5.6
 stopit >= 1.1.1, < 1.1.999
 yamlconf >= 0.0.3, < 0.0.999
