@@ -23,8 +23,8 @@ def test_scoring_context():
 
     FakeExtractor = namedtuple("Extractor", ['extract', 'solve', 'language'])
 
-    def fake_extract(rev_ids, dependents, cache=None):
-        caches = cache or defaultdict(dict)
+    def fake_extract(rev_ids, dependents, caches=None):
+        caches = caches or defaultdict(dict)
         for rev_id in rev_ids:
             cache = caches[rev_id]
             if rev_id % 5 != 0:

@@ -4,8 +4,8 @@ import traceback
 
 import stopit
 
-from ..score_caches import ScoreCache
 from ..metrics_collectors import MetricsCollector
+from ..score_caches import ScoreCache
 from .score_processor import SimpleScoreProcessor
 
 logger = logging.getLogger(__name__)
