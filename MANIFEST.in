@@ -1,1 +1,2 @@
 include LICENSE README.md requirements.txt
+recursive-include ores/wsgi/templates *
