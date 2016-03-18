@@ -28,14 +28,14 @@ setup(
     version="0.6.1",  # Update in ores/__init__.py too.
     author="Aaron Halfaker",
     author_email="ahalfaker@wikimedia.org",
-    description=("A webserver for hosting scoring services."),
+    description=("A webserver for hosting scorer models."),
     license="MIT",
     entry_points = {
         'console_scripts': [
             'ores = ores.ores:main',
         ],
     },
-    url="https://github.com/halfak/Objective-Revision-Evaluation-Service",
+    url="https://github.com/wiki-ai/ores",
     packages=find_packages(),
     long_description=read('README.md'),
     install_requires=list(requirements("requirements.txt")),
