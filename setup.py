@@ -25,7 +25,7 @@ def requirements(fname):
 
 setup(
     name="ores",
-    version="0.6.1",  # Update in ores/__init__.py too.
+    version="0.6.2",  # Update in ores/__init__.py too.
     author="Aaron Halfaker",
     author_email="ahalfaker@wikimedia.org",
     description=("A webserver for hosting scorer models."),
@@ -37,6 +37,7 @@ setup(
     },
     url="https://github.com/wiki-ai/ores",
     packages=find_packages(),
+    include_package_data = True,
     long_description=read('README.md'),
     install_requires=list(requirements("requirements.txt")),
     classifiers=[
