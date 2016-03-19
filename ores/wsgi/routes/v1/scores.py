@@ -97,7 +97,7 @@ def configure(config, bp, score_processor):
             if len(rev_ids) == 0:
                 return responses.bad_request("No revids provided.")
         else:
-            return jsonify(score_processor[context][model]format_info(format="json"))
+            return jsonify(score_processor[context][model].format_info(format="json"))
 
         precache = "precache" in request.args
         try:

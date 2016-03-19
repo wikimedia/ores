@@ -1,5 +1,5 @@
 from revscoring import ScorerModel
-from revscoring.datasources import revision
+from revscoring.datasources.revision_oriented import revision
 from revscoring.features import Feature
 
 
@@ -50,6 +50,15 @@ class RevIdScorer(ScorerModel):
             'version': self.version,
             'behavior': "Returns the last two digits in a rev_id as a score."
         }
+
+    def format_info(self, format="str"):
+        if format == 'str':
+            return str(self.info())
+        elif format == 'json':
+            return self.info()
+        else:
+            raise TypeError("Format {0} not supported".format(format))
+
 
     @classmethod
     def from_config(cls, config, name, section_key='scorer_models'):
