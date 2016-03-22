@@ -47,6 +47,9 @@ scoring_contexts:
     extractor: testwiki_offline
     scorer_models:
       revid: testwiki_revid
+    precache:
+      revid:
+        "on": ['edit']
 
 # Available feature extractors
 extractors:

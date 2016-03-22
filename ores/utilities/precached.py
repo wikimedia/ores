@@ -31,6 +31,8 @@ import yamlconf
 
 logger = logging.getLogger(__name__)
 
+AVAILABLE_EVENTS = {'edit'}
+
 
 def main(argv=None):
     args = docopt.docopt(__doc__, argv=argv)
@@ -62,11 +64,22 @@ def run(stream_url, ores_url, config, delay, verbose):
     requests.packages.urllib3.disable_warnings()
 
     # Build a mapping of wikis and models from the configuration
-    wiki_models = defaultdict(list)
+    score_on = defaultdict(list)
     sp_name = config['ores']['score_processor']
-    for wiki in config['score_processors'][sp_name]['scoring_contexts']:
-        for model in config['scoring_contexts'][wiki]['scorer_models']:
-            wiki_models[wiki].append(model)
+    for context in config['score_processors'][sp_name]['scoring_contexts']:
+        for model in config['scoring_contexts'][context].get('precache', []):
+            precached_config = \
+                config['scoring_contexts'][context]['precache'][model]
+
+            events = precached_config['on']
+            if len(set(events) - AVAILABLE_EVENTS) > 0:
+                logger.error("{0} events are not available"
+                             .format(set(events) - AVAILABLE_EVENTS))
+                sys.exit(1)
+            for event in precached_config['on']:
+                score_on[(event, context)].append(model)
+                logger.debug("Setting up precaching for {0} in {1} on {2}"
+                             .format(model, context, event))
 
     def get_score(wiki, model, rev_id):
         url = ores_url + "/scores/" + wiki + "/" + model + \
@@ -80,18 +93,18 @@ def run(stream_url, ores_url, config, delay, verbose):
         except Exception as e:
             logger.error(str(type(e)) + ": " + str(e))
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=100) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
         class WikiNamespace(socketIO_client.BaseNamespace):
             def on_change(self, change):
                 if change['type'] in ('new', 'edit'):
-                    wiki = change['wiki']
+                    wikidb = change['wiki']
                     rev_id = change['revision']['new']
-                    for model in wiki_models[wiki]:
+                    for model in score_on[('edit', wikidb)]:
                         start = time.time()
-                        executor.submit(get_score, wiki, model, rev_id)
+                        executor.submit(get_score, wikidb, model, rev_id)
                         logger.debug("GET {0} started in {1} seconds."
-                                     .format((wiki, model, rev_id),
-                                             time.time() - start))
+                                     .format((wikidb, model, rev_id),
+                                              time.time() - start))
 
             def on_connect(self):
                 logger.info("Connecting socketIO client to {0}."
