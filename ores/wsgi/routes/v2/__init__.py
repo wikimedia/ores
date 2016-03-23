@@ -8,7 +8,7 @@ def configure(config, bp, score_processor):
 
     @bp.route("/v2/", methods=["GET"])
     def v2_index():
-        return render_template("swagger-ui.html", swagger_spec="/v2/spec")
+        return render_template("swagger-ui.html", swagger_spec="/v2/spec/")
 
     bp = scores.configure(config, bp, score_processor)
     bp = spec.configure(config, bp, score_processor)
