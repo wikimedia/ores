@@ -5,7 +5,8 @@ from flask.ext.jsonpify import jsonify
 
 from ... import responses
 from .... import errors
-from ...util import ParamError, format_output, read_bar_split_param
+from ...util import (ParamError, format_output, parse_features,
+                     read_bar_split_param)
 
 
 def configure(config, bp, score_processor):
@@ -136,7 +137,7 @@ def configure(config, bp, score_processor):
         return format_output(context, scores, model_info)
 
     # /v2/scores/enwiki/reverted/4567890
-    @bp.route("/v2/scores/<context>/<model>/<int:rev_id>/", methods=["GET"])
+    @bp.route("/v2/scores/<context>/<model>/<int:rev_id>/", methods=["GET", "POST"])
     def score_revision_v2(context, model, rev_id):
 
         # Check to see if we have the context available in our score_processor
@@ -144,7 +145,6 @@ def configure(config, bp, score_processor):
             return responses.not_found("No scorers available for {0}"
                                        .format(context))
 
-        precache = "precache" in request.args
         model_object = score_processor[context][model]
         model_info = {model: {'version': model_object.version}}
         scores = {}
@@ -167,9 +167,18 @@ def configure(config, bp, score_processor):
                     return responses.bad_request(
                         "Model '{0}' has no attribute {1}.".format(
                             model, req))
+
+        e, cache = parse_features(request)
+        if e is not None:
+            return responses.bad_request("Unabled to parse params: {0}"
+                                         .format(e))
+
+        precache = "precache" in request.args
+
         try:
             scores = {model: score_processor.score(
-                context, model, [rev_id], precache=precache)}
+                context, model, [rev_id], caches={rev_id: cache},
+                precache=precache)}
         except errors.ScoreProcessorOverloaded:
             return responses.server_overloaded()
 

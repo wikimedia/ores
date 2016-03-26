@@ -7,4 +7,4 @@ socketIO-client == 0.5.6
 stopit >= 1.1.1, < 1.1.999
 yamlconf >= 0.1.0, < 0.1.999
 pyyaml == 3.11
-revscoring >= 1.1.3, < 1.1.999
+revscoring >= 1.1.6, < 1.1.999
