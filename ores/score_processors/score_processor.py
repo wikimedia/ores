@@ -21,6 +21,8 @@ class ScoreProcessor(dict):
     def score(self, context, model, rev_ids, caches=None, precache=False):
         version = self[context].version(model)
         start = time.time()
+        if caches is not None:
+            logger.debug("Scoring with caches {0}".format(caches))
         try:
             scores = self._score(context, model, rev_ids, caches=caches)
         except errors.ScoreProcessorOverloaded:
@@ -161,8 +163,11 @@ class SimpleScoreProcessor(ScoreProcessor):
                 try:
                     score = self._process(context, model, cache)
                     scores[rev_id] = score
-                    if caches is None:
+                    if caches is None:  # No storing score if using caches
                         self._store(context, model, rev_id, score)
+                    else:
+                        logger.debug("Not storing score because caches are " +
+                                     "used.")
                 except Exception as error:
                     scores[rev_id] = {'error': jsonify_error(error)}
 
