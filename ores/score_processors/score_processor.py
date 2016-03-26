@@ -18,13 +18,15 @@ class ScoreProcessor(dict):
         self.score_cache = score_cache or Empty()
         self.metrics_collector = metrics_collector or Null()
 
-    def score(self, context, model, rev_ids, caches=None, precache=False):
+    def score(self, context, model, rev_ids, caches=None, features=False,
+              precache=False):
         version = self[context].version(model)
         start = time.time()
         if caches is not None:
             logger.debug("Scoring with caches {0}".format(caches))
         try:
-            scores = self._score(context, model, rev_ids, caches=caches)
+            scores = self._score(context, model, rev_ids, features=features,
+                                 caches=caches)
         except errors.ScoreProcessorOverloaded:
             self.metrics_collector.score_processor_overloaded(
                 context, model, version)
@@ -67,7 +69,7 @@ class ScoreProcessor(dict):
 
         return roots
 
-    def _process(self, context, model, cache):
+    def _process(self, context, model, features, cache):
         """
         Pure CPU.  Extract features from datasources in the cache and apply the
         model to arrive at a score.
@@ -77,7 +79,7 @@ class ScoreProcessor(dict):
 
         try:
             start = time.time()
-            score = scoring_context.score(model, cache)
+            score, feature_vals = scoring_context.score(model, features, cache)
             duration = time.time() - start
             logger.debug("Scoring took {0} seconds".format(duration))
             self.metrics_collector.score_processed(context, model, version,
@@ -86,9 +88,10 @@ class ScoreProcessor(dict):
             self.metrics_collector.score_errored(context, model, version)
             raise
 
-        return score
+        return score, feature_vals
 
-    def _score_revision(self, context, model, rev_id, cache=None):
+    def _score_revision(self, context, model, rev_id, features=False,
+                        cache=None):
         """
         Both IO and CPU.  Generates a single score or an error.
         """
@@ -98,7 +101,7 @@ class ScoreProcessor(dict):
         if error is not None:
             raise error
 
-        return self._process(context, model, score_cache)
+        return self._process(context, model, features, score_cache)
 
     def _store(self, context, model, rev_id, score):
         version = self[context].version(model)
@@ -144,12 +147,18 @@ class ScoreProcessor(dict):
 
 class SimpleScoreProcessor(ScoreProcessor):
 
-    def _score(self, context, model, rev_ids, caches=None):
+    def _score(self, context, model, rev_ids, features=False, caches=None):
         rev_ids = set(rev_ids)
 
         # Look in the cache
-        scores = self._lookup_cached_scores(context, model, rev_ids)
-        missing_ids = rev_ids - scores.keys()
+        if not features and not caches:
+            scores = self._lookup_cached_scores(context, model, rev_ids)
+            missing_ids = rev_ids - scores.keys()
+        else:
+            scores = {}
+            missing_ids = rev_ids
+
+        feature_maps = {}
 
         # Get the root datasources for the rest of the batch (IO)
         root_ds_caches = self._get_root_ds(context, model, missing_ids,
@@ -161,8 +170,10 @@ class SimpleScoreProcessor(ScoreProcessor):
                 scores[rev_id] = {'error': jsonify_error(error)}
             else:
                 try:
-                    score = self._process(context, model, cache)
+                    score, feature_vals = self._process(context, model,
+                                                        features, cache)
                     scores[rev_id] = score
+                    feature_maps[rev_id] = feature_vals
                     if caches is None:  # No storing score if using caches
                         self._store(context, model, rev_id, score)
                     else:
@@ -171,4 +182,4 @@ class SimpleScoreProcessor(ScoreProcessor):
                 except Exception as error:
                     scores[rev_id] = {'error': jsonify_error(error)}
 
-        return scores
+        return scores, feature_maps

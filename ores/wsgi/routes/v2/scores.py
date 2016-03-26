@@ -5,8 +5,8 @@ from flask.ext.jsonpify import jsonify
 
 from ... import responses
 from .... import errors
-from ...util import (ParamError, format_output, parse_features,
-                     read_bar_split_param)
+from ...util import (CacheParsingError, ParamError, format_output,
+                     parse_caches, read_bar_split_param)
 
 
 def configure(config, bp, score_processor):
@@ -14,45 +14,58 @@ def configure(config, bp, score_processor):
     # /v2/scores/
     @bp.route("/v2/scores/", methods=["GET"])
     def scores_v2():
-        contexts = [context for context in score_processor]
-
-        contexts.sort()
-
-        return jsonify({'contexts': contexts})
+        scores_doc = {}
+        for c_name, context in score_processor.items():
+            scores_doc[c_name] = {m_name: {'version': m.version}
+                                  for m_name, m in context.items()}
+        return jsonify({'scores': scores_doc})
 
     # /v2/scores/enwiki/?models=reverted&revids=456789|4567890
     @bp.route("/v2/scores/<context>/", methods=["GET"])
     def score_model_revisions_v2(context):
-
+        scores_doc = {context: {}}
         # Check to see if we have the context available in our score_processor
         if context not in score_processor:
             return responses.not_found("No scorers available for {0}"
                                        .format(context))
 
-        # If no model is specified, return information on available models
-        if "models" not in request.args:
-            # Return the models that we have
-            models = {name: model.format_info(format="json")
-                      for name, model in score_processor[context].items()}
-            return jsonify({"models": models})
+        # models param
+        if "models" in request.args:
+            # Read the models param
+            try:
+                models = set(read_bar_split_param(request, "models", type=str))
+            except ParamError as e:
+                return responses.bad_request(str(e))
 
-        # Read the params
-        try:
-            models = set(read_bar_split_param(request, "models", type=str))
-        except ParamError as e:
-            return responses.bad_request(str(e))
+            # Check if all the models are available
+            missing_models = models - score_processor[context].keys()
+            if len(missing_models) > 0:
+                return responses.bad_request("Models '{0}' not available for {1}."
+                                             .format(list(missing_models), context))
+        else:
+            # Empty?  All the models!
+            models = score_processor[context].keys()
 
-        # Get model info
-        try:
-            model_info_req = set(read_bar_split_param(request, "model_info", type=str))
-        except ParamError as e:
-            return responses.bad_request(str(e))
+        for model in models:
+            scores_doc[context][model] = \
+                {'version': score_processor[context][model].version}
 
-        # Check if all the models are available
-        missing_models = models - score_processor[context].keys()
-        if len(missing_models) > 0:
-            return responses.bad_request("Models '{0}' not available for {1}."
-                                         .format(list(missing_models), context))
+        # model_info param
+        if 'model_info' in request.args:
+            try:
+                model_info_fields = set(read_bar_split_param(request, "model_info", type=str))
+            except ParamError as e:
+                return responses.bad_request(str(e))
+
+            for model in models:
+                model_info_doc = \
+                    score_processor[context][model].format_info(format='json')
+                if len(model_info_fields) > 0 and model_info_fields != {''}:
+                    model_info_doc = {k: model_info_doc[k]
+                                      for k in model_info_fields
+                                      if k in model_info_doc}
+
+                scores_doc[context][model]['info'] = model_info_doc
 
         # Read the rev_ids
         try:
@@ -60,37 +73,23 @@ def configure(config, bp, score_processor):
         except ParamError as e:
             return responses.bad_request(str(e))
 
-        if len(rev_ids) == 0:
-            return responses.bad_request("No revids provided.")
+        if len(rev_ids) > 0:
+            precache = "precache" in request.args
 
-        precache = "precache" in request.args
+            try:
+                for model in models:
+                    model_scores, _ = score_processor.score(
+                        context, model, rev_ids, precache=precache)
+                    scores_doc[context][model]['scores'] = model_scores
+            except errors.ScoreProcessorOverloaded:
+                return responses.server_overloaded()
 
-        # Get model info for each model and merge them togethe
-        scores = defaultdict(dict)
-        model_info = {}
-        try:
-            for model in models:
-                model_object = score_processor[context][model]
-                model_info[model] = {'version': model_object.version}
-                if model_info_req:
-                    try:
-                        for req in model_info_req:
-                            model_info[model][req] = model_object.format_info(format="json")[req]
-                    except KeyError:
-                        return responses.bad_request(
-                            "Model '{0}' has not attribute {1}.".format(
-                                model, req))
-                model_scores = score_processor.score(
-                    context, model, rev_ids, precache=precache)
-                scores[model] = model_scores
-        except errors.ScoreProcessorOverloaded:
-            return responses.server_overloaded()
-        return format_output(context, scores, model_info)
+        return jsonify({'scores': scores_doc})
 
     # /v2/scores/enwiki/reverted/?revids=456789|4567890
     @bp.route("/v2/scores/<context>/<model>/", methods=["GET"])
     def score_revisions_v2(context, model):
-
+        scores_doc = {context: {model: {}}}
         # Check to see if we have the context available in our score_processor
         if context not in score_processor:
             return responses.not_found("No models available for {0}"
@@ -100,88 +99,94 @@ def configure(config, bp, score_processor):
             return responses.bad_request("Model '{0}' not available for {1}."
                                          .format(model, context))
 
-        # Try to read the rev_ids
-        if 'revids' in request.args:
+        scores_doc[context][model] = \
+            {'version': score_processor[context][model].version}
+
+        if 'model_info' in request.args:
             try:
-                rev_ids = set(read_bar_split_param(request, "revids", type=int))
+                model_info_fields = set(
+                    read_bar_split_param(request, "model_info", type=str))
             except ParamError as e:
                 return responses.bad_request(str(e))
 
-            if len(rev_ids) == 0:
-                return responses.bad_request("No revids provided.")
-        else:
-            return jsonify(score_processor[context][model].format_info(format="json"))
+            model_info_doc = \
+                score_processor[context][model].format_info(format='json')
+            if len(model_info_fields) > 0 and model_info_fields != {''}:
+                model_info_doc = {k: model_info_doc[k]
+                                  for k in model_info_fields
+                                  if k in model_info_doc}
 
-        # Get model info
+            scores_doc[context][model]['info'] = model_info_doc
+
+        # Read the rev_ids
         try:
-            model_info_req = set(read_bar_split_param(request, "model_info", type=str))
+            rev_ids = set(read_bar_split_param(request, "revids", type=int))
         except ParamError as e:
             return responses.bad_request(str(e))
 
-        precache = "precache" in request.args
-        try:
-            model_object = score_processor[context][model]
-            model_info = {model: {'version': model_object.version}}
-            if model_info_req:
-                for req in model_info_req:
-                    try:
-                        model_info[model][req] = model_object.format_info(format="json")[req]
-                    except KeyError:
-                        return responses.bad_request(
-                            "Model '{0}' has not attribute {1}.".format(
-                                model, req))
-            scores = {model: score_processor.score(context, model, rev_ids,
-                                                   precache=precache)}
-        except errors.ScoreProcessorOverloaded:
-            return responses.server_overloaded()
-        return format_output(context, scores, model_info)
+        if len(rev_ids) > 0:
+            precache = "precache" in request.args
+
+            try:
+                model_scores, _ = score_processor.score(
+                    context, model, rev_ids, precache=precache)
+                scores_doc[context][model]['scores'] = model_scores
+            except errors.ScoreProcessorOverloaded:
+                return responses.server_overloaded()
+
+        return jsonify({'scores': scores_doc})
 
     # /v2/scores/enwiki/reverted/4567890
     @bp.route("/v2/scores/<context>/<model>/<int:rev_id>/", methods=["GET", "POST"])
     def score_revision_v2(context, model, rev_id):
-
+        scores_doc = {context: {model: {}}}
         # Check to see if we have the context available in our score_processor
         if context not in score_processor:
-            return responses.not_found("No scorers available for {0}"
+            return responses.not_found("No models available for {0}"
                                        .format(context))
 
-        model_object = score_processor[context][model]
-        model_info = {model: {'version': model_object.version}}
-        scores = {}
-        # If the model exists, score revisions with it and return the result
         if model not in score_processor[context]:
-            return responses.not_found("Model '{0}' not available for {1}."
-                                       .format(model, context))
+            return responses.bad_request("Model '{0}' not available for {1}."
+                                         .format(model, context))
 
-        # Get model info
+        scores_doc[context][model] = \
+            {'version': score_processor[context][model].version}
+
+        if 'model_info' in request.args:
+            try:
+                model_info_fields = set(
+                    read_bar_split_param(request, "model_info", type=str))
+            except ParamError as e:
+                return responses.bad_request(str(e))
+
+            model_info_doc = \
+                score_processor[context][model].format_info(format='json')
+            if len(model_info_fields) > 0 and model_info_fields != {''}:
+                model_info_doc = {k: model_info_doc[k]
+                                  for k in model_info_fields
+                                  if k in model_info_doc}
+
+            scores_doc[context][model]['info'] = model_info_doc
+
         try:
-            model_info_req = set(read_bar_split_param(
-                request, "model_info", type=str))
-        except ParamError as e:
-            return responses.bad_request(str(e))
-        if model_info_req:
-            for req in model_info_req:
-                try:
-                    model_info[model][req] = model_object.format_info(format="json")[req]
-                except KeyError:
-                    return responses.bad_request(
-                        "Model '{0}' has no attribute {1}.".format(
-                            model, req))
-
-        e, cache = parse_features(request)
-        if e is not None:
+            caches = parse_caches(request, rev_id)
+        except CacheParsingError as e:
             return responses.bad_request("Unabled to parse params: {0}"
                                          .format(e))
 
+        features = "features" in request.args
         precache = "precache" in request.args
 
         try:
-            scores = {model: score_processor.score(
-                context, model, [rev_id], caches={rev_id: cache},
-                precache=precache)}
+            model_scores, feature_values = score_processor.score(
+                context, model, [rev_id], caches=caches,
+                precache=precache, features=features)
+            scores_doc[context][model]['scores'] = model_scores
+            if features:
+                scores_doc[context][model]['features'] = feature_values
         except errors.ScoreProcessorOverloaded:
             return responses.server_overloaded()
 
-        return format_output(context, scores, model_info)
+        return jsonify({'scores': scores_doc})
 
     return bp

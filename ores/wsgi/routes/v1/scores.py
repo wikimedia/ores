@@ -5,7 +5,7 @@ from flask.ext.jsonpify import jsonify
 
 from ... import responses
 from .... import errors
-from ...util import ParamError, parse_features, read_bar_split_param
+from ...util import ParamError, read_bar_split_param
 
 
 def configure(config, bp, score_processor):
@@ -121,16 +121,10 @@ def configure(config, bp, score_processor):
             return responses.not_found("Model '{0}' not available for {1}."
                                        .format(model, context))
 
-        e, cache = parse_features(request)
-        if e is not None:
-            return responses.bad_request("Unabled to parse params: {0}"
-                                         .format(e))
-
         precache = "precache" in request.args
 
         try:
             scores = score_processor.score(context, model, [rev_id],
-                                           caches={rev_id: cache},
                                            precache=precache)
         except errors.ScoreProcessorOverloaded:
             return responses.server_overloaded()

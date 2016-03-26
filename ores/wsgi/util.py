@@ -1,8 +1,11 @@
+import json
 from collections import defaultdict
 
 from flask.ext.jsonpify import jsonify
 
-import json
+
+class CacheParsingError(Exception):
+    pass
 
 
 class ParamError(Exception):
@@ -65,16 +68,17 @@ def format_output(context, scores, model_info, warning=None, notice=None):
     return jsonify(output)
 
 
-def parse_features(request):
+def parse_caches(request, rev_id):
     """Parse values for features / datasources of interest."""
-    caches = {}
+    cache = {}
     try:
+        if 'cache' in request.values:
+            cache = json.loads(request.values['cache'])
+
         for k, v in request.values.items():
-            if k == "caches":
-                caches = json.loads(v)
-                break
-            elif k.startswith(("feature.", "datasource.")):
-                caches[k] = json.loads(v)
+            if k.startswith(("feature.", "datasource.")):
+                cache[k] = json.loads(v)
+
+        return {rev_id: cache} if len(cache) > 0 else None
     except Exception as e:
-        return e, None
-    return None, caches
+        raise CacheParsingError(e)
