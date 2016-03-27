@@ -1,5 +1,6 @@
 import logging
 import time
+import traceback
 
 from .. import errors
 from ..metrics_collectors import Null
@@ -18,15 +19,15 @@ class ScoreProcessor(dict):
         self.score_cache = score_cache or Empty()
         self.metrics_collector = metrics_collector or Null()
 
-    def score(self, context, model, rev_ids, caches=None, features=False,
-              precache=False):
+    def score(self, context, model, rev_ids, caches=None,
+              include_features=False, precache=False):
         version = self[context].version(model)
         start = time.time()
         if caches is not None:
             logger.debug("Scoring with caches {0}".format(caches))
         try:
-            scores = self._score(context, model, rev_ids, features=features,
-                                 caches=caches)
+            scores = self._score(context, model, rev_ids, caches=caches,
+                                 include_features=include_features)
         except errors.ScoreProcessorOverloaded:
             self.metrics_collector.score_processor_overloaded(
                 context, model, version)
@@ -69,7 +70,7 @@ class ScoreProcessor(dict):
 
         return roots
 
-    def _process(self, context, model, features, cache):
+    def _process(self, context, model, cache, include_features=False):
         """
         Pure CPU.  Extract features from datasources in the cache and apply the
         model to arrive at a score.
@@ -79,7 +80,8 @@ class ScoreProcessor(dict):
 
         try:
             start = time.time()
-            score, feature_vals = scoring_context.score(model, features, cache)
+            score, feature_vals = scoring_context.score(
+                    model, cache, include_features=include_features)
             duration = time.time() - start
             logger.debug("Scoring took {0} seconds".format(duration))
             self.metrics_collector.score_processed(context, model, version,
@@ -90,8 +92,8 @@ class ScoreProcessor(dict):
 
         return score, feature_vals
 
-    def _score_revision(self, context, model, rev_id, features=False,
-                        cache=None):
+    def _score_revision(self, context, model, rev_id, cache=None,
+                        include_features=False):
         """
         Both IO and CPU.  Generates a single score or an error.
         """
@@ -101,24 +103,28 @@ class ScoreProcessor(dict):
         if error is not None:
             raise error
 
-        return self._process(context, model, features, score_cache)
+        return self._process(context, model, score_cache,
+                             include_features=include_features)
 
-    def _store(self, context, model, rev_id, score):
+    def _store(self, context, model, rev_id, score, cache):
         version = self[context].version(model)
 
-        self.score_cache.store(context, model, rev_id, score, version=version)
+        self.score_cache.store(context, model, rev_id, score, cache=cache,
+                               version=version)
 
-    def _lookup_cached_scores(self, context, model, rev_ids):
+    def _lookup_cached_scores(self, context, model, rev_ids, caches):
         version = self[context].version(model)
 
         scores = {}
         for rev_id in rev_ids:
+            cache = (caches or {}).get(rev_id, {})
             try:
                 score = self.score_cache.lookup(context, model, rev_id,
-                                                version=version)
+                                                version=version, cache=cache)
 
-                logger.debug("Found cached score for {0}:{1}:{2}"
-                             .format(context, model, rev_id))
+                logger.debug("Found cached score for {0}:{1}:{2}{3}"
+                             .format(context, model, rev_id,
+                                     ":w/cache" if len(cache) > 0 else ""))
 
                 self.metrics_collector.score_cache_hit(context, model, version)
                 scores[rev_id] = score
@@ -147,12 +153,14 @@ class ScoreProcessor(dict):
 
 class SimpleScoreProcessor(ScoreProcessor):
 
-    def _score(self, context, model, rev_ids, features=False, caches=None):
+    def _score(self, context, model, rev_ids, caches=None,
+               include_features=False):
         rev_ids = set(rev_ids)
 
         # Look in the cache
-        if not features and not caches:
-            scores = self._lookup_cached_scores(context, model, rev_ids)
+        if not include_features:
+            scores = self._lookup_cached_scores(context, model, rev_ids,
+                                                caches)
             missing_ids = rev_ids - scores.keys()
         else:
             scores = {}
@@ -170,16 +178,15 @@ class SimpleScoreProcessor(ScoreProcessor):
                 scores[rev_id] = {'error': jsonify_error(error)}
             else:
                 try:
-                    score, feature_vals = self._process(context, model,
-                                                        features, cache)
+                    score, feature_vals = \
+                        self._process(context, model, cache,
+                                      include_features=include_features)
                     scores[rev_id] = score
                     feature_maps[rev_id] = feature_vals
-                    if caches is None:  # No storing score if using caches
-                        self._store(context, model, rev_id, score)
-                    else:
-                        logger.debug("Not storing score because caches are " +
-                                     "used.")
+                    cache = (caches or {}).get(rev_id, {})
+                    self._store(context, model, rev_id, score, cache)
                 except Exception as error:
+                    logger.debug(traceback.format_exc())
                     scores[rev_id] = {'error': jsonify_error(error)}
 
         return scores, feature_maps

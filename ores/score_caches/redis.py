@@ -16,13 +16,10 @@ class Redis(ScoreCache):
         self.ttl = int(ttl or TTL)
         self.prefix = str(prefix or PREFIX)
 
-    def lookup(self, wiki, model, rev_id, version=None):
-        wiki = str(wiki)
-        model = str(model)
-        rev_id = str(rev_id)
-        version = str(version)
+    def lookup(self, wiki, model, rev_id, version=None, cache=None):
+        key = self._generate_key(wiki, model, rev_id, version=version,
+                                 cache=cache)
 
-        key = ":".join([self.prefix, wiki, model, rev_id, version])
         logger.debug("Looking up score at {0}".format(key))
         value = self.redis.get(key)
         if value is None:
@@ -30,16 +27,22 @@ class Redis(ScoreCache):
         else:
             return json.loads(str(value, 'utf-8'))
 
-    def store(self, wiki, model, rev_id, score, version=None):
-        wiki = str(wiki)
-        model = str(model)
-        rev_id = str(rev_id)
-        version = str(version)
+    def store(self, wiki, model, rev_id, score, version=None, cache=None):
+        key = self._generate_key(wiki, model, rev_id, version=version,
+                                 cache=cache)
 
-        key = ":".join([self.prefix, wiki, model, rev_id, version])
         logger.debug("Storing score at {0}".format(key))
-
         self.redis.setex(key, self.ttl, bytes(json.dumps(score), 'utf-8'))
+
+    def _generate_key(self, wiki, model, rev_id, version=None, cache=None):
+        if cache is None or len(cache) == 0:
+            key_values = [self.prefix, wiki, model, rev_id, version]
+        else:
+            cache_hash = str(hash(tuple(sorted(cache.items()))))
+            key_values = [self.prefix, wiki, model, rev_id, version,
+                          cache_hash]
+
+        return ":".join(str(v) for v in key_values)
 
     @classmethod
     def from_parameters(cls, *args, ttl=None, prefix=None, **kwargs):

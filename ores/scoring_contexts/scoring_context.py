@@ -29,7 +29,7 @@ class ScoringContext(dict):
         self.update(scorer_models)
         self.extractor = extractor
 
-    def solve_features(self, model, cache):
+    def solve_features(self, model, cache=None):
         """
         Solves a model's features for a revision.  Does not attempt to gather
         new data.
@@ -37,7 +37,7 @@ class ScoringContext(dict):
         features = self[model].features
         return self.extractor.solve(features, cache=cache)
 
-    def solve_base_features(self, model, cache):
+    def solve_base_features(self, model, cache=None):
         """
         Solves a model's basic features for a revision.  Does not attempt to
         gather new data.
@@ -50,7 +50,10 @@ class ScoringContext(dict):
     def version(self, model):
         return self[model].version
 
-    def score(self, model, features, cache):
+    def score(self, model, cache=None, include_features=False):
+        """
+        I am the score function
+        """
         # TODO: record time spend computing features
         start = time.time()
         feature_values = list(self.solve_features(model, cache))
@@ -63,7 +66,7 @@ class ScoringContext(dict):
         logger.debug("Scored features for {0}.{1} in {2} seconds"
                      .format(self.name, model, time.time() - start))
 
-        if features:
+        if include_features:
             start = time.time()
             feature_vals = self.solve_base_features(model, cache)
             logger.debug("Re-extracted base features for {0}.{1} in {2} secs"

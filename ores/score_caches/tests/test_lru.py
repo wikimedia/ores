@@ -1,4 +1,4 @@
-from nose.tools import eq_
+from nose.tools import eq_, raises
 
 from ..lru import LRU
 from ..score_cache import ScoreCache
@@ -18,6 +18,21 @@ def test_lru():
 
     eq_(cache_context.lookup(2), "bar")  # Moves 2 to the front
     eq_(cache_context.lookup(4), "fez")  # Moves 4 to the front
+
+
+@raises(KeyError)
+def test_lru_cache():
+    lru = LRU(2)
+
+    cache_context = lru.context("foo", "bar")
+
+    cache_context.store(1, "foo")
+    cache_context.store(1, "cachedfoo", cache={"cachedvalue": 1})
+
+    eq_(cache_context.lookup(1, cache={"cachedvalue": 1}), "cachedfoo")
+
+    # Raises KeyError
+    cache_context.lookup(1, cache={"cachedvalue": 2})
 
 
 def test_from_config():

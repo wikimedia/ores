@@ -57,5 +57,5 @@ def test_scoring_context():
     eq_(root_ds_caches[1][1][fake_data], "fake")
     assert root_ds_caches[5][0] is not None
 
-    score = scoring_context.score("fake", {characters: 10, is_fake: False})
+    score, feature_vals = scoring_context.score("fake", {characters: 10, is_fake: False})
     eq_(score['prediction'], "generated")

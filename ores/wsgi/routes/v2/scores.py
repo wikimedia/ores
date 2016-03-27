@@ -174,15 +174,15 @@ def configure(config, bp, score_processor):
             return responses.bad_request("Unabled to parse params: {0}"
                                          .format(e))
 
-        features = "features" in request.args
+        include_features = "features" in request.args
         precache = "precache" in request.args
 
         try:
             model_scores, feature_values = score_processor.score(
                 context, model, [rev_id], caches=caches,
-                precache=precache, features=features)
+                precache=precache, include_features=include_features)
             scores_doc[context][model]['scores'] = model_scores
-            if features:
+            if include_features:
                 scores_doc[context][model]['features'] = feature_values
         except errors.ScoreProcessorOverloaded:
             return responses.server_overloaded()

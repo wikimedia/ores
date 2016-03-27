@@ -17,9 +17,9 @@ class Timeout(SimpleScoreProcessor):
         super().__init__(*args, **kwargs)
         self.timeout = float(timeout) if timeout is not None else None
 
-    def _process(self, context, model, features, cache):
-        return timeout(super()._process, context, model, features, cache,
-                       seconds=self.timeout)
+    def _process(self, context, model, cache, include_features=False):
+        return timeout(super()._process, context, model, cache,
+                       include_features=include_features, seconds=self.timeout)
 
     @classmethod
     def from_config(cls, config, name, section_key="score_processors"):
