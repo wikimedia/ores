@@ -1,11 +1,37 @@
 language: python
+sudo: true
 python:
   - "3.4"
+addons:
+  apt:
+    packages:
+    - g++
+    - gfortran
+    - libblas-dev
+    - liblapack-dev
+    - libopenblas-dev
+    - python3-dev
+    - enchant
+
 before_install:
-  - sudo apt-get update -qq
-  - sudo apt-get install -y g++ gfortran liblapack-dev libopenblas-dev python3-dev myspell-pt myspell-fa myspell-en-au  myspell-en-gb myspell-en-us myspell-en-za myspell-fr 
+  - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+  - chmod +x miniconda.sh
+  - ./miniconda.sh -b
+  - export PATH=/home/travis/miniconda3/bin:$PATH
+  - ls -l /home/travis/miniconda3/bin
+  - conda update --yes conda
+# Install packages
 install:
-  - travis_wait pip install -r requirements.txt
+  - conda install --yes python=$TRAVIS_PYTHON_VERSION numpy scipy
+  - python --version
+  - python -c "import numpy;print(numpy.__version__)"
+  - python -c "import scipy;print(scipy.__version__)"
+  - touch /home/travis/miniconda3/lib/python3.4/site-packages/easy-install.pth
+  - travis_wait pip install -r requirements.txt || date
   - pip install statsd pylru
+  - python -m nltk.downloader stopwords
+  - pip install codecov
 script:
-  - nosetests -v --with-coverage --cover-package=revscoring --quiet
+  - nosetests -v --with-coverage --cover-package=revscoring
+after_success:
+    codecov
