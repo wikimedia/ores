@@ -4,6 +4,7 @@ import time
 from revscoring import dependencies
 from revscoring.datasources import Datasource
 from revscoring.extractors import Extractor
+from revscoring.features import trim
 from revscoring.scorer_models import ScorerModel
 
 logger = logging.getLogger("ores.scorer.scorer")
@@ -28,7 +29,7 @@ class ScoringContext(dict):
         self.update(scorer_models)
         self.extractor = extractor
 
-    def solve(self, model, cache):
+    def solve_features(self, model, cache=None):
         """
         Solves a model's features for a revision.  Does not attempt to gather
         new data.
@@ -36,14 +37,27 @@ class ScoringContext(dict):
         features = self[model].features
         return self.extractor.solve(features, cache=cache)
 
+    def solve_base_features(self, model, cache=None):
+        """
+        Solves a model's basic features for a revision.  Does not attempt to
+        gather new data.
+        """
+        features = list(trim(self[model].features))
+        feature_values = self.extractor.solve(features, cache=cache)
+        return {"feature." + f.name: v
+                for f, v in zip(features, feature_values)}
+
     def version(self, model):
         return self[model].version
 
-    def score(self, model, cache):
+    def score(self, model, cache=None, include_features=False):
+        """
+        I am the score function
+        """
         # TODO: record time spend computing features
         start = time.time()
-        feature_values = list(self.solve(model, cache))
-        logger.debug("Extracted features for {0}.{1} in {2} seconds"
+        feature_values = list(self.solve_features(model, cache))
+        logger.debug("Extracted features for {0}.{1} in {2} secs"
                      .format(self.name, model, time.time() - start))
 
         # TODO: record time spent generating a score
@@ -52,7 +66,15 @@ class ScoringContext(dict):
         logger.debug("Scored features for {0}.{1} in {2} seconds"
                      .format(self.name, model, time.time() - start))
 
-        return score
+        if include_features:
+            start = time.time()
+            feature_vals = self.solve_base_features(model, cache)
+            logger.debug("Re-extracted base features for {0}.{1} in {2} secs"
+                         .format(self.name, model, time.time() - start))
+        else:
+            feature_vals = None
+
+        return score, feature_vals
 
     def extract_roots(self, model, rev_ids, caches=None):
         """
@@ -74,8 +96,10 @@ class ScoringContext(dict):
         root_ds_caches = {}
         for rev_id, (error, root_vals) in zip(rev_ids, error_root_vals):
             if error is None:
-                root_ds_caches[rev_id] = \
-                        (None, {rd: rv for rd, rv in zip(root_ds, root_vals)})
+                root_ds_map = {rd: rv for rd, rv in zip(root_ds, root_vals)}
+                if caches is not None:
+                    root_ds_map.update(caches.get(rev_id, {}))
+                root_ds_caches[rev_id] = (None, root_ds_map)
             else:
                 root_ds_caches[rev_id] = (error, None)
 

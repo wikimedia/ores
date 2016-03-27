@@ -17,31 +17,7 @@ paths:
         This route provides a list of available contexts.  Generally a wiki is 1:1 with a context and
         a context is expressed as the database name of the wiki.  For example "enwiki" is English
         Wikipedia and "wikidatawiki" is Wikidata.
-      parameters:
-        - name: context
-          in: path
-          description: The name of the context to find {models}
-          required: true
-          type: string
-          format: string
-        - name: models
-          in: query
-          description: The name of a model(s) to apply (split multiple names with "|")
-          required: false
-          type: string
-          format: string
-        - name: revids
-          in: query
-          description: The revision IDs to score (split multiple ids with "|")
-          required: false
-          type: number
-          format: integer
-        - name: model_info
-          in: query
-          description: Model information items to include in the response
-          required: false
-          type: string
-          format: string
+      parameters: {}
       responses:
         "200":
           description: A JSON document information about the available contexts and models
@@ -181,15 +157,15 @@ paths:
           required: false
           type: string
           format: string
-        - name: feature_values
+        - name: features
           in: query
           description: Include feature values in the response
           required: false
-          type: string
-          format: string
+          type: boolean
+          format: boolean
         - name: cache
           in: query
-          description: A cache of pre-computed features to use when scoring
+          description: A JSON formatted cache of pre-computed features to use when scoring
           required: false
           type: string
           format: JSON document

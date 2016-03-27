@@ -23,13 +23,13 @@ class FakeSM(ScorerModel):
 
 class FakeSC(ScoringContext):
 
-    def solve(self, model, cache):
+    def solve(self, model, cache, include_features=False):
         return cache
 
-    def score(self, model, cache):
+    def score(self, model, cache, include_features=False):
         wait_time_value = cache[wait_time]
         time.sleep(wait_time_value)
-        return {'score': True}
+        return {'score': True}, None
 
     def extract_roots(self, model, rev_ids, caches=None):
         return {rev_id: (None, caches[rev_id]) for rev_id in rev_ids}
@@ -39,8 +39,8 @@ def test_score():
     fakewiki = FakeSC("fakewiki", {'fake': FakeSM()}, None)
     score_processor = Timeout({'fakewiki': fakewiki}, timeout=0.10)
 
-    scores = score_processor.score("fakewiki", "fake", [1],
-                                   caches={1: {wait_time: 0.05}})
+    scores, feature_maps = score_processor.score(
+            "fakewiki", "fake", [1], caches={1: {wait_time: 0.05}})
     eq_(scores, {1: {'score': True}})
 
 
@@ -48,7 +48,7 @@ def test_timeout():
     fakewiki = FakeSC("fakewiki", {'fake': FakeSM()}, None)
     score_processor = Timeout({'fakewiki': fakewiki}, timeout=0.05)
 
-    scores = score_processor.score("fakewiki", "fake", [1],
-                                   caches={1: {wait_time: 0.10}})
+    scores, feature_maps = score_processor.score(
+        "fakewiki", "fake", [1], caches={1: {wait_time: 0.10}})
     assert 'error' in scores[1]
     assert 'Timed out after' in scores[1]['error']['message']

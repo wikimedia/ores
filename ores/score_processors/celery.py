@@ -52,13 +52,17 @@ class Celery(Timeout):
 
         @self.application.task(throws=expected_errors,
                                queue=DEFAULT_CELERY_QUEUE)
-        def _process_task(context, model, cache):
-            return Timeout._process(self, context, model, cache)
+        def _process_task(context, model, cache, include_features):
+            return Timeout._process(self, context, model, cache=cache,
+                                    include_features=include_features)
 
         @self.application.task(throws=expected_errors,
                                queue=DEFAULT_CELERY_QUEUE)
-        def _score_revision_task(context, model, rev_id, cache=None):
-            return Timeout._score_revision(self, context, model, rev_id, cache=cache)
+        def _score_revision_task(context, model, rev_id, cache=None,
+                                 include_features=False):
+            return Timeout._score_revision(self, context, model, rev_id,
+                                           cache=cache,
+                                           include_features=include_features)
 
         APPLICATIONS.append(application)
 
@@ -66,18 +70,21 @@ class Celery(Timeout):
 
         self._score_revision_task = _score_revision_task
 
-    def _score_in_celery(self, context, model, rev_ids, caches):
+    def _score_in_celery(self, context, model, rev_ids, caches,
+                         include_features):
         scores = {}
+        feature_maps = {}
         results = {}
 
         if len(rev_ids) == 0:
-            return scores
+            return scores, feature_maps
         if len(rev_ids) == 1:  # Special case -- do everything in celery
             rev_id = rev_ids.pop()
-            id_string = self._generate_id(context, model, rev_id)
             cache = (caches or {}).get(rev_id, {})
+            id_string = self._generate_id(context, model, rev_id, cache)
             result = self._score_revision_task.apply_async(
-                args=(context, model, rev_id), kwargs={'cache': cache},
+                args=(context, model, rev_id),
+                kwargs={'include_features': include_features, 'cache': cache},
                 task_id=id_string
             )
             results[rev_id] = result
@@ -101,23 +108,28 @@ class Celery(Timeout):
         # Process async results
         for rev_id, result in results.items():
             try:
-                score = result.get(self.timeout)
+                score, feature_vals = result.get(self.timeout)
+                if feature_vals is not None:
+                    feature_maps[rev_id] = feature_vals
                 scores[rev_id] = score
-                if caches is None:  # No storing score if using caches
-                    self._store(context, model, rev_id, score)
-                else:
-                    logger.debug("Not storing score because caches are " +
-                                 "used.")
+                cache = (caches or {}).get(rev_id, {})
+                self._store(context, model, rev_id, score, cache)
             except Exception as error:
                 scores[rev_id] = {'error': jsonify_error(error)}
 
-        return scores
+        return scores, feature_maps
 
-    def _generate_id(self, context, model, rev_id):
+    def _generate_id(self, context, model, rev_id, cache):
         scorer_model = self[context][model]
         version = scorer_model.version
 
-        return ":".join(str(v) for v in [context, model, rev_id, version])
+        id_string = ":".join(str(v) for v in [context, model, rev_id, version])
+
+        if len(cache) == 0:
+            return id_string
+        else:
+            cache_hash = str(hash(tuple(sorted(cache.items()))))
+            return id_string + ":" + cache_hash
 
     def _check_queue_full(self):
         # Check redis to see if the queue of waiting tasks is too big.
@@ -132,38 +144,53 @@ class Celery(Timeout):
                 logger.warning(message)
                 raise errors.ScoreProcessorOverloaded(message)
 
-    def _score(self, context, model, rev_ids, caches=None):
+    def _score(self, context, model, rev_ids, caches=None,
+               include_features=False):
+        scores = {}
+        feature_maps = {}
         self._check_queue_full()  # Raises ScoreProcessorOverloaded
 
         rev_ids = set(rev_ids)
 
-        # Lookup scoring results that are currently in progress
-        results = self._lookup_inprogress_results(context, model, rev_ids)
-        missing_ids = rev_ids - results.keys()
+        if not include_features:
+            # Lookup scoring results that are currently in progress
+            results = self._lookup_inprogress_results(context, model, rev_ids,
+                                                      caches)
+            missing_ids = rev_ids - results.keys()
 
-        # Lookup scoring results that are in the cache
-        scores = self._lookup_cached_scores(context, model, missing_ids)
-        missing_ids = missing_ids - scores.keys()
+            # Lookup scoring results that are in the cache
+            scores = self._lookup_cached_scores(context, model, missing_ids,
+                                                caches)
+            missing_ids = missing_ids - scores.keys()
+        else:
+            results = {}
+            missing_ids = rev_ids
 
         # Generate scores for missing rev_ids
-        scores.update(self._score_in_celery(context, model, missing_ids,
-                                            caches=caches))
+        new_scores, new_feature_maps = \
+            self._score_in_celery(context, model, missing_ids,
+                                  caches=caches,
+                                  include_features=include_features)
+        scores.update(new_scores)
+        feature_maps.update(new_feature_maps)
 
         # Gather results
         for rev_id in results:
             try:
-                scores[rev_id] = results[rev_id].get(self.timeout)
+                scores[rev_id], feature_maps[rev_id] = \
+                    results[rev_id].get(self.timeout)
             except Exception as error:
                 scores[rev_id] = {'error': jsonify_error(error)}
 
         # Return scores
-        return scores
+        return scores, feature_maps
 
-    def _lookup_inprogress_results(self, context, model, rev_ids):
+    def _lookup_inprogress_results(self, context, model, rev_ids, caches):
 
         results = {}
         for rev_id in rev_ids:
-            id_string = self._generate_id(context, model, rev_id)
+            cache = (caches or {}).get(rev_id, {})
+            id_string = self._generate_id(context, model, rev_id, cache)
             try:
                 results[rev_id] = self._get_result(id_string)
             except KeyError:

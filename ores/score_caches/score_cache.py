@@ -5,13 +5,13 @@ logger = logging.getLogger("ores.score_caches.score_cache")
 
 class ScoreCache:
 
-    def lookup(self, wiki, model, rev_id, version=None):
+    def lookup(self, wiki, model, rev_id, version=None, cache=None):
         """
         Returns a pre-cached score
         """
         raise NotImplementedError()
 
-    def store(self, wiki, model, rev_id, score, version=None):
+    def store(self, wiki, model, rev_id, score, version=None, cache=None):
         """
         Caches a new score
         """
@@ -44,10 +44,10 @@ class Context:
         self.model = str(model)
         self.version = version
 
-    def lookup(self, rev_id):
+    def lookup(self, rev_id, cache=None):
         return self.scorer_cache.lookup(self.wiki, self.model, rev_id,
-                                        version=self.version)
+                                        cache=cache, version=self.version)
 
-    def store(self, rev_id, score):
+    def store(self, rev_id, score, cache=None):
         return self.scorer_cache.store(self.wiki, self.model, rev_id, score,
-                                       version=self.version)
+                                       cache=cache, version=self.version)
