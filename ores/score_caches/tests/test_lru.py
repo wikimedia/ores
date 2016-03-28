@@ -30,6 +30,7 @@ def test_lru_cache():
     cache_context.store(1, "cachedfoo", cache={"cachedvalue": 1})
 
     eq_(cache_context.lookup(1, cache={"cachedvalue": 1}), "cachedfoo")
+    eq_(cache_context.lookup(1), "foo")
 
     # Raises KeyError
     cache_context.lookup(1, cache={"cachedvalue": 2})

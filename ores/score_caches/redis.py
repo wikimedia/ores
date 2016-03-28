@@ -1,5 +1,6 @@
 import json
 import logging
+from hashlib import sha1
 
 from .score_cache import ScoreCache
 
@@ -38,7 +39,7 @@ class Redis(ScoreCache):
         if cache is None or len(cache) == 0:
             key_values = [self.prefix, wiki, model, rev_id, version]
         else:
-            cache_hash = str(hash(tuple(sorted(cache.items()))))
+            cache_hash = self.hash_cache(cache)
             key_values = [self.prefix, wiki, model, rev_id, version,
                           cache_hash]
 
@@ -70,3 +71,8 @@ class Redis(ScoreCache):
         kwargs = {k: v for k, v in section.items() if k != "class"}
 
         return cls.from_parameters(**kwargs)
+
+    @classmethod
+    def hash_cache(cls, cache):
+        sorted_tuple = tuple(sorted(cache.items()))
+        return sha1(bytes(str(sorted_tuple), 'utf8')).hexdigest()

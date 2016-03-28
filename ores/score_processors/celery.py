@@ -1,5 +1,6 @@
 import logging
 import re
+from hashlib import sha1
 from urllib.parse import urlparse
 
 import celery
@@ -128,7 +129,7 @@ class Celery(Timeout):
         if len(cache) == 0:
             return id_string
         else:
-            cache_hash = str(hash(tuple(sorted(cache.items()))))
+            cache_hash = self.hash_cache(cache)
             return id_string + ":" + cache_hash
 
     def _check_queue_full(self):
@@ -209,6 +210,11 @@ class Celery(Timeout):
         else:
             logger.debug("Found AsyncResult for {0}".format(repr(id_string)))
             return result
+
+    @classmethod
+    def hash_cache(cls, cache):
+        sorted_tuple = tuple(sorted(cache.items()))
+        return sha1(bytes(str(sorted_tuple), 'utf8')).hexdigest()
 
     @classmethod
     def from_config(cls, config, name, section_key="score_processors"):

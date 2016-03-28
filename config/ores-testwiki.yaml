@@ -9,6 +9,7 @@ ores:
 score_caches:
   memory_lru:
     class: ores.score_caches.LRU
+    size: 1024
   local_redis:
     class: ores.score_caches.Redis
     host: localhost
@@ -24,6 +25,7 @@ metrics_collectors:
 score_processors:
   defaults:
     metrics_collector: local_logging
+    score_cache: memory_lru
     scoring_contexts:
       - testwiki
   local_timeout:
