@@ -1,8 +1,16 @@
 swagger: '2.0'
 info:
   title: ORES scoring interface
-  description: A webserver for hosting scoring services (v2 paths)
-  version: "1"
+  description: |
+    A RESTful API for scoring revisions (v2 paths).  These paths provide
+    access to a set of scoring models.  This API primarily differs from v1 in
+    that there is only one response document schema that any path returns.
+    This response document contains 'error' information, 'warnings' and
+    'scores' structures.
+
+    There's also new functionality for returning 'feature' values used in
+    scoring and 'inject'ing custom feature values for scoring.
+  version: "2"
 host: ores.wmflabs.org
 schemes:
   - https
@@ -12,12 +20,23 @@ produces:
 paths:
   /v2/scores/:
     get:
-      summary: Provides access to a list of available contexts.
+      tags: ['scoring']
+      summary: List available scoring contexts and models.
       description: |
-        This route provides a list of available contexts.  Generally a wiki is 1:1 with a context and
-        a context is expressed as the database name of the wiki.  For example "enwiki" is English
+        This route provides a list of available contexts for scoring.
+        Generally a wiki is 1:1 with a context and a context is expressed as
+        the database name of the wiki.  For example "enwiki" is English
         Wikipedia and "wikidatawiki" is Wikidata.
-      parameters: {}
+      parameters:
+        - name: model_info
+          in: query
+          description: |
+            Model information fields to include in the response.  If no value is
+            provided, all info fields will be returned.  Otherise, fields will
+            be limited to those provided (e.g. "type|test_stats").
+          required: false
+          type: string
+          format: \"|\" delimited field names
       responses:
         "200":
           description: A JSON document information about the available contexts and models
@@ -29,41 +48,43 @@ paths:
             $ref: '#/definitions/ResponseDocument'
   /v2/scores/{context}:
     get:
-      summary: Provides a means of scoring *revids* using multiple *models* in the same request.
+      tags: ['scoring']
+      summary: Score {revids} using multiple {models} in the same request.
       description: |
-        This route provides either a list a models available in {context} if no {models} or {revids}
-        are provided.  If both *models* and {revids} are provided, ModelScoreResponse will be returned.
+        This route provides access to all {models} within a {context}.  This
+        path is useful for either exploring information about {models} available
+        within a {context} or scoring one or more {revids} using one or more
+        {models} at the same time.
       parameters:
         - name: context
           in: path
-          description: The name of the context to find {models}
+          description: |
+            The name of the {context} to find {model}.  This is usually the
+            dbname of a wiki project.
           required: true
           type: string
           format: string
         - name: models
           in: query
-          description: The name of a model(s) to apply (split multiple names with "|")
+          description: The name of a model to use when scoring
           required: false
           type: string
-          format: string
+          format: \"|\" delimited model names
         - name: revids
           in: query
           description: The revision IDs to score (split multiple ids with "|")
           required: false
           type: number
           format: integer
-        - name: feature_values
-          in: query
-          description: Include feature values in the response
-          required: false
-          type: string
-          format: string
         - name: model_info
           in: query
-          description: Model information items to include in the response
+          description: |
+            Model information fields to include in the response.  If no value is
+            provided, all info fields will be returned.  Otherise, fields will
+            be limited to those provided (e.g. "type|test_stats").
           required: false
           type: string
-          format: string
+          format: \"|\" delimited field names
       responses:
         "200":
           description: A JSON document containing scores or information about the available models
@@ -79,41 +100,41 @@ paths:
             $ref: '#/definitions/ResponseDocument'
   /v2/scores/{context}/{model}:
     get:
-      summary: Provides a means of scoring *revids* using {model} in the same request.
+      tags: ['scoring']
+      summary: Score many {revids} using {model} in the same request.
       description: |
-        Provides a means of scoring *revids* using {model} in the same request. A
-        ScoreResponse will be returned.
+        Provides a means of scoring many {revids} using {model} in the same
+        request.
       parameters:
         - name: context
           in: path
-          description: The name of the context to find {model}
+          description: |
+            The name of the {context} to find {model}.  This is usually the
+            dbname of a wiki project.
           required: true
           type: string
           format: string
         - name: model
           in: path
-          description: The name of a model to apply
+          description: The name of a model to use when scoring
           required: true
           type: string
           format: string
         - name: revids
           in: query
-          description: The revision IDs to score (split multiple ids with "|")
+          description: The revision IDs to score
           required: false
           type: number
-          format: integer
-        - name: feature_values
-          in: query
-          description: Include feature values in the response
-          required: false
-          type: string
-          format: string
+          format: \"|\" delimited integers
         - name: model_info
           in: query
-          description: Model information items to include in the response
+          description: |
+            Model information fields to include in the response.  If no value is
+            provided, all info fields will be returned.  Otherise, fields will
+            be limited to those provided (e.g. "type|test_stats").
           required: false
           type: string
-          format: string
+          format: \"|\" delimited field names
       responses:
         "200":
           description: A JSON document containing scores
@@ -129,19 +150,22 @@ paths:
             $ref: '#/definitions/ResponseDocument'
   /v2/scores/{context}/{model}/{revid}:
     get:
-      summary: Provides a means of scoring a single {revid} using {model}.
+      tags: ['scoring']
+      summary: Score a single {revid} using {model}.
       description: |
-        Provides a means of scoring {revid} using {model}. A ScoreResponse will be returned.
+        Provides a means of scoring {revid} using {model} in {context}.
       parameters:
         - name: context
           in: path
-          description: The name of the context to find {model}
+          description: |
+            The name of the {context} to find {model}.  This is usually the
+            dbname of a wiki project.
           required: true
           type: string
           format: string
         - name: model
           in: path
-          description: The name of a model to apply
+          description: The name of a model to use when scoring
           required: true
           type: string
           format: string
@@ -153,22 +177,30 @@ paths:
           format: integer
         - name: model_info
           in: query
-          description: Model information items to include in the response
+          description: |
+            Model information fields to include in the response.  If no value is
+            provided, all info fields will be returned.  Otherise, fields will
+            be limited to those provided (e.g. "type|test_stats").
           required: false
           type: string
-          format: string
+          format: \"|\" delimited field names
         - name: features
           in: query
-          description: Include feature values in the response
+          description: |
+            If present, feature values used in scoring will be presented in the
+            response
           required: false
           type: boolean
-          format: boolean
-        - name: cache
+          format: n/a
+        - name: inject
           in: query
-          description: A JSON formatted cache of pre-computed features to use when scoring
+          description: |
+            A JSON formatted set of of pre-computed datasources/features to use
+            when scoring.  Keys correspond to the name of dependencies used
+            when scoring (e.g. features and datasources).
           required: false
-          type: string
-          format: JSON document
+          type: JSON
+          format: key-value pairs
       responses:
         "200":
           description: A JSON document containing scores

@@ -68,12 +68,12 @@ def format_output(context, scores, model_info, warning=None, notice=None):
     return jsonify(output)
 
 
-def parse_caches(request, rev_id):
+def parse_injection(request, rev_id):
     """Parse values for features / datasources of interest."""
     cache = {}
     try:
-        if 'cache' in request.values:
-            cache = json.loads(request.values['cache'])
+        if 'inject' in request.values:
+            cache = json.loads(request.values['inject'])
 
         for k, v in request.values.items():
             if k.startswith(("feature.", "datasource.")):
