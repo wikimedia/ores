@@ -1,5 +1,8 @@
+import logging
+
 from .score_cache import ScoreCache
 
+logger = logging.getLogger(__name__)
 
 class LRU(ScoreCache):
 
@@ -15,12 +18,16 @@ class LRU(ScoreCache):
     def lookup(self, wiki, model, rev_id, version=None, cache=None):
         # Deterministic hash of cache values
         cache_hash = hash(tuple(sorted((cache or {}).items())))
-        return self.lru[(wiki, model, rev_id, version, cache_hash)]
+        key = (wiki, model, rev_id, version, cache_hash)
+        logger.debug("Looking up score at {0}".format(key))
+        return self.lru[key]
 
     def store(self, wiki, model, rev_id, score, version=None, cache=None):
         # Deterministic hash of cache values
         cache_hash = hash(tuple(sorted((cache or {}).items())))
-        self.lru[(wiki, model, rev_id, version, cache_hash)] = score
+        key = (wiki, model, rev_id, version, cache_hash)
+        logger.debug("Storing score at {0}".format(key))
+        self.lru[key] = score
 
     @classmethod
     def from_config(cls, config, name, section_key="score_caches"):

@@ -25,6 +25,7 @@ class ScoreProcessor(dict):
         start = time.time()
         if caches is not None:
             logger.debug("Scoring with caches {0}".format(caches))
+
         try:
             scores = self._score(context, model, rev_ids, caches=caches,
                                  include_features=include_features)
