@@ -62,4 +62,4 @@ extractors:
 scorer_models:
   testwiki_revid:
     class: ores.scorer_models.RevIdScorer
-    version: test version
+    version: 0.0.0

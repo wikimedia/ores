@@ -187,6 +187,8 @@ class Celery(Timeout):
         return scores, feature_maps
 
     def _lookup_inprogress_results(self, context, model, rev_ids, caches):
+        scorer_model = self[context][model]
+        version = scorer_model.version
 
         results = {}
         for rev_id in rev_ids:
@@ -194,6 +196,7 @@ class Celery(Timeout):
             id_string = self._generate_id(context, model, rev_id, cache)
             try:
                 results[rev_id] = self._get_result(id_string)
+                self.metrics_collector.score_cache_hit(context, model, version)
             except KeyError:
                 pass
 

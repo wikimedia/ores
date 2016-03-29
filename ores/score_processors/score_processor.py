@@ -24,7 +24,8 @@ class ScoreProcessor(dict):
         version = self[context].version(model)
         start = time.time()
         if caches is not None:
-            logger.debug("Scoring with caches {0}".format(caches))
+            logger.debug("Scoring {0}:{1}:{2} with caches {3}"
+                         .format(context, model, rev_ids, version, caches))
 
         try:
             scores = self._score(context, model, rev_ids, caches=caches,
@@ -58,8 +59,9 @@ class ScoreProcessor(dict):
         start = time.time()
         roots = scoring_context.extract_roots(model, rev_ids, caches=caches)
         duration = time.time() - start
-        logger.debug("Extracted root Datasources for {0} in {1} seconds"
-                     .format(rev_ids, duration))
+        logger.debug("Extracted root datasources for " +
+                     "{0}:{1}:{2}:{3} in {4} secs"
+                     .format(context, model, version, rev_ids, duration))
 
         self.metrics_collector.datasources_extracted(context, model,
                                                      version, len(rev_ids),
@@ -77,14 +79,15 @@ class ScoreProcessor(dict):
         model to arrive at a score.
         """
         scoring_context = self[context]
-        version = scoring_context.version(model)
+        version = scoring_context[model].version
 
         try:
             start = time.time()
             score, feature_vals = scoring_context.score(
                     model, cache, include_features=include_features)
             duration = time.time() - start
-            logger.debug("Scoring took {0} seconds".format(duration))
+            logger.debug("Scoring {0}:{1}:{2} took {3} secs"
+                         .format(context, model, version, duration))
             self.metrics_collector.score_processed(context, model, version,
                                                    duration)
         except:
@@ -114,7 +117,7 @@ class ScoreProcessor(dict):
                                version=version)
 
     def _lookup_cached_scores(self, context, model, rev_ids, caches):
-        version = self[context].version(model)
+        version = self[context][model].version
 
         scores = {}
         for rev_id in rev_ids:

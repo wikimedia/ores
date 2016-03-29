@@ -11,37 +11,37 @@ class Logger(MetricsCollector):
         self.logger = logger or logging.getLogger(__name__)
 
     def precache_request(self, context, model, version, duration):
-        self.logger.debug("precache_request: {0}.{1}.{2} in {3} seconds"
+        self.logger.debug("precache_request: {0}:{1}:{2} in {3} seconds"
                           .format(context, model, version, duration))
 
     def scores_request(self, context, model, version, rev_id_count, duration):
         self.logger.debug("scores_request: " +
-                          "{0}.{1}.{2} for {3} revisions in {4} seconds"
+                          "{0}:{1}:{2} for {3} revisions in {4} seconds"
                           .format(context, model, version, rev_id_count,
                                   duration))
 
     def datasources_extracted(self, context, model, version, rev_id_count, duration):
         self.logger.debug("datasources_extracted: " +
-                          "{0}.{1}.{2} for {3} revisions in {4} seconds"
+                          "{0}:{1}:{2} for {3} revisions in {4} seconds"
                           .format(context, model, version, rev_id_count,
                                   duration))
 
     def score_processor_overloaded(self, context, model, version, count=1):
         self.logger.debug("score_processor_overloaded: " +
-                          "{0}.{1}.{2}".format(context, model, version))
+                          "{0}:{1}:{2}".format(context, model, version))
 
     def score_processed(self, context, model, version, duration):
-        self.logger.debug("score_processed: {0}.{1}.{2} in {3} seconds"
+        self.logger.debug("score_processed: {0}:{1}:{2} in {3} seconds"
                           .format(context, model, version, duration))
 
     def score_cache_hit(self, context, model, version, count=1):
         for i in range(count):
-            self.logger.debug("score_cache_hit: {0}.{1}.{2}"
+            self.logger.debug("score_cache_hit: {0}:{1}:{2}"
                               .format(context, model, version))
 
     def score_errored(self, context, model, version, count=1):
         for i in range(count):
-            self.logger.debug("score_errored: {0}.{1}.{2}"
+            self.logger.debug("score_errored: {0}:{1}:{2}"
                               .format(context, model, version))
 
     @classmethod

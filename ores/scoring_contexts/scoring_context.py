@@ -7,7 +7,7 @@ from revscoring.extractors import Extractor
 from revscoring.features import trim
 from revscoring.scorer_models import ScorerModel
 
-logger = logging.getLogger("ores.scorer.scorer")
+logger = logging.getLogger(__name__)
 
 
 class ScoringContext(dict):
@@ -54,23 +54,26 @@ class ScoringContext(dict):
         """
         I am the score function
         """
+        version = self[model].version
+
         # TODO: record time spend computing features
         start = time.time()
         feature_values = list(self.solve_features(model, cache))
-        logger.debug("Extracted features for {0}.{1} in {2} secs"
-                     .format(self.name, model, time.time() - start))
+        logger.debug("Extracted features for {0}:{1}:{2} in {3} secs"
+                     .format(self.name, model, version, time.time() - start))
 
         # TODO: record time spent generating a score
         start = time.time()
         score = self[model].score(feature_values)
-        logger.debug("Scored features for {0}.{1} in {2} seconds"
-                     .format(self.name, model, time.time() - start))
+        logger.debug("Scored features for {0}:{1}:{2} in {3} secs"
+                     .format(self.name, model, version, time.time() - start))
 
         if include_features:
             start = time.time()
             feature_vals = self.solve_base_features(model, cache)
-            logger.debug("Re-extracted base features for {0}.{1} in {2} secs"
-                         .format(self.name, model, time.time() - start))
+            logger.debug("Re-extracted base features for " +
+                         "{0}:{1}:{2} in {3} secs"
+                         .format(self.name, model, version, time.time() - start))
         else:
             feature_vals = None
 
@@ -134,9 +137,9 @@ class ScoringContext(dict):
         section = config[section_key][name]
 
         scorer_models = {}
-        for name, key in section['scorer_models'].items():
+        for model_name, key in section['scorer_models'].items():
             scorer_model = ScorerModel.from_config(config, key)
-            scorer_models[name] = scorer_model
+            scorer_models[model_name] = scorer_model
 
         extractor = Extractor.from_config(config, section['extractor'])
 
