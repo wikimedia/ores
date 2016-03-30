@@ -99,9 +99,12 @@ class Celery(Timeout):
                 if error is not None:
                     scores[rev_id] = {'error': jsonify_error(error)}
                 else:
-                    id_string = self._generate_id(context, model, rev_id)
+                    injection_cache = (caches or {}).get(rev_id)
+                    id_string = \
+                        self._generate_id(context, model, rev_id,
+                                          injection_cache)
                     result = self._process_task.apply_async(
-                        args=(context, model, cache),
+                        args=(context, model, cache, include_features),
                         task_id=id_string
                     )
                     results[rev_id] = result
@@ -126,7 +129,7 @@ class Celery(Timeout):
 
         id_string = ":".join(str(v) for v in [context, model, rev_id, version])
 
-        if len(cache) == 0:
+        if cache is None or len(cache) == 0:
             return id_string
         else:
             cache_hash = self.hash_cache(cache)

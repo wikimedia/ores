@@ -64,8 +64,8 @@ def configure(config, bp, score_processor):
         try:
             scores = defaultdict(dict)
             for model in models:
-                model_scores = score_processor.score(context, model, rev_ids,
-                                                     precache=precache)
+                model_scores, _ = score_processor.score(
+                    context, model, rev_ids, precache=precache)
                 for rev_id in model_scores:
                     scores[rev_id][model] = model_scores[rev_id]
         except errors.ScoreProcessorOverloaded:
@@ -101,11 +101,11 @@ def configure(config, bp, score_processor):
 
         precache = "precache" in request.args
         try:
-            scores = score_processor.score(context, model, rev_ids,
-                                           precache=precache)
+            model_scores, _ = score_processor.score(context, model, rev_ids,
+                                                    precache=precache)
         except errors.ScoreProcessorOverloaded:
             return responses.server_overloaded()
-        return jsonify(scores)
+        return jsonify(model_scores)
 
     # /scores/enwiki/reverted/4567890
     @bp.route("/scores/<context>/<model>/<int:rev_id>/", methods=["GET", "POST"])
@@ -124,11 +124,11 @@ def configure(config, bp, score_processor):
         precache = "precache" in request.args
 
         try:
-            scores = score_processor.score(context, model, [rev_id],
-                                           precache=precache)
+            model_scores, _ = score_processor.score(context, model, [rev_id],
+                                                    precache=precache)
         except errors.ScoreProcessorOverloaded:
             return responses.server_overloaded()
 
-        return jsonify(scores)
+        return jsonify(model_scores)
 
     return bp

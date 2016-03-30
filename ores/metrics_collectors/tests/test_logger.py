@@ -19,13 +19,13 @@ def test_logger():
     collector.score_errored("foo", "bar", "0.0.1")
 
     eq_(messages,
-        ['precache_request: foo.bar.0.0.1 in 100 seconds',
-         'scores_request: foo.bar.0.0.1 for 50 revisions in 150 seconds',
-         'datasources_extracted: foo.bar.0.0.1 for 10 revisions in 25 seconds',
-         'score_processed: foo.bar.0.0.1 in 1.1 seconds',
-         'score_cache_hit: foo.bar.0.0.1',
-         'score_cache_hit: foo.bar.0.0.1',
-         'score_errored: foo.bar.0.0.1'])
+        ['precache_request: foo:bar:0.0.1 in 100 seconds',
+         'scores_request: foo:bar:0.0.1 for 50 revisions in 150 seconds',
+         'datasources_extracted: foo:bar:0.0.1 for 10 revisions in 25 seconds',
+         'score_processed: foo:bar:0.0.1 in 1.1 seconds',
+         'score_cache_hit: foo:bar:0.0.1',
+         'score_cache_hit: foo:bar:0.0.1',
+         'score_errored: foo:bar:0.0.1'])
 
 
 def test_from_config():
