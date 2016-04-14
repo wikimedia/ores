@@ -4,6 +4,7 @@ from .score_cache import ScoreCache
 
 logger = logging.getLogger(__name__)
 
+
 class LRU(ScoreCache):
 
     def __init__(self, size=1024):

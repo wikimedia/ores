@@ -59,7 +59,6 @@ class RevIdScorer(ScorerModel):
         else:
             raise TypeError("Format {0} not supported".format(format))
 
-
     @classmethod
     def from_config(cls, config, name, section_key='scorer_models'):
         section = config[section_key][name]
