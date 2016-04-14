@@ -15,11 +15,13 @@ happens.
     --delay=<secs>   The delay between when an event is received and when the
                      request is sent to ORES. [default: 0]
     --config=<path>  The path to a yaml config file
-                     [default: config/ores-localdev.yaml]
+                     [default: config]
     --verbose        Print debugging information
 """
 import concurrent.futures
+import glob
 import logging
+import os
 import sys
 import time
 from collections import defaultdict
@@ -39,7 +41,9 @@ def main(argv=None):
 
     stream_url = args['<stream-url>']
     ores_url = args['<ores-url>']
-    config = yamlconf.load(open(args['--config']))
+    config_paths = os.path.join(args['--config'], "*.yaml")
+    config = yamlconf.load(*(open(p) for p in
+                             sorted(glob.glob(config_paths))))
     delay = float(args['--delay'])
     verbose = bool(args['--verbose'])
     run(stream_url, ores_url, config, delay,

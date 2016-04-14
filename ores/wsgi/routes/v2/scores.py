@@ -1,12 +1,10 @@
-from collections import defaultdict
-
 from flask import request
 from flask.ext.jsonpify import jsonify
 
 from ... import responses
 from .... import errors
-from ...util import (CacheParsingError, ParamError, format_output,
-                     parse_injection, read_bar_split_param)
+from ...util import (CacheParsingError, ParamError, parse_injection,
+                     read_bar_split_param)
 
 
 def configure(config, bp, score_processor):

@@ -30,14 +30,14 @@ setup(
     author_email="ahalfaker@wikimedia.org",
     description=("A webserver for hosting scorer models."),
     license="MIT",
-    entry_points = {
+    entry_points={
         'console_scripts': [
             'ores = ores.ores:main',
         ],
     },
     url="https://github.com/wiki-ai/ores",
     packages=find_packages(),
-    include_package_data = True,
+    include_package_data=True,
     long_description=read('README.md'),
     install_requires=list(requirements("requirements.txt")),
     classifiers=[

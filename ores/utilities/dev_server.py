@@ -11,14 +11,15 @@ Options:
     --host=<name>      The hostname to listen on [default: 0.0.0.0]
     --port=<num>       The port number to start the server on [default: 8080]
     --config=<path>    The path to a yaml config file
-                       [default: config/ores-testwiki.yaml]
+                       [default: config]
     --processes=<num>  The number of parallel processes to handle [default: 32]
     --debug            Print debug logging information
     --verbose          Print verbose extraction information
 """
-import logging
-
 import docopt
+import glob
+import logging
+import os
 import yamlconf
 
 from ..wsgi import server
@@ -27,7 +28,9 @@ from ..wsgi import server
 def main(argv=None):
     args = docopt.docopt(__doc__, argv=argv)
 
-    config = yamlconf.load(open(args['--config']))
+    config_paths = os.path.join(args['--config'], "*.yaml")
+    config = yamlconf.load(*(open(p) for p in
+                             sorted(glob.glob(config_paths))))
 
     processes = int(args['--processes'])
 

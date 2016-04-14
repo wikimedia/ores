@@ -8,12 +8,13 @@ Usage:
 Options:
     -h --help          Prints this documentation
     --config=<path>    The path to a yaml config file
-                       [default: config/ores-localdev.yaml]
+                       [default: config]
     --verbose          Turns up logging level
 """
-import logging
-
 import docopt
+import glob
+import logging
+import os
 import yamlconf
 
 from ..score_processors import Celery
@@ -29,7 +30,9 @@ def main(argv=None):
     ores_level = logging.DEBUG if args['--verbose'] else logging.INFO
     logging.getLogger('ores').setLevel(ores_level)
 
-    config = yamlconf.load(open(args['--config']))
+    config_paths = os.path.join(args['--config'], "*.yaml")
+    config = yamlconf.load(*(open(p) for p in
+                             sorted(glob.glob(config_paths))))
 
     name = config['ores']['score_processor']
     score_processor = Celery.from_config(config, name)
