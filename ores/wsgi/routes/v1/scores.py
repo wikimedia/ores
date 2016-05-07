@@ -61,11 +61,13 @@ def configure(config, bp, score_processor):
         precache = "precache" in request.args
 
         # Generate scores for each model and merge them together
+        features_cache = {}
         try:
             scores = defaultdict(dict)
             for model in models:
                 model_scores, _ = score_processor.score(
-                    context, model, rev_ids, precache=precache)
+                    context, model, rev_ids, precache=precache,
+                    features_cache=features_cache)
                 for rev_id in model_scores:
                     scores[rev_id][model] = model_scores[rev_id]
         except errors.ScoreProcessorOverloaded:

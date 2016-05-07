@@ -100,10 +100,12 @@ def configure(config, bp, score_processor):
         if len(rev_ids) > 0:
             precache = "precache" in request.args
 
+            features_cache = {}
             try:
                 for model in models:
                     model_scores, _ = score_processor.score(
-                        context, model, rev_ids, precache=precache)
+                        context, model, rev_ids, precache=precache,
+                        features_cache=features_cache)
                     scores_doc[context][model]['scores'] = model_scores
             except errors.ScoreProcessorOverloaded:
                 return responses.server_overloaded()
