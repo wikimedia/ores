@@ -59,7 +59,7 @@ class ScoreProcessor(dict):
         start = time.time()
         roots = scoring_context.extract_roots(model, rev_ids, caches=caches)
         duration = time.time() - start
-        logger.debug("Extracted root datasources for " +
+        logger.debug("Extracted root datasources for "
                      "{0}:{1}:{2}:{3} in {4} secs"
                      .format(context, model, version, rev_ids, duration))
 
@@ -69,6 +69,9 @@ class ScoreProcessor(dict):
 
         for error, cache in roots.values():
             if error is not None:
+                logger.error("Errored while getting root datasource "
+                             "for {0}:{1}:{2}:{3}"
+                             .format(context, model, version, rev_ids))
                 self.metrics_collector.score_errored(context, model, version)
 
         return roots
@@ -92,6 +95,8 @@ class ScoreProcessor(dict):
                                                    duration)
         except:
             self.metrics_collector.score_errored(context, model, version)
+            logger.error("Errored while scoring {0}:{1}:{2}"
+                         .format(context, model, version))
             raise
 
         return score, feature_vals
