@@ -3,6 +3,8 @@ Runs a pre-caching server against an ORES instance by listening to an RCStream
 and submitting requests for scores to the web interface for each revision as it
 happens.
 
+If ran by systemd, it uses watchdog to stay alive.
+
 :Usage:
     precached -h | --help
     precached <stream-url> <ores-url> [--config=<path>] [--delay=<secs>]
@@ -31,6 +33,8 @@ import requests
 import socketIO_client
 import yamlconf
 
+from .watchdog import notify_socket, watchdog_ping
+
 logger = logging.getLogger(__name__)
 
 AVAILABLE_EVENTS = {'edit'}
@@ -46,11 +50,12 @@ def main(argv=None):
                              sorted(glob.glob(config_paths))))
     delay = float(args['--delay'])
     verbose = bool(args['--verbose'])
+    notify = notify_socket()
     run(stream_url, ores_url, config, delay,
-        verbose)
+        notify, verbose)
 
 
-def run(stream_url, ores_url, config, delay, verbose):
+def run(stream_url, ores_url, config, delay, notify, verbose):
 
     if verbose:
         log_level = logging.DEBUG
@@ -67,6 +72,8 @@ def run(stream_url, ores_url, config, delay, verbose):
     logging.getLogger("socketIO_client").setLevel(logging.ERROR)  # SHUT UP!
     requests.packages.urllib3.disable_warnings()
 
+    if not notify:
+        logger.info('Not being ran as a service, watchdog disabled')
     # Build a mapping of wikis and models from the configuration
     score_on = defaultdict(list)
     sp_name = config['ores']['score_processor']
@@ -94,6 +101,8 @@ def run(stream_url, ores_url, config, delay, verbose):
             requests.get(url, timeout=20, verify=True)
             logger.debug("GET {0} completed in {1} seconds."
                          .format(url, time.time() - start))
+            if notify:
+                watchdog_ping(*notify)
         except Exception as e:
             logger.error(str(type(e)) + ": " + str(e))
 
