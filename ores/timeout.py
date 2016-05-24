@@ -4,16 +4,7 @@ import traceback
 
 import stopit
 
-from .errors import TimeoutError
-
 logger = logging.getLogger(__name__)
-
-
-def jsonify_error(error):
-    error_type = error.__class__.__name__
-    message = str(error)
-
-    return {'error': {'type': error_type, 'message': message}}
 
 
 def timeout(func, *args, seconds=None, **kwargs):

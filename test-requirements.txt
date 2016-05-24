@@ -1,0 +1,3 @@
+git+https://github.com/torotil/celerytest#issue6
+pylru
+statsd

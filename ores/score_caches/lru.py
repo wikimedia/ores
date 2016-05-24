@@ -16,16 +16,17 @@ class LRU(ScoreCache):
 
         self.lru = pylru.lrucache(size)
 
-    def lookup(self, wiki, model, rev_id, version=None, cache=None):
+    def lookup(self, wiki, model, rev_id, version=None, injection_cache=None):
         # Deterministic hash of cache values
-        cache_hash = hash(tuple(sorted((cache or {}).items())))
+        cache_hash = hash(tuple(sorted((injection_cache or {}).items())))
         key = (wiki, model, rev_id, version, cache_hash)
         logger.debug("Looking up score at {0}".format(key))
         return self.lru[key]
 
-    def store(self, wiki, model, rev_id, score, version=None, cache=None):
+    def store(self, wiki, model, rev_id, score, version=None,
+              injection_cache=None):
         # Deterministic hash of cache values
-        cache_hash = hash(tuple(sorted((cache or {}).items())))
+        cache_hash = hash(tuple(sorted((injection_cache or {}).items())))
         key = (wiki, model, rev_id, version, cache_hash)
         logger.debug("Storing score at {0}".format(key))
         self.lru[key] = score
