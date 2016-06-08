@@ -1,3 +1,10 @@
+"""
+This module provides a :class:`ores.api.Session` class that can maintain a
+connection to an instance of ORES and efficiently generate scores.
+
+.. autoclass:: ores.api.Session
+    :members:
+"""
 import logging
 import time
 import urllib.parse
@@ -14,6 +21,19 @@ class Session:
     """
     Constructs a session with an ORES API and provides facilities for scoring
     revisions in batch and parallel.
+
+    :Parameters:
+        host : str
+            The host of ORES to connect to (preceed with http:// or https://)
+        user_agent : str
+            A User-Agent header to send with every request
+        batch_size : int
+            The number of scores to batch per request.
+        parallel_request : int
+            The maximum number of requests to make in parallel
+        retries : int
+            The maximum number of retries for basic HTTP errors before giving
+            up
     """
     DEFAULT_USERAGENT = "ORESapi default user-agent"
 
@@ -37,6 +57,17 @@ class Session:
             self.headers['User-Agent'] = user_agent
 
     def score(self, context, model, revids):
+        """
+        Genetate scores for model applied to a sequence of revisions.
+
+        :Parameters:
+            context : str
+                The name of the context -- usually the database name of a wiki
+            model : str
+                The name of a model to apply
+            revids : `iterable`
+                A sequence of revision IDs to score.
+        """
         if isinstance(revids, int):
             rev_ids = [revids]
         else:
