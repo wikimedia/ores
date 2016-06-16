@@ -1,0 +1,215 @@
+/*GRAYS*/
+@primary-gray-tint3: #F9F9F9;
+@primary-gray-tint2: lighten( @primary-gray-base, 59% );
+@primary-gray-tint1: lighten( @primary-gray-base, 52% );
+@primary-gray-base: #555;
+@primary-gray-shade1: darken( @primary-gray-base, 13 .5%);
+@primary-gray-shade2: darken( @primary-gray-base, 20 %);
+@primary-gray-shade3: #111;
+
+/*BLUES*/
+@primary-blue-tint3: lighten( @primary-blue-base, 66% );
+@primary-blue-tint2: lighten( @primary-blue-base, 62% );
+@primary-blue-tint1: lighten( @primary-blue-base, 56% );
+@primary-blue-base: #165C91;
+@primary-blue-shade1: darken( @primary-blue-base, 15 %);
+@primary-blue-shade2: darken( @primary-blue-base, 20 %);
+@primary-blue-shade3: darken( @primary-blue-base, 25 %);
+@primary-blue-accent: #0645ad;
+
+/*REDS*/
+@primary-red-tint3: lighten( @primary-red-base, 59% );
+@primary-red-tint2: lighten( @primary-red-base, 56% );
+@primary-red-tint1: lighten( @primary-red-base, 51% );
+@primary-red-base: #AB1F1D;
+@primary-red-shade1: darken( @primary-red-base, 17 %);
+@primary-red-shade2: darken( @primary-red-base, 24 %);
+@primary-red-shade3: darken( @primary-red-base, 30 %);
+@primary-red-accent: #c00;
+
+@black: #000;
+@white: #fff;
+@gray1: #111;
+@gray2: #222;
+@gray3: #3f3f3f;
+@gray4: #444;
+@gray5: #555;
+@gray6: #666;
+@gray7: #777;
+@gray8: #888;
+@gray9: #999;
+@gray10: #aaa;
+@gray11: #bbb;
+@gray12: #ccc;
+@gray13: #ddd;
+@gray14: #e5e5e5;
+@gray15: #f9f9f9;
+@gray-base: @gray2;
+@border-color: @gray12;
+@menu-header-color: @secondary-text-color;
+@text-color: @gray2;
+@secondary-text-color: @gray3;
+@disabled-color: @gray8;
+@placeholder-color: @disabled-color;
+
+@text-color-inverse: @gray15;
+@secondary-text-color-inverse: @gray14;
+@disabled-color-inverse: @gray8;
+@placeholder-color-inverse: @disabled-color-inverse;
+
+
+
+@border-transparent: 1px solid transparent;
+@border-reg: 1px solid @border-color;
+@border-dark: 1px solid @black;
+@brand-primary: @primary-blue-base;
+@brand-success: #00af89;
+@brand-warning: #ff5d00;
+@brand-danger: @primary-red-base;
+
+@btn-primary-border: @brand-primary;
+@btn-success-border: @brand-success;
+@btn-warning-border: @brand-warning;
+@btn-danger-border: @brand-danger;
+@btn-link-disabled-color: @disabled-color;
+
+@secondaryColorHover : lighten( @brand-success, 3 );
+@secondaryColorDown  : darken( @brand-success, 5 );
+@secondaryColorActive: @secondaryColorDown;
+@secondaryColorFocus : @secondaryColorHover;
+
+@primaryColorHover   : lighten( @brand-primary, 3 );
+@primaryColorDown    : darken( @brand-primary, 5 );
+@primaryColorActive  : @primaryColorDown;
+@primaryColorFocus   : @primaryColorHover;
+
+@warningColorHover   : lighten( @brand-warning, 3 );
+@warningColorDown    : darken( @brand-warning, 5 );
+@warningColorActive  : @warningColorDown;
+@warningColorFocus   : @warningColorHover;
+
+@dangerColorHover   : lighten( @brand-danger, 3 );
+@dangerColorDown    : darken( @brand-danger, 5 );
+@dangerColorActive  : darken( @brand-danger, 5 );
+@dangerColorFocus   : @dangerColorHover;
+
+@state-success-text	: @brand-success;
+@state-warning-text	: @brand-warning;
+@state-danger-text	: @brand-danger;
+
+@inverseColorHover   : lighten( @primary-gray-shade2, 4 );
+@inverseColorActive  : darken( @primary-gray-shade2, 6 );
+@inverseColorFocus   : @inverseColorHover;
+
+@inverseGray1ColorHover   : lighten( @primary-gray-shade1, 4 );
+@inverseGray1ColorActive  : darken( @primary-gray-shade1, 8 );
+@inverseGray1ColorFocus   : @inverseColorHover;
+
+@whiteColorHover   : darken( @white, 3 );
+@whiteColorActive  : darken( @white, 6 );
+@whiteColorFocus   : @whiteColorHover;
+
+@gray1ColorHover   : darken( @primary-gray-tint1, 7 );
+@gray1ColorActive  : darken( @whiteColorHover, 5 );
+@gray1ColorFocus   : @whiteColorHover;
+
+@gray3ColorHover   : darken( @primary-gray-tint3, 3 );
+@gray3ColorActive  : darken( @primary-gray-tint3, 6 );
+@gray3ColorFocus   : @gray3ColorHover;
+
+@table-border-color	: @border-color;
+
+@font-size-base: 16px;
+@font-size-h1: floor((@font-size-base * 3));
+@font-size-h2: floor((@font-size-base * 2));
+@font-size-h3: ceil((@font-size-base * 1.5));
+@font-size-h5: @font-size-base;
+@font-size-h6: ceil((@font-size-base * 0.85));
+
+@line-height-base: 1.6;
+@headings-line-height: 1.25;
+@small-line-height: 1.2;
+@border-radius-base: 2px;
+@border-radius-large: 2px;
+@table-cell-padding: 1em;
+@btn-default-color: @gray5;
+@input-border-focus: @brand-primary;
+@input-color-placeholder: @placeholder-color;
+@legend-border-color: @gray12;
+@navbar-default-color: rgb(217, 83, 79);
+@padding-reg: .5em 1em;
+@focusFormInsetBorder: inset 0 0 0 1px @brand-primary;
+@focusFormInsetWarningBorder: inset 0 0 0 1px @brand-warning;
+@focusFormInsetDangerBorder: inset 0 0 0 1px @brand-danger;
+@focusFormInsetSuccessBorder: inset 0 0 0 1px @brand-success;
+
+
+@focusInsetBorder: inset 0 0 0 1px @white;
+@hoverBorder: 1px solid @brand-primary;
+@boxshadow-reg: 0 2px 0 rgba(204, 204, 204, .5);
+@boxshadow-dark: 0 2px 0 rgba(0, 0, 0, .5);
+
+@navbar-border-radius: 0;
+@pagination-border: transparent;
+@pagination-disabled-border: transparent;
+@pagination-color: @secondary-text-color;
+@pagination-active-color: @brand-primary;
+
+/* hover of white */
+@list-group-hover-bg: @gray14;
+
+
+@padding-bigContainer: 1em 1.5em .7em 1.5em;
+@padding-regContainer: 1em 1.5em 1em 1.5em;
+
+@navbar-inverse-color: @text-color-inverse;
+@navbar-inverse-bg: @gray3;
+@navbar-inverse-link-color: @text-color-inverse;
+
+@dropdown-border: @gray12;
+@dropdown-divider-bg: @gray12;
+
+@breadcrumb-bg: @gray15;
+@breadcrumb-padding-vertical: .5em;
+@breadcrumb-padding-horizontal: 1em;
+@breadcrumb-active-color: @gray5;
+@dropdown-link-color: @gray5;
+@nav-tabs-active-link-hover-color: @gray5;
+@dropdown-link-hover-bg: @gray14;
+@nav-tabs-active-link-hover-border-color: @border-color;
+@nav-link-hover-bg: @gray14;
+@nav-disabled-link-hover-color: @disabled-color;
+@nav-tabs-border-color: @border-color;
+@dropdown-link-disabled-color: @disabled-color;
+@nav-disabled-link-color: @disabled-color;
+@dropdown-header-color: @gray10;
+@nav-link-padding: @padding-reg;
+@navbar-default-bg: @gray15;
+@navbar-default-link-color: @gray5;
+@navbar-default-border: @border-color;
+@navbar-default-link-disabled-color: @disabled-color;
+@navbar-default-brand-color: @gray3;
+@navbar-default-toggle-hover-bg: @gray14;
+@navbar-default-toggle-border-color: @border-color;
+
+@marginbottom-toolbar: 2em;
+
+@input-bg-disabled: @disabled-color;
+@input-color: @gray5;
+@state-success-text: @brand-success;
+@alert-success-text: @brand-success;
+@state-warning-text: @brand-warning;
+@alert-warning-text: @brand-warning;
+@state-danger-text: @brand-danger;
+@alert-danger-text: @brand-danger;
+
+@navbar-padding-vertical: .5em;
+@navbar-padding-horizontal: 1em;
+
+@tooltip-arrow-width: 0;
+@tooltip-bg: @gray3;
+@tooltip-opacity: 100;
+@popover-border-color: @gray12;
+@popover-arrow-width: 6px;
+
+@well-border: none;

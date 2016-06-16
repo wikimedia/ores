@@ -1,0 +1,1304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Mediawiki UI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <link rel="stylesheet" href="MW/mediawiki.min.css">
+  <link rel="stylesheet" href="bootstrap-3.3.5-dist/css/docs.min.css">
+</head>
+
+<style type="text/css">
+  .bs-docs-section h4{
+    margin-top: 1.5em;
+  }
+  iframe{
+    margin-top: 1em;
+  }
+  .icon-container {
+    margin-left: 0;
+    margin-right: 0;
+    margin-bottom: 5em;
+
+    -webkit-column-count: 3;
+    -moz-column-count: 3;
+    column-count: 3;
+
+    -webkit-column-gap: 20px;
+    -moz-column-gap: 20px;
+    column-gap: 20px;
+  }
+  .icon-container .icon{
+    margin-right: 1em;
+  }
+  body{
+    margin-bottom: 3em;
+  }
+  li a svg{
+    color: #165C91;
+    vertical-align: top;
+    width: 1.5em;
+    height: 1.5em;
+  }
+  li a svg.icon{
+    vertical-align: top;
+    width: 1.5em;
+    height: 1.5em;
+  }
+</style>
+
+<body>
+
+  <div class="container bs-docs-container">
+    <div class="row">
+      <div class="col-md-12">
+        <h1 class="page-header" style="margin-bottom: 0;">Wikimedia UI</h1>
+      </div>
+
+      <div class="col-md-9" role="main">
+        <div class="bs-docs-section">
+
+                <!-- ----------------- 
+                  ICONS 
+                  ----------------- -->
+
+                  <h2 id="icons" class="page-header">
+                    <a class="anchorjs-link" href="#icons" aria-label="Anchor link for: icons"></a>
+                    Icons
+                  </h2>
+
+
+
+                  <p class="page-header">
+                  <a href="https://jsfiddle.net/violetto/uscehhLu">Example:</a><br> <code>&lt;svg class="icon wikiglyph-unstar"&gt;&lt;use xlink:href="#wikiglyph-unstar"&gt;&lt;/use>&lt;/svg&gt;</code> generates a <svg class="icon wikiglyph-unstar" style="color: #165C91"><use xlink:href="#wikiglyph-unstar"></use></svg>
+                  </p>
+
+                  <!-- <div class="input-group page-header"> 
+                    <input type="text" class="form-control" placeholder="Search icons (coming soon)">
+                    <span class="input-group-btn">
+                      <button class="btn btn-default" type="button">
+                        Filter
+                      </button>
+                    </span>
+                  </div> -->
+
+
+                  <div class="icon-container">
+                    <ul class="nav nav-pills nav-stacked">
+
+                      <li role="presentation">
+                        <a href="" search-terms="link chain"><svg class="icon wikiglyph-link"><use xlink:href="#wikiglyph-link"></use></svg>link</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms="heart love thanks like appreciate"><svg class="icon wikiglyph-heart"><use xlink:href="#wikiglyph-heart"></use></svg>heart</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms="star watch follow watchlist subscribe tune in"><svg class="icon wikiglyph-star"><use xlink:href="#wikiglyph-star"></use></svg>star</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms="unstar unwatch unfollow watchlist unsubscribe tune out"><svg class="icon wikiglyph-unstar"><use xlink:href="#wikiglyph-unstar"></use></svg>unstar</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms="watchlist follow list list subscription starred list"><svg class="icon wikiglyph-watchlist"><use xlink:href="#wikiglyph-watchlist"></use></svg>watchlist</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms="sun help"><svg class="icon wikiglyph-sun"><use xlink:href="#wikiglyph-sun"></use></svg>sun</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms="funnel filter search"><svg class="icon wikiglyph-funnel"><use xlink:href="#wikiglyph-funnel"></use></svg>funnel</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms="eye show reveal"><svg class="icon wikiglyph-eye"><use xlink:href="#wikiglyph-eye"></use></svg>eye</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms="closed eye unshow hide"><svg class="icon wikiglyph-eye-closed"><use xlink:href="#wikiglyph-eye-closed"></use></svg>eye-closed</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms="printer print"><svg class="icon wikiglyph-printer"><use xlink:href="#wikiglyph-printer"></use></svg>printer</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms="puzzle contribution"><svg class="icon wikiglyph-puzzle"><use xlink:href="#wikiglyph-puzzle"></use></svg>puzzle</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms="clock time history"><svg class="icon wikiglyph-clock"><use xlink:href="#wikiglyph-clock"></use></svg>clock</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms="dice random"><svg class="icon wikiglyph-dice"><use xlink:href="#wikiglyph-dice"></use></svg>dice</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms="magnifying glass search filter"><svg class="icon wikiglyph-magnifying-glass"><use xlink:href="#wikiglyph-magnifying-glass"></use></svg>magnifying-glass</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms="folder placeholder directory"><svg class="icon wikiglyph-folder-placeholder"><use xlink:href="#wikiglyph-folder-placeholder"></use></svg>folder-placeholder</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms="log out logout sign out signout exit bye goodbye"><svg class="icon wikiglyph-log-out"><use xlink:href="#wikiglyph-log-out"></use></svg>log-out</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms="article search within"><svg class="icon wikiglyph-article-search"><use xlink:href="#wikiglyph-article-search"></use></svg>article-search</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms="side menu stripe hamburger sidebar"><svg class="icon wikiglyph-stripe-menu"><use xlink:href="#wikiglyph-stripe-menu"></use></svg>stripe-menu</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms="table of contents toc stripe"><svg class="icon wikiglyph-stripe-toc"><use xlink:href="#wikiglyph-stripe-toc"></use></svg>stripe-toc</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms="flow stripe details detailed expanded expanded expand full"><svg class="icon wikiglyph-stripe-flow"><use xlink:href="#wikiglyph-stripe-flow"></use></svg>stripe-flow</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms="view summary contract shrink collapsed compact"><svg class="icon wikiglyph-stripe-summary"><use xlink:href="#wikiglyph-stripe-summary"></use></svg>stripe-summary</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms="view details detailed list expanded expanded expand full"><svg class="icon wikiglyph-view-details"><use xlink:href="#wikiglyph-view-details"></use></svg>view-details</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms="view compact image gallery"><svg class="icon wikiglyph-view-compact"><use xlink:href="#wikiglyph-view-compact"></use></svg>view-compact</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms="map places locate"><svg class="icon wikiglyph-map"><use xlink:href="#wikiglyph-map"></use></svg>map</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms="map pin places locate geolocate"><svg class="icon wikiglyph-map-pin"><use xlink:href="#wikiglyph-map-pin"></use></svg>map-pin</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms="map pin places locate geolocate add location"><svg class="icon wikiglyph-map-pin-add"><use xlink:href="#wikiglyph-map-pin-add"></use></svg>map-pin-add</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms="beta new experimental"><svg class="icon wikiglyph-beta"><use xlink:href="#wikiglyph-beta"></use></svg>beta</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms="beta launch graduate new experimental"><svg class="icon wikiglyph-beta-launch"><use xlink:href="#wikiglyph-beta-launch"></use></svg>beta-launch</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms="cog setting settings gear"><svg class="icon wikiglyph-cog"><use xlink:href="#wikiglyph-cog"></use></svg>cog</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms="appreciate ribbon prize win award grant reward"><svg class="icon wikiglyph-ribbon-prize"><use xlink:href="#wikiglyph-ribbon-prize"></use></svg>ribbon-prize</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms="window new window external link"><svg class="icon wikiglyph-new-window"><use xlink:href="#wikiglyph-new-window"></use></svg>new-window</a>
+                      </li>
+
+                    </ul>
+                  </div>
+
+
+                  <!-- Interface -->  
+
+                  <h4 id="icons-interface" class="page-header">
+                    <a class="anchorjs-link" href="#icons-interface" aria-label="Anchor link for: interface icons"></a>
+                    Interface icons
+                  </h4>
+
+                  <div class="icon-container">
+                    <ul class="nav nav-pills nav-stacked">
+                      <li role="presentation">
+                        <a href="" search-terms="ellipses options more menu drawer"><svg class="icon wikiglyph-ellipses"><use xlink:href="#wikiglyph-ellipses"></use></svg>ellipses</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms="clear input delete empty"><svg class="icon wikiglyph-close-input"><use xlink:href="#wikiglyph-close-input"></use></svg>close-input</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms="cross cancel delete disappear"><svg class="icon wikiglyph-cross"><use xlink:href="#wikiglyph-cross"></use></svg>cross</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms="check done correct right"><svg class="icon wikiglyph-check"><use xlink:href="#wikiglyph-check"></use></svg>check</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms="left arrow point direction"><svg class="icon wikiglyph-arrow-left"><use xlink:href="#wikiglyph-arrow-left"></use></svg>arrow-left</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms="expand down arrow point direction triangle dropdown"><svg class="icon wikiglyph-triangle-down"><use xlink:href="#wikiglyph-triangle-down"></use></svg>triangle-down</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms="caret expand down arrow point direction triangle dropdown"><svg class="icon wikiglyph-caret-down"><use xlink:href="#wikiglyph-caret-down"></use></svg>caret-down</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms="caret up arrow point direction dropdown collapse"><svg class="icon wikiglyph-caret-up"><use xlink:href="#wikiglyph-caret-up"></use></svg>caret-up</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms="left arrow point direction back previous caret"><svg class="icon wikiglyph-caret-left"><use xlink:href="#wikiglyph-caret-left"></use></svg>caret-left</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms="right arrow point direction forward next caret"><svg class="icon wikiglyph-caret-right"><use xlink:href="#wikiglyph-caret-right"></use></svg>caret-right</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms="add more additional plus step up stepper"><svg class="icon wikiglyph-plus"><use xlink:href="#wikiglyph-plus"></use></svg>plus</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms="minus subtract step down stepper"><svg class="icon wikiglyph-minus"><use xlink:href="#wikiglyph-minus"></use></svg>minus</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms="move resize reposition position"><svg class="icon wikiglyph-move"><use xlink:href="#wikiglyph-move"></use></svg>move</a>
+                      </li>
+                      
+                    </ul>
+                  </div>
+
+
+                  <!-- Editing -->  
+
+                  <h4 id="icons-editing" class="page-header">
+                    <a class="anchorjs-link" href="#icons-editing" aria-label="Anchor link for: editing editor icons"></a>
+                    Editing icons
+                  </h4>
+
+                  <div class="icon-container">
+                    <ul class="nav nav-pills nav-stacked">
+
+                      <li role="presentation">
+                        <a href="" search-terms=""><svg class="icon wikiglyph-edit"><use xlink:href="#wikiglyph-edit"></use></svg>edit</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms=""><svg class="icon wikiglyph-edit-lock"><use xlink:href="#wikiglyph-edit-lock"></use></svg>edit-lock</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms=""><svg class="icon wikiglyph-edit-undo"><use xlink:href="#wikiglyph-edit-undo"></use></svg>edit-undo</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms=""><svg class="icon wikiglyph-quotes"><use xlink:href="#wikiglyph-quotes"></use></svg>quotes</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms=""><svg class="icon wikiglyph-quotes-add"><use xlink:href="#wikiglyph-quotes-add"></use></svg>quotes-add</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms=""><svg class="icon wikiglyph-image-lock"><use xlink:href="#wikiglyph-image-lock"></use></svg>image-lock</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms=""><svg class="icon wikiglyph-keyboard"><use xlink:href="#wikiglyph-keyboard"></use></svg>keyboard</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms=""><svg class="icon wikiglyph-signature"><use xlink:href="#wikiglyph-signature"></use></svg>signature</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms=""><svg class="icon wikiglyph-list-numbered"><use xlink:href="#wikiglyph-list-numbered"></use></svg>list-numbered</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms=""><svg class="icon wikiglyph-list-bullet"><use xlink:href="#wikiglyph-list-bullet"></use></svg>list-bullet</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms=""><svg class="icon wikiglyph-indent-left"><use xlink:href="#wikiglyph-indent-left"></use></svg>indent-left</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms=""><svg class="icon wikiglyph-indent-right"><use xlink:href="#wikiglyph-indent-right"></use></svg>indent-right</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms=""><svg class="icon wikiglyph-wikitext"><use xlink:href="#wikiglyph-wikitext"></use></svg>wikitext</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms=""><svg class="icon wikiglyph-wikitext-no"><use xlink:href="#wikiglyph-wikitext-no"></use></svg>wikitext-no</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms=""><svg class="icon wikiglyph-translation"><use xlink:href="#wikiglyph-translation"></use></svg>translation</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms=""><svg class="icon wikiglyph-template-add"><use xlink:href="#wikiglyph-template-add"></use></svg>template-add</a>
+                      </li>
+                      
+                    </ul>
+                  </div>
+
+                  <!-- Media -->
+
+                  <h4 id="icons-media" class="page-header">
+                    <a class="anchorjs-link" href="#icons-media" aria-label="Anchor link for: media icons"></a>
+                    Media icons
+                  </h4>
+
+                  <div class="icon-container">
+                    <ul class="nav nav-pills nav-stacked">
+
+                      <li role="presentation">
+                        <a href="" search-terms=""><svg class="icon wikiglyph-play"><use xlink:href="#wikiglyph-play"></use></svg>play</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms=""><svg class="icon wikiglyph-stop"><use xlink:href="#wikiglyph-stop"></use></svg>stop</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms=""><svg class="icon wikiglyph-upload"><use xlink:href="#wikiglyph-upload"></use></svg>upload</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms=""><svg class="icon wikiglyph-download"><use xlink:href="#wikiglyph-download"></use></svg>download</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms=""><svg class="icon wikiglyph-image"><use xlink:href="#wikiglyph-image"></use></svg>image</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms=""><svg class="icon wikiglyph-image-add"><use xlink:href="#wikiglyph-image-add"></use></svg>image-add</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms=""><svg class="icon wikiglyph-photo-gallery"><use xlink:href="#wikiglyph-photo-gallery"></use></svg>photo-gallery</a>
+                      </li>
+                    </ul>
+                  </div>
+
+
+                  <!-- Messaging -->
+
+                  <h4 id="icons-messaging" class="page-header">
+                    <a class="anchorjs-link" href="#icons-messaging" aria-label="Anchor link for: messaging icons"></a>
+                    Messaging icons
+                  </h4>
+
+                  <div class="icon-container">
+                    <ul class="nav nav-pills nav-stacked">
+
+                      <li role="presentation">
+                        <a href="" search-terms=""><svg class="icon wikiglyph-message"><use xlink:href="#wikiglyph-message"></use></svg>message</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms=""><svg class="icon wikiglyph-bell"><use xlink:href="#wikiglyph-bell"></use></svg>bell</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms=""><svg class="icon wikiglyph-bell-on"><use xlink:href="#wikiglyph-bell-on"></use></svg>bell-on</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms=""><svg class="icon wikiglyph-speech-bubble"><use xlink:href="#wikiglyph-speech-bubble"></use></svg>speech-bubble</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms=""><svg class="icon wikiglyph-speech-bubbles"><use xlink:href="#wikiglyph-speech-bubbles"></use></svg>speech-bubbles</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms=""><svg class="icon wikiglyph-user-talk"><use xlink:href="#wikiglyph-user-talk"></use></svg>user-talk</a>
+                      </li>
+
+                    </ul>
+                  </div>
+
+                  <!-- References -->
+
+                  <h4 id="icons-references" class="page-header">
+                    <a class="anchorjs-link" href="#icons-references" aria-label="Anchor link for: references icons"></a>
+                    References icons
+                  </h4>
+
+                  <div class="icon-container">
+                    <ul class="nav nav-pills nav-stacked">
+
+                      <li role="presentation">
+                        <a href="" search-terms=""><svg class="icon wikiglyph-cite"><use xlink:href="#wikiglyph-cite"></use></svg>cite</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms=""><svg class="icon wikiglyph-cite-article"><use xlink:href="#wikiglyph-cite-article"></use></svg>cite-article</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms=""><svg class="icon wikiglyph-book"><use xlink:href="#wikiglyph-book"></use></svg>book</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms=""><svg class="icon wikiglyph-journal"><use xlink:href="#wikiglyph-journal"></use></svg>journal</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms=""><svg class="icon wikiglyph-newspaper"><use xlink:href="#wikiglyph-newspaper"></use></svg>newspaper</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms=""><svg class="icon wikiglyph-bookmark"><use xlink:href="#wikiglyph-bookmark"></use></svg>bookmark</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms=""><svg class="icon wikiglyph-article"><use xlink:href="#wikiglyph-article"></use></svg>article</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms=""><svg class="icon wikiglyph-browser"><use xlink:href="#wikiglyph-browser"></use></svg>browser</a>
+                      </li>
+
+                    </ul>
+                  </div>
+
+
+
+                  <!-- Moderation -->
+                  <h4 id="icons-moderation" class="page-header">
+                    <a class="anchorjs-link" href="#icons-moderation" aria-label="Anchor link for: moderation icons"></a>
+                    Moderation icons
+                  </h4>
+
+                  <div class="icon-container">
+                    <ul class="nav nav-pills nav-stacked">
+
+                      <li role="presentation">
+                        <a href="" search-terms=""><svg class="icon wikiglyph-block"><use xlink:href="#wikiglyph-block"></use></svg>block</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms=""><svg class="icon wikiglyph-block-undo"><use xlink:href="#wikiglyph-block-undo"></use></svg>block-undo</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms=""><svg class="icon wikiglyph-trash"><use xlink:href="#wikiglyph-trash"></use></svg>trash</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms=""><svg class="icon wikiglyph-trash-undo"><use xlink:href="#wikiglyph-trash-undo"></use></svg>trash-undo</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms=""><svg class="icon wikiglyph-flag"><use xlink:href="#wikiglyph-flag"></use></svg>flag</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms=""><svg class="icon wikiglyph-flag-undo"><use xlink:href="#wikiglyph-flag-undo"></use></svg>flag-undo</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms=""><svg class="icon wikiglyph-lock"><use xlink:href="#wikiglyph-lock"></lock></svg>lock</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms=""><svg class="icon wikiglyph-unlock"><use xlink:href="#wikiglyph-unlock"></unlock></svg>key</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms=""><svg class="icon wikiglyph-article-check"><use xlink:href="#wikiglyph-article-check"></use></svg>article-check</a>
+                      </li>
+
+                    </ul>
+                  </div>
+
+
+                  <!-- Users -->
+                  <h4 id="icons-user" class="page-header">
+                    <a class="anchorjs-link" href="#icons-user" aria-label="Anchor link for: user icons"></a>
+                    User icons
+                  </h4>
+
+                  <div class="icon-container">
+                    <ul class="nav nav-pills nav-stacked">
+
+                      <li role="presentation">
+                        <a href="" search-terms=""><svg class="icon wikiglyph-user-avatar"><use xlink:href="#wikiglyph-user-avatar"></use></svg>user-avatar</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms=""><svg class="icon wikiglyph-user-active"><use xlink:href="#wikiglyph-user-active"></use></svg>user-active</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms=""><svg class="icon wikiglyph-user-inactive"><use xlink:href="#wikiglyph-user-inactive"></use></svg>user-inactive</a>
+                      </li>
+                    </ul>
+                  </div>
+
+
+
+                  <!-- Accessibility --> 
+
+                  <h4 id="icons-accessibility" class="page-header">
+                    <a class="anchorjs-link" href="#icons-accessibility" aria-label="Anchor link for: accessibility icons"></a>
+                    Accessibility icons
+                  </h4>
+
+                  <div class="icon-container">
+                    <ul class="nav nav-pills nav-stacked">
+
+                      <li role="presentation">
+                        <a href="" search-terms=""><svg class="icon wikiglyph-bright-full"><use xlink:href="#wikiglyph-bright-full"></use></svg>bright-full</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms=""><svg class="icon wikiglyph-sun-moon"><use xlink:href="#wikiglyph-sun-moon"></use></svg>sun-moon</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms=""><svg class="icon wikiglyph-full-moon"><use xlink:href="#wikiglyph-full-moon"></use></svg>full-moon</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms=""><svg class="icon wikiglyph-moon"><use xlink:href="#wikiglyph-moon"></use></svg>moon</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms=""><svg class="icon wikiglyph-large-text"><use xlink:href="#wikiglyph-large-text"></use></svg>large-text</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms=""><svg class="icon wikiglyph-smaller-text"><use xlink:href="#wikiglyph-smaller-text"></use></svg>smaller-text</a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" search-terms=""><svg class="icon wikiglyph-vision-simulator"><use xlink:href="#wikiglyph-vision-simulator"></use></svg>vision-simulator</a>
+                      </li>
+
+
+                    </ul>
+                  </div>
+
+
+
+        <!-- ----------------- 
+               BUTTONS 
+               ----------------- -->
+               <h2 id="buttons" class="page-header">
+                <a class="anchorjs-link " href="#button" aria-label="Anchor link for: buttons"></a>
+                Buttons
+              </h2>
+              <h4>Colors</h4>
+              <p>
+                Change button type within <code>button-type="..."</code><br>
+
+                <ul>
+                  <li><code>default</code> white</li>
+                  <li><code>primary</code> blue</li>
+                  <li><code>success</code> green</li>
+                  <li><code>warning</code> orange</li>
+                  <li><code>danger</code> red</li>
+                </ul>
+              </p>
+
+              <h4>Sizes</h4>
+              <p>
+                Change the size within <code>button-size="..."</code><br>
+                <ul>
+                  <li><code>xs</code> extra-small</li>
+                  <li><code>sm</code> small</li>
+                  <li><code>lg</code> large</li>
+                </ul>
+              </p>
+
+              <h4>Add an icon</h4>
+              <p>
+                Add <code>icon='wikiglyph-star'</code>. See the last example. 
+              </p>
+
+              <iframe width="100%" height="300" src="//jsfiddle.net/violetto/zofrzhmc/embedded/result,html/" allowfullscreen="allowfullscreen" frameborder="0"></iframe>
+
+
+              <!-- ----------------- BUTTONS - Button group -->
+
+              <h3 id="button-group" class="page-header">
+                <a class="anchorjs-link " href="#button-group" aria-label="Anchor link for: button group"></a>
+                Button group
+              </h3>
+
+              <iframe width="100%" height="300" src="//jsfiddle.net/violetto/bs6LsajL/embedded/result,html/" allowfullscreen="allowfullscreen" frameborder="0"></iframe>
+
+
+              <!-- ----------------- BUTTONS - Sizes -->
+
+              <!-- <h3 id="button-sizes" class="page-header">
+                <a class="anchorjs-link " href="#button-sizes" aria-label="Anchor link for: button sizes"></a>
+                Button sizes
+              </h3>
+
+              <h4>Full-width buttons</h4>
+              <p>
+                Add <code>btn-block</code> See example below.
+              </p>
+
+              <iframe width="100%" height="300" src="//jsfiddle.net/violetto/p1ce3qsw/embedded/result,html/" allowfullscreen="allowfullscreen" frameborder="0"></iframe><br><br>
+
+
+              <h4>Full-width button group</h4>
+              <p>
+                Add <code>btn-group-justified</code> See example below
+              </p>
+
+              <iframe width="100%" height="300" src="//jsfiddle.net/violetto/up5wakh5/embedded/result,html/" allowfullscreen="allowfullscreen" frameborder="0"></iframe> -->
+
+
+
+        <!-- ----------------- 
+               DROPDOWN 
+               ----------------- -->
+
+               <h2 id="dropdowns" class="page-header">
+                <a class="anchorjs-link " href="#dropdowns" aria-label="Anchor link for: dropdowns"></a>
+                Dropdown
+              </h2>
+
+              <p>Add <code>&lt;li role="separator" class="divider"&gt;&lt;/li></code> if you need a separator in your dropdown menu.</p>
+
+              <iframe width="100%" height="300" src="//jsfiddle.net/violetto/t8f3vLxh/embedded/result,html/" allowfullscreen="allowfullscreen" frameborder="0"></iframe>
+
+
+              <!-- ----------------- DROPDOWNS + buttons -->
+
+              <h3 id="button-dropdowns" class="page-header">
+                <a class="anchorjs-link" href="#button-dropdowns" aria-label="Anchor link for: button dropdowns"></a>
+                Button + Dropdown
+              </h3>
+
+              <iframe width="100%" height="350" src="//jsfiddle.net/violetto/thv9pam9/embedded/result,html/" allowfullscreen="allowfullscreen" frameborder="0"></iframe>
+
+
+        <!-- -----------------
+            INPUT GROUPS
+            ----------------- -->
+
+            <h2 id="input-groups" class="page-header">
+              <a class="anchorjs-link " href="#input-groups" aria-label="Anchor link for: input groups"></a>
+              Input groups
+            </h2>
+
+            <iframe width="100%" height="900" src="//jsfiddle.net/violetto/nnvh8mk9/embedded/result,html/" allowfullscreen="allowfullscreen" frameborder="0"></iframe>
+
+
+            <!-- ----------------- INPUT - sizes -->
+
+            <h3 id="input-sizes" class="page-header">
+              <a class="anchorjs-link " href="#input-sizes" aria-label="Anchor link for: input sizes  "></a>
+              Input sizes
+            </h3>
+
+            <p>
+              The default size is regular. See example on how to change input sizes. 
+              <ul>
+                <li><code>btn-group-sm</code> small</li>
+                <li><code>btn-group-lg</code> large</li>
+              </ul>
+            </p>
+
+            <iframe width="100%" height="600" src="//jsfiddle.net/violetto/0uasmLhz/embedded/result,html/" allowfullscreen="allowfullscreen" frameborder="0"></iframe>
+
+
+            <!-- ----------------- NAVIGATION -->
+
+            <h2 id="navigation" class="page-header">
+              <a class="anchorjs-link " href="#navigation" aria-label="Anchor link for: navigation"></a>
+              Navigation
+            </h2>
+
+            <!-- ----------------- NAVIGATION - tabs -->
+
+            <h3 id="tabs" class="page-header">
+              <a class="anchorjs-link " href="#tabs" aria-label="Anchor link for: tabs"></a>
+              Tabs
+            </h3>
+
+            <iframe width="100%" height="250" src="//jsfiddle.net/violetto/1cb4ktbe/embedded/result,html/" allowfullscreen="allowfullscreen" frameborder="0"></iframe>
+
+            <!-- ----------------- NAVIGATION - pills -->
+
+            <h3 id="pills" class="page-header">
+              <a class="anchorjs-link " href="#pills" aria-label="Anchor link for: pills"></a>
+              Pills
+            </h3>
+
+            <iframe width="100%" height="250" src="//jsfiddle.net/violetto/p8jv4Ldc/embedded/result,html/" allowfullscreen="allowfullscreen" frameborder="0"></iframe>
+
+            <!-- ----------------- NAVIGATION - sizes -->
+
+            <h3 id="nav-sizes" class="page-header">
+              <a class="anchorjs-link " href="#nav-sizes" aria-label="Anchor link for: navigation sizes"></a>
+              Sizes
+            </h3>
+
+            <p>
+              Add <code>nav-justified</code> See example below.
+            </p>
+
+            <iframe width="100%" height="250" src="//jsfiddle.net/violetto/7d3y5arb/embedded/result,html/" allowfullscreen="allowfullscreen" frameborder="0"></iframe>
+
+
+
+        <!-- -----------------
+            NAVIGATION BAR
+            ----------------- -->
+
+            <!-- <h2 id="navigation-bar" class="page-header">
+              <a class="anchorjs-link " href="#navigation-bar" aria-label="Anchor link for: navigation bar"></a>
+              Navigation bar
+            </h2> -->
+
+            <!-- navigation bar - [left] brand + buttons + dropdown + input field [right] link + dropdown -->
+            <!-- <p class="bs-component">
+              <nav class="navbar navbar-default">
+                <div class="navbar-header">
+                  <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                  </button>
+                  <a class="navbar-brand" href="#">MediaWiki</a>
+                </div>
+
+                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                  <ul class="nav navbar-nav">
+                    <li class="active"><a href="#">Link <span class="sr-only">(current)</span></a></li>
+                    <li><a href="#">Link</a></li>
+                    <li class="dropdown">
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
+                      <ul class="dropdown-menu">
+                        <li><a href="#">Action</a></li>
+                        <li><a href="#">Another action</a></li>
+                        <li><a href="#">Something else here</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><a href="#">Separated link</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><a href="#">One more separated link</a></li>
+                      </ul>
+                    </li>
+                  </ul>
+                  <form class="navbar-form navbar-left" role="search">
+                    <div class="form-group">
+                      <input type="text" class="form-control" placeholder="Search">
+                    </div>
+                  </form>
+                  <ul class="nav navbar-nav navbar-right">
+                    <li><a href="#">Link</a></li>
+                    <li class="dropdown">
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
+                      <ul class="dropdown-menu">
+                        <li><a href="#">Action</a></li>
+                        <li><a href="#">Another action</a></li>
+                        <li><a href="#">Something else here</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><a href="#">Separated link</a></li>
+                      </ul>
+                    </li>
+                  </ul>
+                </div>
+              </nav>
+            </p> -->
+
+            <!-- navigation bar - buttons + text -->
+            <!-- <p class="bs-component">
+              <nav class="navbar navbar-default">
+                <div class="navbar-header">
+                  <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                  </button>
+                  <a class="navbar-brand" href="#">Wikimedia</a>
+                </div>
+
+                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                  <ul class="nav navbar-nav">
+                    <li class="active"><a href="#">Link <span class="sr-only">(current)</span></a></li>
+                    <li><a href="#">Link</a></li>
+                    <p class="navbar-text">Signed in as Mark Otto</p>
+                  </ul>
+                </li>
+              </ul>
+            </div>
+          </nav>
+        </p>
+
+      -->
+      <!-- navigation bar - [left] buttons [right] text -->
+        <!-- <p class="bs-component">
+          <nav class="navbar navbar-default">
+            <div class="navbar-header">
+              <a class="navbar-brand" href="">Brand</a>
+            </div>
+
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+              <ul class="nav navbar-nav">
+                <li class="active"><a href="#">Link <span class="sr-only">(current)</span></a></li>
+                <li><a href="">Link</a></li>
+              </ul>
+              <p class="navbar-text navbar-right">
+                Signed in as 
+                <a href="" class="navbar-link">
+                  Mark Otto
+                </a>
+              </p>
+            </div>
+          </nav>
+        </p> -->
+
+        <!-- NAVIGATION BAR - HOW TO FIX NAVBAR -->
+
+<!--  <h3 id="fix-navbar" class="page-header">
+      <a class="anchorjs-link " href="#fix-navbar" aria-label="Anchor link for: fix navigation bar"></a>
+      Fix navigation bar
+    </h3> -->
+
+
+    <!-- ----------------- 
+         BREADCRUMBS
+         ----------------- -->
+
+         <h2 id="breadcrumb" class="page-header">
+          <a class="anchorjs-link " href="#breadcrumb" aria-label="Anchor link for: breadcrumb"></a>
+          Breadcrumb
+        </h2>
+
+        <iframe width="100%" height="250" src="//jsfiddle.net/violetto/dq39vkjp/embedded/result,html/" allowfullscreen="allowfullscreen" frameborder="0"></iframe>
+
+
+    <!-- ----------------- 
+          PAGINATION 
+          ----------------- -->
+
+          <h2 id="pagination" class="page-header">
+            <a class="anchorjs-link " href="#pagination" aria-label="Anchor link for: pagination"></a>
+            Pagination
+          </h2>
+
+          <iframe width="100%" height="250" src="//jsfiddle.net/violetto/2v6hvwLa/embedded/result,html/" allowfullscreen="allowfullscreen" frameborder="0"></iframe>
+
+
+
+          <!-- ----------------- PAGINATION - sizes -->
+
+          <h3 id="pagination-sizes" class="page-header">
+            <a class="anchorjs-link " href="#pagination-sizes" aria-label="Anchor link for: pagination sizes"></a>
+            Pagination sizes
+          </h3>
+
+          <p>
+            The default size is regular. See example on how to change pagination sizes below. 
+            <ul>
+              <li><code>pagination-sm</code> small</li>
+              <li><code>pagination-lg</code> large</li>
+            </ul>
+          </p>
+
+          <iframe width="100%" height="250" src="//jsfiddle.net/violetto/v2zz276r/embedded/result,html/" allowfullscreen="allowfullscreen" frameborder="0"></iframe>
+
+
+    <!-- ----------------- 
+            PAGER
+            ----------------- -->
+
+            <h3 id="pager" class="page-header">
+              <a class="anchorjs-link " href="#pager" aria-label="Anchor link for: pager"></a>
+              Pager
+            </h3>
+
+            <iframe width="100%" height="250" src="//jsfiddle.net/violetto/1dtme8np/embedded/result,html/" allowfullscreen="allowfullscreen" frameborder="0"></iframe>
+
+
+    <!-- -----------------
+           LABELS
+           ----------------- -->
+
+           <h2 id="labels" class="page-header">
+            <a class="anchorjs-link " href="#labels" aria-label="Anchor link for: labels"></a>
+            Labels
+          </h2>
+
+          <iframe width="100%" height="250" src="//jsfiddle.net/violetto/rLhd37nw/embedded/result,html/" allowfullscreen="allowfullscreen" frameborder="0"></iframe>
+
+
+    <!-- -----------------
+            BADGES
+            ----------------- -->
+
+            <h2 id="badges" class="page-header">
+              <a class="anchorjs-link " href="#badges" aria-label="Anchor link for: badges"></a>
+              Badges
+            </h2>
+
+            <p>
+              Add <code>&lt;span class="badge"&gt;...&lt;/span&gt;</code> within <code>&lt;a&gt;&lt;/a&gt;</code> See example below. 
+            </p>
+
+            <iframe width="100%" height="250" src="//jsfiddle.net/violetto/dx0zoa38/embedded/result,html/" allowfullscreen="allowfullscreen" frameborder="0"></iframe>
+
+
+    <!-- -----------------
+            LIST GROUP
+            ----------------- -->
+
+            <!-- <h2 id="list-group" class="page-header">
+              <a class="anchorjs-link " href="#list-group" aria-label="Anchor link for: list group"></a>
+              List group
+            </h2> -->
+
+            <!-- basic list -->
+            <!-- <p class="bs-component">
+              <ul class="list-group">
+                <li class="list-group-item">Cras justo odio</li>
+                <li class="list-group-item">Dapibus ac facilisis in</li>
+                <li class="list-group-item">Morbi leo risus</li>
+                <li class="list-group-item">Porta ac consectetur ac</li>
+                <li class="list-group-item">Vestibulum at eros</li>
+              </ul>
+            </p> -->
+
+            <!-- list with badge -->
+            <!-- <p class="bs-component">
+              <ul class="list-group">
+                <li class="list-group-item">
+                  <span class="badge">14</span>
+                  Cras justo odio
+                </li>
+                <li class="list-group-item">
+                  <span class="badge">1</span>
+                  Morbi leo risus
+                </li>
+                <li class="list-group-item">
+                  <span class="badge">100</span>
+                  Vestibulum at eros
+                </li>
+              </ul>
+            </p> -->
+
+            <!-- linked list -->
+            <!-- <p class="bs-component">
+              <div class="list-group">
+                <a href="#" class="list-group-item active">
+                  Cras justo odio
+                </a>
+                <a href="#" class="list-group-item">Dapibus ac facilisis in</a>
+                <a href="#" class="list-group-item">Morbi leo risus</a>
+                <a href="#" class="list-group-item">Porta ac consectetur ac</a>
+                <a href="#" class="list-group-item">Vestibulum at eros</a>
+              </div>
+            </p> -->
+
+            <!-- button list -->
+            <!-- <p class="bs-component">
+              <div class="list-group">
+                <button type="button" class="list-group-item">Cras justo odio</button>
+                <button type="button" class="list-group-item">Dapibus ac facilisis in</button>
+                <button type="button" class="list-group-item">Morbi leo risus</button>
+                <button type="button" class="list-group-item">Porta ac consectetur ac</button>
+                <button type="button" class="list-group-item">Vestibulum at eros</button>
+              </div>
+            </p> -->
+
+
+            <!-- ----------------- LIST GROUP - colored -->
+
+            <!-- <h2 id="list-colored" class="page-header">
+              <a class="anchorjs-link " href="#list-colored" aria-label="Anchor link for: colored list"></a>
+              Colored list
+            </h2>
+
+            <p class="bs-component">
+              <ul class="list-group">
+                <li class="list-group-item list-group-item-success">Dapibus ac facilisis in</li>
+                <li class="list-group-item list-group-item-info">Cras sit amet nibh libero</li>
+                <li class="list-group-item list-group-item-warning">Porta ac consectetur ac</li>
+                <li class="list-group-item list-group-item-danger">Vestibulum at eros</li>
+              </ul>
+              <div class="list-group">
+                <a href="#" class="list-group-item list-group-item-success">Dapibus ac facilisis in</a>
+                <a href="#" class="list-group-item list-group-item-info">Cras sit amet nibh libero</a>
+                <a href="#" class="list-group-item list-group-item-warning">Porta ac consectetur ac</a>
+                <a href="#" class="list-group-item list-group-item-danger">Vestibulum at eros</a>
+              </div>
+            </p> -->
+
+            <!-- ----------------- LIST GROUP - custom -->
+
+            <!-- <h2 id="list-custom" class="page-header">
+              <a class="anchorjs-link " href="#list-custom" aria-label="Anchor link for: custom list"></a>
+              Custom list
+            </h2>
+
+            <p class="bs-component">
+              <div class="list-group">
+                <a href="#" class="list-group-item active">
+                  <h4 class="list-group-item-heading">List group item heading</h4>
+                  <p class="list-group-item-text">
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam posuere odio massa, accumsan ullamcorper turpis fermentum quis. Nunc consequat, ex ac efficitur semper, risus orci porttitor eros,
+                  </p>
+                </a>
+
+                <a href="#" class="list-group-item">
+                  <h4 class="list-group-item-heading">List group item heading</h4>
+                  <p class="list-group-item-text">
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam posuere odio massa, accumsan ullamcorper turpis fermentum quis. Nunc consequat, ex ac efficitur semper, risus orci porttitor eros,
+                  </p>
+                </a>
+
+                <a href="#" class="list-group-item">
+                  <h4 class="list-group-item-heading">List group item heading</h4>
+                  <p class="list-group-item-text">
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam posuere odio massa, accumsan ullamcorper turpis fermentum quis. Nunc consequat, ex ac efficitur semper, risus orci porttitor eros,
+                  </p>
+                </a>
+              </div>
+            </p> -->
+
+
+        <!-- ----------------- 
+                   LISTS 
+                   ----------------- -->
+                   <h2 id="lists" class="page-header">
+                    <a class="anchorjs-link " href="#lists" aria-label="Anchor link for: lists"></a>
+                    Lists
+                  </h2>
+
+                  <h4>List content</h4>
+
+                  <ul>
+                    <li><strong>Title</strong><br>
+                      <code>&lt;wiki-list-title&gt;<br>...<br>&lt;/wiki-list-title&gt;</code>
+                    </li>
+
+                    <li><strong>Sub-title</strong><br>
+                      <code>&lt;wiki-list-sub-title&gt;<br>...<br>&lt;/wiki-list-sub-title&gt;</code>
+                    </li>
+
+                    <li><strong>Content</strong><br>
+                      <code>&lt;wiki-list-content&gt;<br>...<br>&lt;/wiki-list-content&gt;</code><br>
+                    </li>
+                  </ul>
+
+                  <h4>Image</h4>
+                  <p>
+                    Add <code>img-src="..."</code> to <code>&lt;wiki-list-item img-src="..."&gt;</code>
+                  </p>
+
+                  <iframe width="100%" height="800" src="//jsfiddle.net/violetto/rdwq18Lx/embedded/result,html/" allowfullscreen="allowfullscreen" frameborder="0"></iframe>
+
+
+
+
+        <!-- ----------------- 
+                   PANELS 
+                   ----------------- -->
+                   <h2 id="panels" class="page-header">
+                    <a class="anchorjs-link " href="#panels" aria-label="Anchor link for: panels"></a>
+                    Panels
+                  </h2>
+                  <h4>Panel title</h4>
+                  <p>
+                    Add title within <code>&lt;wiki-info-panel title="..."&gt;</code><br>
+                  </p>
+
+                  <h4>Panel content</h4>
+
+                  <ul>
+                    <li><strong>Title</strong><br>
+                      <code>&lt;wiki-info-panel-content title="..."&gt;</code>
+                    </li>
+
+                    <li><strong>Content</strong><br>
+                      <code>&lt;wiki-info-panel-content&gt;<br>...<br>&lt;/wiki-info-panel-content&gt;</code><br>
+                    </li>
+                  </ul>
+
+                  <h4>Image</h4>
+                  <ul>
+                    <li>
+                      <strong>Panel lead image</strong><br>
+                      Add <code>img-src="..."</code> to <code>&lt;wiki-info-panel title="Mahatma Ghandi" img-src="..."&gt;</code>
+                    </li>
+
+                    <li>
+                      <strong>Content image</strong><br>
+                      Add <code>img-src="..."</code> to <code>&lt;wiki-info-panel-content title="Signature" img-src="..."&gt;</code>
+                    </li>
+                  </ul><br>
+
+                  <iframe width="100%" height="1000" src="//jsfiddle.net/violetto/9gxu8wxo/embedded/result,html/" allowfullscreen="allowfullscreen" frameborder="0"></iframe>
+
+
+
+
+
+        <!-- ----------------- 
+                   CARDS 
+                   ----------------- -->
+                   <h2 id="cards" class="page-header">
+                    <a class="anchorjs-link " href="#cards" aria-label="Anchor link for: cards"></a>
+                    Cards
+                  </h2>
+
+                  <h4>Card content</h4>
+
+                  <ul>
+                    <li><strong>Title</strong><br>
+                      <code>&lt;wiki-card-title&gt;<br>...<br>&lt;/wiki-card-title&gt;</code>
+                    </li>
+
+                    <li><strong>Content</strong><br>
+                      <code>&lt;wiki-card-content&gt;<br>...<br>&lt;/wiki-card-content&gt;</code><br>
+                    </li>
+                  </ul>
+
+                  <h4>Tags / Label</h4>
+                  <p>
+                    Add <code>&lt;a href="#"...&lt;/a&gt;</code> before <code>&lt;/wiki-card&gt;</code>
+                  </p>
+
+                  <h4>Image</h4>
+                  <p>
+                    Add <code>img-src="..."</code> to <code>&lt;wiki-card img-src="..."&gt;</code> 
+                  </p>
+
+                  <h4>Card orientation</h4>
+                  <p>
+                    Change <code>orientation="..."</code> within <code>&lt;wiki-card&gt;</code>
+                    <ul>
+                      <li>
+                        Portrait
+                      </li>
+                      <li>
+                        Landscape
+                      </li>
+                    </ul>
+                  </p>
+
+                  <iframe width="100%" height="800" src="//jsfiddle.net/violetto/29hckjy2/embedded/result,html/" allowfullscreen="allowfullscreen" frameborder="0"></iframe>
+
+
+
+
+
+                  <h2 id="card-2" class="page-header">
+                    <a class="anchorjs-link " href="#card-2" aria-label="Anchor link for: card-2"></a>
+                    Card 2
+                  </h2>
+
+                  <h4>Card 2 content</h4>
+
+                  <ul>
+                    <li><strong>Title</strong><br>
+                      Add <code>title='...'</code> to <code>&lt;wiki-stat&gt;</code>
+                    </li>
+
+                    <li><strong>Sub-title</strong><br>
+                      Add <code>sub-title='...'</code> to <code>&lt;wiki-stat&gt;</code>
+                    </li>
+
+                    <li><strong>Card content</strong><br>
+                      <code>&lt;wiki-stat-content&gt;<br>...<br>&lt;/wiki-stat-content&gt;</code><br>
+                    </li>
+                  </ul>
+
+                  <h4>Tags / Label</h4>
+                  <p>
+                    Add <code>&lt;a href="#"...&lt;/a&gt;</code> before <code>&lt;/wiki-stat&gt;</code>
+                  </p>
+
+                  <iframe width="100%" height="300" src="//jsfiddle.net/violetto/0uq05x89/embedded/result,html/" allowfullscreen="allowfullscreen" frameborder="0"></iframe>
+
+
+
+                  <!-- <li role="presentation">
+                    <a href="" search-terms=""><svg class="icon wikiglyph-wikimedia-commons"><use xlink:href="#wikiglyph-wikimedia-commons"></use></svg>wikimedia-commons</a>
+                  </li>
+                  <li role="presentation">
+                    <a href="" search-terms=""><svg class="icon wikiglyph-wikipedia"><use xlink:href="#wikiglyph-wikipedia"></use></svg>wikipedia</a>
+                  </li> 
+                  <li role="presentation">
+                        <a href="" search-terms=""><svg class="icon wikiglyph-public-domain"><use xlink:href="#wikiglyph-public-domain"></use></svg>public-domain</a>
+                      </li>
+                    -->
+
+
+        <!-- ----------------- 
+                   LAYOUTS 
+                   ----------------- -->
+                   <h2 id="layouts" class="page-header">
+                    <a class="anchorjs-link " href="#layouts" aria-label="Anchor link for: layouts"></a>
+                    Layouts
+                  </h2>
+
+                  <h4>3 Columns</h4>
+
+                  <iframe width="100%" height="1200" src="//jsfiddle.net/violetto/12d4nju4/embedded/result,html/" allowfullscreen="allowfullscreen" frameborder="0"></iframe>
+
+
+
+                </div>
+              </div>
+      <!-- -------------------------
+            TABLE OF CONTENTS
+            -------------------------- -->
+
+            <div class="col-md-3" role="complementary">
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" style="margin-top: 3em;">
+                <ul class="nav bs-docs-sidenav">
+                  <li>
+                    <a href="#icons">Icons</a>
+                    <ul class="nav">
+                      <li><a href="#icons-editing">Editing</a></li> 
+                      <li><a href="#icons-media">Media</a></li>
+                      <li><a href="#icons-messaging">Messaging</a></li>
+                      <li><a href="#icons-references">References</a></li>
+                      <li><a href="#icons-moderation">Moderation</a></li>
+                      <li><a href="#icons-user">User</a></li>
+                      <li><a href="#icons-accessibility">Accessibility</a></li>
+                    </ul>
+                  </li>
+                  <li>
+                    <a href="#buttons">Buttons</a>
+                    <ul class="nav">
+                      <li><a href="#button-group">Button group</a></li>
+                      <!-- <li><a href="#button-sizes">Button sizes</a></li> -->
+                    </ul>
+                  </li>
+                  <li>
+                    <a href="#dropdowns">Dropdowns</a>
+                    <ul class="nav">
+                      <li><a href="#button-dropdowns">Button + Dropdown</a></li>
+                    </ul>
+                  </li>
+                  <li>
+                    <a href="#input-groups">Input groups</a>
+                    <ul class="nav">
+                      <li><a href="#input-sizes">Input sizes</a></li>
+                    </ul>
+                  </li>
+                  <li>
+                    <a href="#navigation">Navigation</a>
+                    <ul class="nav">
+                      <li><a href="#tabs">Tabs</a></li>
+                      <li><a href="#pills">Pills</a></li>
+                      <li><a href="#nav-sizes">Sizes</a></li>
+                    </ul>
+                  </li>
+<!--                   <li>
+                    <a href="#navigation-bar">Navigation bar</a>
+                    <ul class="nav">
+                      <li><a href="#basic-navbar">Basic navigation bar</a></li>
+                      <li><a href="#fix-navbar">Fix navigation bar</a></li>
+                    </ul>
+                  </li>
+                -->                  
+                <li>
+                  <a href="#breadcrumb">Breadcrumb</a>
+                </li>
+                <li>
+                  <a href="#pagination">Pagination</a>
+                  <ul class="nav">
+                    <li><a href="#pager">Pager</a></li>
+                  </ul>
+                </li>
+                <li>
+                  <a href="#labels">Labels</a>
+                  <ul class="nav">
+                    <li><a href="#label-sizes">Label-sizes</a></li>
+                  </ul>
+                </li>
+                <li>
+                  <a href="#badges">Badges</a>
+                </li>
+                  <!-- <li>
+                    <a href="#list-group">List group</a>
+                    <ul class="nav">
+                      <li><a href="#list-colored">Colored list</a></li>
+                      <li><a href="#list-custom">Custom list</a></li>
+                    </ul>
+                  </li> -->
+                  <li>
+                    <a href="#panels">Panels</a>
+                    <ul class="nav">
+                      <li><a href="#panel-sizes">Panel-sizes</a></li>
+                    </ul>
+                  </li>
+                  <li>
+                    <a href="#lists">Lists</a>
+                  </li>
+                  <li>
+                    <a href="#cards">Cards</a>
+                    <ul class="nav">
+                      <li><a href="#card-2">Card 2</a></li>
+                    </ul>
+                  </li>
+                  <li>
+                    <a href="#layouts">Layouts</a>
+                    <ul class="nav">
+                      <li><a href="#layout-3col">3 columns</a></li> 
+                    </ul>
+                  </li>
+
+                </ul>
+              </nav>
+            </div>
+
+
+
+<!-- Bootstrap core JavaScript
+  ================================================== -->
+  <!-- Placed at the end of the document so the pages load faster -->
+  <script src="https://fontastic.s3.amazonaws.com/Sr6GbqfKhL8VvZWw23WzLN/icons.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/js/bootstrap.min.js"></script>
+  <script src="bootstrap-3.3.5-dist/js/docs.min.js"></script>
+  <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+  <script src="bootstrap-3.3.5-dist/js/ie10-viewport-bug-workaround.js"></script>
+
+  <script>
+    $('body').scrollspy({
+      target: '.bs-docs-sidebar',
+      offset: 40
+    });
+  </script>
+</body>
+</html>
