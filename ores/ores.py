@@ -6,6 +6,11 @@ This script provides access to a set of utilities for ORES
 * celery_worker -- Starts a "ScoreProcessor" celery worker
 * precached -- Starts a daemon that requests scores for revisions as they happen
 
+You can also launch a set of production like applications
+
+* applications.wsgi -- A wsgi server
+* applications.celery -- A celery worker
+
 {usage}
 Options:
     -h | --help  Shows this documentation
@@ -35,12 +40,18 @@ def main():
         sys.exit(1)
 
     module_name = sys.argv[1]
+
+    if module_name.find("application") == 0:
+        module_path = "." + module_name
+    else:
+        module_path = ".utilities." + module_name
+
     try:
         sys.path.insert(0, ".")
-        module = import_module(".utilities." + module_name, package="ores")
+        module = import_module(module_path, package="ores")
     except ImportError:
         sys.stderr.write(traceback.format_exc())
-        sys.stderr.write("Could not find utility {0}.\n".format(module_name))
+        sys.stderr.write("Could not find module {0}.\n".format(module_path))
         sys.exit(1)
 
     module.main(sys.argv[2:])
