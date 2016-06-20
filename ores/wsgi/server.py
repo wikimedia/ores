@@ -1,6 +1,7 @@
 import os
 
 import flask_swaggerui
+import flask_wikimediaui
 
 
 def configure(config):
@@ -29,10 +30,16 @@ def configure(config):
     bp = routes.configure(config, bp, score_processor)
     app.register_blueprint(bp)
 
-    # Configure swagger routes
+    # Configure swagger-ui routes
     swagger_bp = flask_swaggerui.build_static_blueprint(
         'ores-swaggerui', __name__,
         url_prefix=config['ores']['wsgi']['url_prefix'])
     app.register_blueprint(swagger_bp)
+
+    # Configure WikimediaUI routes
+    wikimedia_bp = flask_wikimediaui.build_static_blueprint(
+        'ores-wikimediaui', __name__,
+        url_prefix=config['ores']['wsgi']['url_prefix'])
+    app.register_blueprint(wikimedia_bp)
 
     return app
