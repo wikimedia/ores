@@ -37,7 +37,7 @@ from .watchdog import notify_socket, watchdog_ping
 
 logger = logging.getLogger(__name__)
 
-AVAILABLE_EVENTS = {'edit'}
+AVAILABLE_EVENTS = {'edit', 'nonbot_edit'}
 
 
 def main(argv=None):
@@ -113,11 +113,11 @@ def run(stream_url, ores_url, config, delay, notify, verbose):
                     wikidb = change['wiki']
                     rev_id = change['revision']['new']
                     for model in score_on[('edit', wikidb)]:
-                        start = time.time()
                         executor.submit(get_score, wikidb, model, rev_id)
-                        logger.debug("GET {0} started in {1} seconds."
-                                     .format((wikidb, model, rev_id),
-                                              time.time() - start))
+
+                    if not change.get('bot'):
+                        for model in score_on[('nonbot_edit', wikidb)]:
+                            executor.submit(get_score, wikidb, model, rev_id)
 
             def on_connect(self):
                 logger.info("Connecting socketIO client to {0}."
