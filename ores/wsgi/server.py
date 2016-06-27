@@ -18,7 +18,7 @@ def configure(config):
                 template_folder=os.path.join(directory, 'templates'))
 
     app.config['APPLICATION_ROOT'] = config['ores']['wsgi']['application_root']
-
+    app.url_map.strict_slashes = False
     # Configure routes
     bp = Blueprint('ores', __name__,
                    static_folder=os.path.join(directory, 'static'),
