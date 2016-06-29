@@ -20,7 +20,7 @@ class ScoreProcessor(dict):
         self.metrics_collector = metrics_collector or Null()
 
     def score(self, context, model, rev_ids, caches=None,
-              include_features=False, precache=False):
+              include_features=False, precache=False, features_cache={}):
         version = self[context].version(model)
         start = time.time()
         if caches is not None:
@@ -29,7 +29,8 @@ class ScoreProcessor(dict):
 
         try:
             scores = self._score(context, model, rev_ids, caches=caches,
-                                 include_features=include_features)
+                                 include_features=include_features,
+                                 features_cache=features_cache)
         except errors.ScoreProcessorOverloaded:
             self.metrics_collector.score_processor_overloaded(
                 context, model, version)
@@ -76,7 +77,8 @@ class ScoreProcessor(dict):
 
         return roots
 
-    def _process(self, context, model, cache, include_features=False):
+    def _process(self, context, model, cache, include_features=False,
+                 features_cache={}):
         """
         Pure CPU.  Extract features from datasources in the cache and apply the
         model to arrive at a score.
@@ -163,7 +165,7 @@ class ScoreProcessor(dict):
 class SimpleScoreProcessor(ScoreProcessor):
 
     def _score(self, context, model, rev_ids, caches=None,
-               include_features=False):
+               include_features=False, features_cache={}):
         rev_ids = set(rev_ids)
 
         # Look in the cache
@@ -183,6 +185,7 @@ class SimpleScoreProcessor(ScoreProcessor):
 
         # Extract features and generate scores (CPU)
         for rev_id, (error, cache) in root_ds_caches.items():
+            cache.update(features_cache)
             if error is not None:
                 scores[rev_id] = {'error': jsonify_error(error)}
             else:

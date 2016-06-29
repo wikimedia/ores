@@ -50,7 +50,8 @@ class ScoringContext(dict):
     def version(self, model):
         return self[model].version
 
-    def score(self, model, cache=None, include_features=False):
+    def score(self, model, cache=None, include_features=False,
+              features_cache={}):
         """
         I am the score function
         """
