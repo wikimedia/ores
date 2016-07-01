@@ -1,10 +1,15 @@
 import logging
 import time
 
+import revscoring.errors
+import stopit
+
 from .. import errors
 from ..metrics_collectors import Null
 from ..score_caches import Empty
 from ..util import jsonify_error, timeout
+from ..errors import TimeoutError
+
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +37,7 @@ class ScoringSystem(dict):
             scores_doc = self._score(
                 context_name, model_names, rev_ids,
                 injection_caches=injection_caches, include_features=False,
-                include_model_info=None)
+                include_model_info=include_model_info)
         except errors.ScoreProcessorOverloaded:
             self.metrics_collector.score_processor_overloaded(
                 context_name, model_names)
@@ -53,7 +58,7 @@ class ScoringSystem(dict):
         rev_ids = set(rev_ids)
 
         # 0. Get model information
-        model_info = self._format_model_info(
+        model_info = self.format_model_info(
             context_name, model_names, include_model_info)
 
         # 1. Lookup cached and inprogress scores (Fast IO)
@@ -86,6 +91,7 @@ class ScoringSystem(dict):
 
         # 3.5. Record extraction errors
         for rev_id, error in extraction_errors:
+
             rev_scores[rev_id] = jsonify_error(error)
 
         # 4. Generate scores (Heavy CPU)
@@ -130,9 +136,25 @@ class ScoringSystem(dict):
 
         start = time.time()
         # Runs a timeout function so that we don't get stuck here
-        score_map = timeout(
-            context.process_model_scores, model_names, root_cache,
-            include_features=include_features, seconds=self.timeout)
+        try:
+            score_map = timeout(
+                context.process_model_scores, model_names, root_cache,
+                include_features=include_features, seconds=self.timeout)
+        except revscoring.errors.CaughtDependencyError as e:
+            if isinstance(e.exception, stopit.TimeoutException):
+                duration = time.time() - start
+                self.metrics_collector.score_timed_out(
+                    context_name, model_names, duration)
+                raise TimeoutError("Timed out after {0} seconds."
+                                   .format(duration))
+            else:
+                raise
+        except TimeoutError:
+            duration = time.time() - start
+            self.metrics_collector.score_timed_out(
+                context_name, model_names, duration)
+            raise
+
         duration = time.time() - start
 
         logger.debug("Score generated for {0}:{1} in {2} seconds"
@@ -150,14 +172,11 @@ class ScoringSystem(dict):
                                 include_features):
         raise NotImplementedError()
 
-    def _format_model_info(self, context_name, model_names, include_model_info):
+    def format_model_info(self, context_name, model_names=None,
+                          include_model_info=None):
         context = self[context_name]
-        if not include_model_info:
-            fields = ['version']
-        else:
-            fields = include_model_info
-
-        return context.format_model_info(model_names, fields=fields)
+        model_names = model_names or context.keys()
+        return context.format_model_info(model_names, fields=include_model_info)
 
     def _filter_missing_model_set_revs(self, context_name, model_names, rev_ids,
                                        rev_scores=None,
@@ -215,10 +234,12 @@ class ScoringSystem(dict):
         rev_scores = {}
         for rev_id in rev_ids:
             for model_name in model_names:
+                injection_cache = injection_caches.get(rev_id) \
+                                  if injection_caches is not None else None
                 try:
                     rev_score = self._lookup_cached_score(
                         context_name, model_name, rev_id,
-                        injection_cache=injection_caches.get(rev_id))
+                        injection_cache=injection_cache)
                     if rev_id in rev_scores:
                         rev_scores[rev_id][model_name] = rev_score
                     else:
@@ -230,7 +251,7 @@ class ScoringSystem(dict):
 
     def _lookup_cached_score(self, context_name, model_name, rev_id,
                              injection_cache=None):
-        version = self[context_name][model_name].version
+        version = self[context_name].model_version(model_name)
         try:
             score = self.score_cache.lookup(
                 context_name, model_name, rev_id,
@@ -241,16 +262,16 @@ class ScoringSystem(dict):
                                  ":w/cache" if injection_cache else ""))
 
             self.metrics_collector.score_cache_hit(
-                context_name, model_name, version)
+                context_name, model_name)
             return score
         except KeyError:
             self.metrics_collector.score_cache_miss(
-                context_name, model_name, version)
+                context_name, model_name)
             raise
 
     @classmethod
     def _build_context_map(cls, config, name, section_key="scoring_systems"):
-        from ..scoring_contexts import ScoringContext
+        from ..scoring_context import ScoringContext
 
         section = config[section_key][name]
 

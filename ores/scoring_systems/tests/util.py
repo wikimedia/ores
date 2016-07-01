@@ -9,15 +9,20 @@ from ...scoring_context import ScoringContext
 wait_time = Feature("wait_time", returns=float)
 
 
+def process_wait(wait_time):
+    time.sleep(wait_time)
+    return wait_time
+wait = Feature("wait", process=process_wait, returns=float,
+               depends_on=[wait_time])
+
+
 class FakeSM(ScorerModel):
 
     def __init__(self):
-        self.features = [wait_time]
+        self.features = [wait]
         self.version = "fake version"
 
     def score(self, feature_values):
-        wait_time = feature_values[0]
-        time.sleep(wait_time)
         return True
 
     def format_info(self, format=None):

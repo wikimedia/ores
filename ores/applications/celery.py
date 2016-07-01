@@ -15,7 +15,7 @@ import logging
 
 import docopt
 
-from ..score_processors import Celery
+from ..scoring_systems import CeleryQueue
 from .util import build_config
 
 
@@ -34,6 +34,6 @@ def run(*args, **kwargs):
 
 def build(*args, **kwargs):
     config = build_config(*args, **kwargs)
-    score_processor = Celery.from_config(
-        config, config['ores']['score_processor'])
-    return score_processor.application
+    scoring_system = CeleryQueue.from_config(
+        config, config['ores']['scoring_system'])
+    return scoring_system.application

@@ -74,6 +74,17 @@ class Statsd(MetricsCollector):
                         duration * 1000)
             pipe.timing("score_processed", duration * 1000)
 
+    def score_timed_out(self, context_name, model_names, duration):
+        with self.statsd_client.pipeline() as pipe:
+            for model_name in model_names:
+                pipe.timing("score_timed_out.{0}.{1}"
+                            .format(context_name, model_name),
+                            duration * 1000)
+
+            pipe.timing("score_timed_out.{0}".format(context_name),
+                        duration * 1000)
+            pipe.timing("score_timed_out", duration * 1000)
+
     def score_processor_overloaded(self, context_name, model_names, count=1):
         with self.statsd_client.pipeline() as pipe:
             for model_name in model_names:

@@ -20,6 +20,9 @@ class Null(MetricsCollector):
     def score_processed(self, context, model, duration):
         pass
 
+    def score_timed_out(self, context, model, duration):
+        pass
+
     def score_cache_hit(self, context, model, count=1):
         pass
 

@@ -1,3 +1,4 @@
+import revscoring.errors
 from .scoring_system import ScoringSystem
 
 
@@ -12,10 +13,12 @@ class SingleThread(ScoringSystem):
         for missing_models, rev_ids in missing_model_set_revs.items():
             for rev_id in rev_ids:
                 root_cache = root_caches[rev_id]
+                injection_cache = injection_caches.get(rev_id) \
+                                  if injection_caches is not None else None
                 try:
                     score_map = self._process_score_map(
                         context_name, missing_models, rev_id, root_cache,
-                        injection_caches.get(rev_id), include_features)
+                        injection_cache, include_features)
                     rev_scores[rev_id] = score_map
                 except Exception as error:
                     errors[rev_id] = error

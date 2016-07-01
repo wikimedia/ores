@@ -190,7 +190,7 @@ class CeleryQueue(ScoringSystem):
     @classmethod
     def _build_context_map(cls, config, name, section_key="scoring_systems"):
         from .. import ores
-        from ..scoring_contexts import ScoringContext, ClientScoringContext
+        from ..scoring_context import ScoringContext, ClientScoringContext
 
         section = config[section_key][name]
 

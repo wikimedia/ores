@@ -17,9 +17,11 @@ class Redis(ScoreCache):
         self.ttl = int(ttl or TTL)
         self.prefix = str(prefix or PREFIX)
 
-    def lookup(self, wiki, model, rev_id, version=None, cache=None):
-        key = self._generate_key(wiki, model, rev_id, version=version,
-                                 cache=cache)
+    def lookup(self, context_name, model_name, rev_id, version=None,
+               injection_cache=None):
+        key = self._generate_key(
+            context_name, model_name, rev_id, version=version,
+            injection_cache=injection_cache)
 
         logger.debug("Looking up score at {0}".format(key))
         value = self.redis.get(key)
@@ -28,10 +30,11 @@ class Redis(ScoreCache):
         else:
             return json.loads(str(value, 'utf-8'))
 
-    def store(self, wiki, model, rev_id, score, version=None,
+    def store(self, score, context_name, model_name, rev_id, version=None,
               injection_cache=None):
-        key = self._generate_key(wiki, model, rev_id, version=version,
-                                 injection_cache=injection_cache)
+        key = self._generate_key(
+            context_name, model_name, rev_id, version=version,
+            injection_cache=injection_cache)
 
         logger.debug("Storing score at {0}".format(key))
         self.redis.setex(key, self.ttl, bytes(json.dumps(score), 'utf-8'))

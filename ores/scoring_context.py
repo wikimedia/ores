@@ -37,7 +37,7 @@ class ScoringContext(dict):
             formatted_info = self._get_model_info_for(model_name)
             filtered_info = {field: value
                              for field, value in formatted_info.items()
-                             if field in fields or field == "all"}
+                             if fields == "all" or field in fields}
 
             model_info[model_name] = filtered_info
 
@@ -59,6 +59,9 @@ class ScoringContext(dict):
 
     def model_version(self, model_name):
         return self[model_name].version
+
+    def model_features(self, model_name):
+        return self[model_name].features
 
     def process_model_scores(self, model_names, root_cache, include_features):
         model_scores = {}
@@ -114,7 +117,7 @@ class ScoringContext(dict):
 
     def _generate_root_datasources(self, model_names):
         for model_name in model_names:
-            for dependency in dependencies.dig(self[model_name]):
+            for dependency in dependencies.dig(self.model_features(model_name)):
                 if isinstance(dependency, Datasource):
                     yield dependency
 
@@ -132,7 +135,8 @@ class ScoringContext(dict):
         # Make a copy of dependency_caches
         root_caches = {}
         for rev_id in rev_ids:
-            injection_cache = injection_caches.get(rev_id, {})
+            injection_cache = injection_caches.get(rev_id) \
+                              if injection_caches is not None else {}
             root_caches[rev_id] = {key: value
                                    for key, value in injection_cache.items()}
 
@@ -184,14 +188,14 @@ class ScoringContext(dict):
         logger.info("Loading ScoringContext '{0}' from config.".format(name))
         section = config[section_key][name]
 
-        scorer_models = {}
+        model_map = {}
         for model_name, key in section['scorer_models'].items():
             scorer_model = ScorerModel.from_config(config, key)
-            scorer_models[model_name] = scorer_model
+            model_map[model_name] = scorer_model
 
         extractor = Extractor.from_config(config, section['extractor'])
 
-        return cls(name, scorer_models=scorer_models, extractor=extractor)
+        return cls(name, model_map=model_map, extractor=extractor)
 
 
 class ClientScoringContext(ScoringContext):
@@ -205,9 +209,14 @@ class ClientScoringContext(ScoringContext):
         # Create an info map for use when formatting information
         self.info_map = {model_name: model.format_info(format='json')
                          for model_name, model in model_map.items()}
+        self.features_map = {model_name: model.features
+                             for model_name, model in model_map.items()}
 
     def _get_model_info_for(self, model_name):
         return self.info_map[model_name]
 
     def model_version(self, model_name):
         return self.info_map[model_name].get("version")
+
+    def model_features(self, model_name):
+        return self.features_map[model_name]

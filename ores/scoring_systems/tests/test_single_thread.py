@@ -15,4 +15,4 @@ def test_timeout():
         "fakewiki", ["fake"], [1], injection_caches={1: {wait_time: 0.10}})
     assert 'error' in score_doc['scores'][1], str(score_doc['scores'])
     assert 'Timed out after' in score_doc['scores'][1]['error']['message'], \
-           score_doc['scores'][1]['error']['message']
+           score_doc['scores'][1]['error']
