@@ -92,7 +92,7 @@ class ScoringContext(dict):
         """
         features = list(trim(self[model_name].features))
         feature_values = self.extractor.solve(features, cache=dependency_cache)
-        return {"feature." + f.name: v
+        return {str(f): v
                 for f, v in zip(features, feature_values)}
 
     def process_score(self, model_name, dependency_cache=None):
@@ -154,8 +154,10 @@ class ScoringContext(dict):
         for rev_id, (error, root_vals) in zip(rev_ids, error_root_vals):
             if error is not None:
                 errors[rev_id] = error
-        logger.debug("Extracted root datasources for {0}:{1} in {2} secs"
-                     .format(model_names, rev_ids, time.time() - start))
+                del root_caches[rev_id]
+        logger.debug("Extracted root datasources for {0}:{1}:{2} in {3} secs"
+                     .format(self.name, set(model_names), rev_ids,
+                             round(time.time() - start, 3)))
 
         # Note that root_caches should have been modified in place
         return root_caches, errors

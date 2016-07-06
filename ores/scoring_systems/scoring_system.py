@@ -29,14 +29,15 @@ class ScoringSystem(dict):
         model_names = set(model_names)
         start = time.time()
         logger.debug("Scoring {0}:{1}:{2}{3}"
-                     .format(context_name, model_names, rev_ids,
+                     .format(context_name, set(model_names), rev_ids,
                              " w/cache = {0}".format(injection_caches)
                              if injection_caches else ""))
 
         try:
             scores_doc = self._score(
                 context_name, model_names, rev_ids,
-                injection_caches=injection_caches, include_features=False,
+                injection_caches=injection_caches,
+                include_features=include_features,
                 include_model_info=include_model_info)
         except errors.ScoreProcessorOverloaded:
             self.metrics_collector.score_processor_overloaded(
@@ -90,7 +91,7 @@ class ScoringSystem(dict):
             injection_caches=injection_caches)
 
         # 3.5. Record extraction errors
-        for rev_id, error in extraction_errors:
+        for rev_id, error in extraction_errors.items():
 
             rev_scores[rev_id] = jsonify_error(error)
 
@@ -103,7 +104,7 @@ class ScoringSystem(dict):
             if rev_id not in rev_scores:
                 rev_scores[rev_id] = model_scores
             else:
-                for model_name, score in model_scores:
+                for model_name, score in model_scores.items():
                     rev_scores[rev_id][model_name] = score
 
         # 4.5 Record scoring errors
@@ -158,7 +159,8 @@ class ScoringSystem(dict):
         duration = time.time() - start
 
         logger.debug("Score generated for {0}:{1} in {2} seconds"
-                     .format(context_name, model_names, round(duration, 3)))
+                     .format(context_name, set(model_names),
+                             round(duration, 3)))
         self.metrics_collector.score_processed(
             context_name, model_names, duration)
 

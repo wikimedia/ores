@@ -1,5 +1,8 @@
-import revscoring.errors
+import logging
+
 from .scoring_system import ScoringSystem
+
+logger = logging.getLogger(__name__)
 
 
 class SingleThread(ScoringSystem):
@@ -12,6 +15,8 @@ class SingleThread(ScoringSystem):
 
         for missing_models, rev_ids in missing_model_set_revs.items():
             for rev_id in rev_ids:
+                if rev_id not in root_caches:
+                    continue
                 root_cache = root_caches[rev_id]
                 injection_cache = injection_caches.get(rev_id) \
                                   if injection_caches is not None else None
@@ -27,6 +32,7 @@ class SingleThread(ScoringSystem):
 
     @classmethod
     def from_config(cls, config, name, section_key="scoring_systems"):
+        logger.info("Loading SingleThread '{0}' from config.".format(name))
         kwargs = cls._kwargs_from_config(
             config, name, section_key=section_key)
         return cls(**kwargs)

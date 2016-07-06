@@ -1,6 +1,6 @@
 import logging
-import pickle
 from concurrent import futures as cfutures
+import revscoring.errors
 
 from .scoring_system import ScoringSystem
 from ..errors import TimeoutError
@@ -24,6 +24,8 @@ class ProcessPool(ScoringSystem):
         with cfutures.ProcessPoolExecutor(max_workers=self.workers) as executor:
             for missing_models, rev_ids in missing_model_set_revs.items():
                 for rev_id in rev_ids:
+                    if rev_id not in root_caches:
+                        continue
                     root_cache = root_caches[rev_id]
                     injection_cache = injection_caches.get(rev_id) \
                                       if injection_caches is not None else None

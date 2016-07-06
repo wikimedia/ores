@@ -98,7 +98,7 @@ def configure(config, bp, scoring_system):
                             scores_doc['scores'][rev_id]
                     else:
                         response_doc[context][model_name]['scores'][rev_id] = \
-                            scores_doc['scores'][rev_id][model_name]
+                            scores_doc['scores'][rev_id][model_name]['score']
 
                 if include_model_info:
                     response_doc[context][model_name]['info'] = \
@@ -161,14 +161,14 @@ def configure(config, bp, scoring_system):
                         scores_doc['scores'][rev_id]
                 else:
                     response_doc[context][model]['scores'][rev_id] = \
-                        scores_doc['scores'][rev_id][model]
+                        scores_doc['scores'][rev_id][model]['score']
 
             if include_model_info:
                 response_doc[context][model]['info'] = \
                     scores_doc['models'][model]
         elif include_model_info is not None:
             models_info_doc = scoring_system.format_model_info(
-                context, [model], fields=include_model_info)
+                context, [model], include_model_info=include_model_info)
             for model_name, model_info_doc in models_info_doc.items():
                 response_doc[context][model_name]['info'] = model_info_doc
 
@@ -177,34 +177,29 @@ def configure(config, bp, scoring_system):
     # /v2/scores/enwiki/reverted/4567890
     @bp.route("/v2/scores/<context>/<model>/<int:rev_id>/", methods=["GET", "POST"])
     def score_revision_v2(context, model, rev_id):
-        scores_doc = {context: {model: {}}}
+        response_doc = {context: {model: {}}}
         # Check to see if we have the context available in our score_processor
-        if context not in score_processor:
+        if context not in scoring_system:
             return responses.not_found("No models available for {0}"
                                        .format(context))
 
-        if model not in score_processor[context]:
+        if model not in scoring_system[context]:
             return responses.bad_request("Model '{0}' not available for {1}."
                                          .format(model, context))
 
-        scores_doc[context][model] = \
-            {'version': score_processor[context][model].version}
+        response_doc[context][model] = \
+            {'version': scoring_system[context].model_version(model)}
 
         if 'model_info' in request.args:
-            try:
-                model_info_fields = set(
-                    read_bar_split_param(request, "model_info", type=str))
-            except ParamError as e:
-                return responses.bad_request(str(e))
-
-            model_info_doc = \
-                score_processor[context][model].format_info(format='json')
-            if len(model_info_fields) > 0 and model_info_fields != {''}:
-                model_info_doc = {k: model_info_doc[k]
-                                  for k in model_info_fields
-                                  if k in model_info_doc}
-
-            scores_doc[context][model]['info'] = model_info_doc
+                try:
+                    include_model_info = set(
+                        read_bar_split_param(request, "model_info", type=str))
+                    if include_model_info == {''}:
+                        include_model_info = "all"
+                except ParamError as e:
+                    return responses.bad_request(str(e))
+        else:
+            include_model_info = None
 
         try:
             caches = parse_injection(request, rev_id)
@@ -216,15 +211,25 @@ def configure(config, bp, scoring_system):
         precache = "precache" in request.args
 
         try:
-            model_scores, feature_values = score_processor.score(
-                context, model, [rev_id], caches=caches,
-                precache=precache, include_features=include_features)
-            scores_doc[context][model]['scores'] = model_scores
-            if include_features:
-                scores_doc[context][model]['features'] = feature_values
+            scores_doc = scoring_system.score(
+                context, [model], [rev_id], injection_caches=caches,
+                precache=precache, include_features=include_features,
+                include_model_info=include_model_info)
+            if 'error' in scores_doc['scores'][rev_id]:
+                response_doc[context][model]['scores'] = \
+                    {rev_id: scores_doc['scores'][rev_id]}
+            else:
+                response_doc[context][model]['scores'] = \
+                    {rev_id: scores_doc['scores'][rev_id][model]['score']}
+                if include_features:
+                    response_doc[context][model]['features'] = \
+                        {rev_id: scores_doc['scores'][rev_id][model]['features']}
+            if include_model_info:
+                response_doc[context][model]['info'] = \
+                    scores_doc['models'][model]
         except errors.ScoreProcessorOverloaded:
             return responses.server_overloaded()
 
-        return jsonify({'scores': scores_doc})
+        return jsonify({'scores': response_doc})
 
     return bp

@@ -29,7 +29,7 @@ def main(argv=None):
 def run(*args, **kwargs):
     application = build(*args, **kwargs)
     logging.getLogger('ores').setLevel(logging.DEBUG)
-    application.worker_main(argv=["celery_worker", "--loglevel=INFO"])
+    application.worker_main(argv=["celery_worker", "--loglevel=DEBUG"])
 
 
 def build(*args, **kwargs):

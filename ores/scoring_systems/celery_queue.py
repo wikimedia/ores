@@ -55,8 +55,14 @@ class CeleryQueue(ScoringSystem):
                                queue=DEFAULT_CELERY_QUEUE,
                                priority=0)
         def _lookup_score_in_map(result_id, model_name):
+            logger.info("Looking up {0} in {1}".format(model_name, result_id))
             score_map_result = self._process_score_map.AsyncResult(result_id)
-            score_map = score_map_result.get(timeout=self.timeout)
+            try:
+                score_map = score_map_result.get(timeout=self.timeout)
+            except Exception as e:
+                logger.error(e)
+                raise
+            logger.info("Found up {0} in {1}!".format(model_name, result_id))
             return score_map[model_name]
 
         @self.application.task(throws=expected_errors,
@@ -65,10 +71,21 @@ class CeleryQueue(ScoringSystem):
         def _process_score_map(
              context_name, model_names, rev_id, root_cache=None,
              injection_cache=None, include_features=False):
-            score_map = ScoringSystem._process_score_map(
-                self, context_name, model_names, rev_id, root_cache=root_cache,
-                injection_cache=injection_cache,
-                include_features=include_features)
+            logger.info("Generating a score map for" +
+                        "{0}:{1}:{2}"
+                        .format(context_name, set(model_names), rev_id))
+            try:
+                score_map = ScoringSystem._process_score_map(
+                    self, context_name, model_names, rev_id,
+                    root_cache=root_cache,
+                    injection_cache=injection_cache,
+                    include_features=include_features)
+            except Exception as e:
+                logger.error(e)
+                raise
+            logger.info("Completed generating score map for" +
+                        "{0}:{1}:{2}"
+                        .format(context_name, set(model_names), rev_id))
             return score_map
 
         APPLICATIONS.append(application)
@@ -79,6 +96,8 @@ class CeleryQueue(ScoringSystem):
     def _process_missing_scores(self, context_name, missing_model_set_revs,
                                 root_caches, injection_caches,
                                 include_features, inprogress_results=None):
+        logger.debug("Processing missing scores {0}:{1}."
+                     .format(context_name, missing_model_set_revs))
         context = self[context_name]
 
         inprogress_results = inprogress_results or {}
@@ -87,9 +106,16 @@ class CeleryQueue(ScoringSystem):
         results = {}
         for missing_models, rev_ids in missing_model_set_revs.items():
             for rev_id in rev_ids:
-                root_cache = root_caches[rev_id]
                 injection_cache = injection_caches.get(rev_id) \
                                   if injection_caches is not None else None
+                if rev_id not in root_caches:
+                    for model_name in missing_models:
+                        task_id = context.format_id_string(
+                            model_name, rev_id, injection_cache=injection_cache)
+                        self.application.backend.mark_as_failure(
+                            task_id, RuntimeError("Never started"))
+                    continue
+                root_cache = {str(k): v for k, v in root_caches[rev_id].items()}
                 result = self._process_score_map.delay(
                     context_name, missing_models, rev_id, root_cache,
                     injection_cache=injection_cache,
@@ -99,7 +125,8 @@ class CeleryQueue(ScoringSystem):
                     task_id = context.format_id_string(
                         model_name, rev_id, injection_cache=injection_cache)
                     score_result = self._lookup_score_in_map.apply_async(
-                        args=(result.id, model_name), task_id=task_id)
+                        args=(result.id, model_name), task_id=task_id,
+                        expires=self.timeout)
                     if rev_id in results:
                         results[rev_id][model_name] = score_result
                     else:
@@ -119,11 +146,10 @@ class CeleryQueue(ScoringSystem):
                 except celery.exceptions.TimeoutError:
                     errors[rev_id] = TimeoutError(
                         "Timed out after {0} seconds.".format(self.timeout))
+                    self.application.backend.mark_as_failure(
+                        score_result.id, TimeoutError("Timed out"))
                 except Exception as error:
-                    if rev_id in errors:
-                        errors[rev_id][model_name] = error
-                    else:
-                        errors[rev_id] = {model_name: error}
+                    errors[rev_id] = error
 
         return rev_scores, errors
 
@@ -131,7 +157,7 @@ class CeleryQueue(ScoringSystem):
                                    injection_caches=None, rev_scores=None):
         context = self[context_name]
 
-        rev_scores = rev_scores or {}
+        inprogress_results = {}
         for rev_id in rev_ids:
             injection_cache = injection_caches.get(rev_id) \
                               if injection_caches is not None else None
@@ -149,12 +175,12 @@ class CeleryQueue(ScoringSystem):
                                           "SUCCESS"):
                     logger.info("Found in-progress result for {0} -- {1}"
                                 .format(task_id, score_result.state))
-                    if rev_id in rev_scores:
-                        rev_scores[rev_id][model_name] = score_result
+                    if rev_id in inprogress_results:
+                        inprogress_results[rev_id][model_name] = score_result
                     else:
-                        rev_scores[rev_id] = {model_name: score_result}
+                        inprogress_results[rev_id] = {model_name: score_result}
 
-        return rev_scores
+        return inprogress_results
 
     def _register_model_set_revs_to_process(self, context_name, model_set_revs,
                                             injection_caches):
