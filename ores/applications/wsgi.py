@@ -14,8 +14,13 @@ import logging
 
 import docopt
 from ores.wsgi import server
+from ores import ores
 
 from .util import build_config
+
+# This is a hack to help know when the models must or must not be loaded
+# into memory.
+ores._is_wsgi_client = True
 
 
 def main(argv=None):
@@ -28,7 +33,7 @@ def run(*args, **kwargs):
     application = build(*args, **kwargs)
     logging.getLogger('ores').setLevel(logging.DEBUG)
     application.debug = True
-    application.run(host="0.0.0.0", processes=64, debug=True)
+    application.run(host="0.0.0.0", processes=16, debug=True)
 
 
 def build(*args, **kwargs):

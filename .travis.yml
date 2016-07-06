@@ -1,7 +1,7 @@
 language: python
 sudo: true
 python:
-  - "3.4"
+  - "3.5"
 addons:
   apt:
     packages:
@@ -26,9 +26,9 @@ install:
   - python --version
   - python -c "import numpy;print(numpy.__version__)"
   - python -c "import scipy;print(scipy.__version__)"
-  - touch /home/travis/miniconda3/lib/python3.4/site-packages/easy-install.pth
+  - touch /home/travis/miniconda3/lib/python3.5/site-packages/easy-install.pth
   - travis_wait pip install -r requirements.txt || date
-  - pip install statsd pylru
+  - travis_wait pip install -r test-requirements.txt || date
   - python -m nltk.downloader stopwords
   - pip install codecov
 script:
