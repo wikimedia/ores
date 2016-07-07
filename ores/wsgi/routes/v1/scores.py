@@ -9,13 +9,13 @@ from .... import errors
 from ...util import ParamError, read_bar_split_param
 
 
-def configure(config, bp, score_processor):
+def configure(config, bp, scoring_system):
 
     # /scores/
     @bp.route("/scores/", methods=["GET"])
     @bp.route("/v1/scores/", methods=["GET"])
     def scores():
-        contexts = [context for context in score_processor]
+        contexts = [context for context in scoring_system]
 
         contexts.sort()
 
@@ -27,16 +27,16 @@ def configure(config, bp, score_processor):
     def score_model_revisions(context):
 
         # Check to see if we have the context available in our score_processor
-        if context not in score_processor:
+        if context not in scoring_system:
             return responses.not_found("No scorers available for {0}"
                                        .format(context))
 
         # If no model is specified, return information on available models
         if "models" not in request.args:
             # Return the models that we have
-            models = {name: model.format_info(format="json")
-                      for name, model in score_processor[context].items()}
-            return jsonify({"models": models})
+            model_info_doc = scoring_system.format_model_info(
+                context, include_model_info="all")
+            return jsonify({"models": model_info_doc})
 
         # Read the params
         try:
@@ -45,7 +45,7 @@ def configure(config, bp, score_processor):
             return responses.bad_request(str(e))
 
         # Check if all the models are available
-        missing_models = models - score_processor[context].keys()
+        missing_models = models - scoring_system[context].keys()
         if len(missing_models) > 0:
             return responses.bad_request("Models '{0}' not available for {1}."
                                          .format(list(missing_models), context))
@@ -63,18 +63,13 @@ def configure(config, bp, score_processor):
 
         # Generate scores for each model and merge them together
         try:
-            scores = defaultdict(dict)
-            for model in models:
-                model_scores, _ = score_processor.score(
-                    context, model, rev_ids, precache=precache)
-                for rev_id in model_scores:
-                    scores[rev_id][model] = model_scores[rev_id]
+            score_doc = scoring_system.score(
+                context, models, rev_ids, precache=precache)
+            return jsonify(convert_score_doc(score_doc))
         except errors.ScoreProcessorOverloaded:
             return responses.server_overloaded()
         except Exception:
             return responses.unknown_error(traceback.format_exc())
-
-        return jsonify(scores)
 
     # /scores/enwiki/reverted/?revids=456789|4567890
     @bp.route("/scores/<context>/<model>/", methods=["GET"])
@@ -82,11 +77,11 @@ def configure(config, bp, score_processor):
     def score_revisions(context, model):
 
         # Check to see if we have the context available in our score_processor
-        if context not in score_processor:
+        if context not in scoring_system:
             return responses.not_found("No models available for {0}"
                                        .format(context))
 
-        if model not in score_processor[context]:
+        if model not in scoring_system[context]:
             return responses.bad_request("Model '{0}' not available for {1}."
                                          .format(model, context))
 
@@ -100,18 +95,18 @@ def configure(config, bp, score_processor):
             if len(rev_ids) == 0:
                 return responses.bad_request("No revids provided.")
         else:
-            return jsonify(score_processor[context][model].format_info(format="json"))
+            return jsonify(scoring_system.format_model_info(
+                context, [model], include_model_info="all")[model])
 
         precache = "precache" in request.args
         try:
-            model_scores, _ = score_processor.score(context, model, rev_ids,
-                                                    precache=precache)
+            score_doc = scoring_system.score(context, [model], rev_ids,
+                                             precache=precache)
+            return jsonify(convert_score_doc(score_doc)[model])
         except errors.ScoreProcessorOverloaded:
             return responses.server_overloaded()
         except Exception:
             return responses.unknown_error(traceback.format_exc())
-
-        return jsonify(model_scores)
 
     # /scores/enwiki/reverted/4567890
     @bp.route("/scores/<context>/<model>/<int:rev_id>/", methods=["GET", "POST"])
@@ -119,24 +114,38 @@ def configure(config, bp, score_processor):
     def score_revision(context, model, rev_id):
 
         # Check to see if we have the context available in our score_processor
-        if context not in score_processor:
+        if context not in scoring_system:
             return responses.not_found("No models available for {0}"
                                        .format(context))
 
-        if model not in score_processor[context]:
+        if model not in scoring_system[context]:
             return responses.not_found("Model '{0}' not available for {1}."
                                        .format(model, context))
 
         precache = "precache" in request.args
 
         try:
-            model_scores, _ = score_processor.score(context, model, [rev_id],
-                                                    precache=precache)
+            score_doc = scoring_system.score(context, [model], [rev_id],
+                                             precache=precache)
+            return jsonify(convert_score_doc(score_doc)[model])
         except errors.ScoreProcessorOverloaded:
             return responses.server_overloaded()
         except Exception:
             return responses.unknown_error(traceback.format_exc())
 
-        return jsonify(model_scores)
-
     return bp
+
+
+def convert_score_doc(score_doc):
+    v1_score_doc = {}
+    for model_name in score_doc['models']:
+        v1_score_doc[model_name] = {}
+        for rev_id, rev_score_error in score_doc['scores'].items():
+            if 'error' in rev_score_error:
+                error_doc = rev_score_error
+                v1_score_doc[model_name][rev_id] = error_doc
+            else:
+                rev_score = rev_score_error
+                v1_score_doc[model_name][rev_id] = rev_score[model_name]
+
+    return v1_score_doc
