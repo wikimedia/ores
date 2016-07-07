@@ -25,49 +25,48 @@ def test_statsd():
     fake_client = StatsClient()
 
     collector = Statsd(fake_client)
-    collector.precache_request("foo", "bar", "0.0.1", 100)
-    collector.scores_request("foo", "bar", "0.0.1", 50, 150)
-    collector.datasources_extracted("foo", "bar", "0.0.1", 10, 25)
-    collector.score_processed("foo", "bar", "0.0.1", 1.1)
-    collector.score_cache_hit("foo", "bar", "0.0.1")
-    collector.score_errored("foo", "bar", "0.0.1")
-    collector.score_timed_out("foo", "bar", "0.0.1")
+    collector.precache_request("foo", {"bar", "derp"}, 100)
+    collector.scores_request("foo", {"bar"}, 50, 150)
+    collector.datasources_extracted("foo", {"bar"}, 10, 25)
+    collector.score_processed("foo", {"bar"}, 1.1)
+    collector.score_timed_out("foo", {"bar"}, 15.1)
+    collector.score_cache_miss("foo", {"bar", "derp"}, 1)
+    collector.score_cache_hit("foo", {"bar"}, 2)
+    collector.score_errored("foo", {"bar"})
 
-    eq_(fake_client.messages,
-        [('TIMING', 'precache_request.foo.bar.0.0.1', 100000),
+    eq_(set(fake_client.messages) -
+        {('TIMING', 'precache_request.foo.derp', 100000),
          ('TIMING', 'precache_request.foo.bar', 100000),
          ('TIMING', 'precache_request.foo', 100000),
          ('TIMING', 'precache_request', 100000),
-         ('TIMING', 'scores_request.foo.bar.0.0.1.50', 150000),
-         ('TIMING', 'scores_request.foo.bar.0.0.1', 150000),
+         ('TIMING', 'scores_request.foo.bar.50', 150000),
          ('TIMING', 'scores_request.foo.bar', 150000),
+         ('INCR', 'revision_scored.foo.bar', 50),
          ('TIMING', 'scores_request.foo', 150000),
          ('TIMING', 'scores_request', 150000),
-         ('INCR', 'revision_scored.foo.bar.0.0.1', 50),
-         ('INCR', 'revision_scored.foo.bar', 50),
          ('INCR', 'revision_scored.foo', 50),
          ('INCR', 'revision_scored', 50),
-         ('TIMING', 'datasources_extracted.foo.bar.0.0.1.10', 25000),
-         ('TIMING', 'datasources_extracted.foo.bar.0.0.1', 25000),
+         ('TIMING', 'datasources_extracted.foo.bar.10', 25000),
          ('TIMING', 'datasources_extracted.foo.bar', 25000),
          ('TIMING', 'datasources_extracted.foo', 25000),
          ('TIMING', 'datasources_extracted', 25000),
-         ('TIMING', 'score_processed.foo.bar.0.0.1', 1100),
-         ('TIMING', 'score_processed.foo.bar', 1100),
-         ('TIMING', 'score_processed.foo', 1100),
-         ('TIMING', 'score_processed', 1100),
-         ('INCR', 'score_cache_hit.foo.bar.0.0.1', 1),
-         ('INCR', 'score_cache_hit.foo.bar', 1),
-         ('INCR', 'score_cache_hit.foo', 1),
-         ('INCR', 'score_cache_hit', 1),
-         ('INCR', 'score_errored.foo.bar.0.0.1', 1),
+         ('TIMING', 'score_processed.foo.bar', 1100.0),
+         ('TIMING', 'score_processed.foo', 1100.0),
+         ('TIMING', 'score_processed', 1100.0),
+         ('TIMING', 'score_timed_out.foo.bar', 15100.0),
+         ('TIMING', 'score_timed_out.foo', 15100.0),
+         ('TIMING', 'score_timed_out', 15100.0),
+         ('INCR', 'score_cache_miss.foo.derp', 1),
+         ('INCR', 'score_cache_miss.foo.bar', 1),
+         ('INCR', 'score_cache_miss.foo', 1),
+         ('INCR', 'score_cache_miss', 1),
+         ('INCR', 'score_cache_hit.foo.bar', 2),
+         ('INCR', 'score_cache_hit.foo', 2),
+         ('INCR', 'score_cache_hit', 2),
          ('INCR', 'score_errored.foo.bar', 1),
          ('INCR', 'score_errored.foo', 1),
-         ('INCR', 'score_errored', 1),
-         ('INCR', 'score_timed_out.foo.bar.0.0.1', 1),
-         ('INCR', 'score_timed_out.foo.bar', 1),
-         ('INCR', 'score_timed_out.foo', 1),
-         ('INCR', 'score_timed_out', 1)])
+         ('INCR', 'score_errored', 1)},
+        set())
 
 
 @raises(socket.gaierror)

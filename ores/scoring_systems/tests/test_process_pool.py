@@ -11,7 +11,7 @@ from ...score_caches import LRU
 
 def test_score():
     scoring_system = ProcessPool({'fakewiki': fakewiki}, timeout=0.10,
-                                 metrics_collector=Logger())
+                                 workers=8)
 
     test_scoring_system(scoring_system)
 
@@ -21,7 +21,6 @@ def test_rev_id_scorer():
     fakewiki = ScoringContext(
         'fakewiki', {'revid': revid}, OfflineExtractor())
     scoring_system = ProcessPool({'fakewiki': fakewiki}, timeout=0.10,
-                                 metrics_collector=Logger(),
                                  workers=8,
                                  score_cache=LRU(size=10))
     score_doc = scoring_system.score("fakewiki", ["revid"], [1, 19],

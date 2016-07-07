@@ -11,22 +11,26 @@ def test_logger():
     logging_logger = FakeLogger(lambda m: messages.append(m))
 
     collector = Logger(logging_logger)
-    collector.precache_request("foo", "bar", "0.0.1", 100)
-    collector.scores_request("foo", "bar", "0.0.1", 50, 150)
-    collector.datasources_extracted("foo", "bar", "0.0.1", 10, 25)
-    collector.score_processed("foo", "bar", "0.0.1", 1.1)
-    collector.score_cache_hit("foo", "bar", "0.0.1")
-    collector.score_errored("foo", "bar", "0.0.1")
-    collector.score_timed_out("foo", "bar", "0.0.1")
+    collector.precache_request("foo", {"bar", "derp"}, 100)
+    collector.scores_request("foo", {"bar"}, 50, 150)
+    collector.datasources_extracted("foo", {"bar"}, 10, 25)
+    collector.score_processed("foo", {"bar"}, 1.1)
+    collector.score_timed_out("foo", {"bar"}, 15.1)
+    collector.score_cache_miss("foo", {"bar", "derp"}, 1)
+    collector.score_cache_hit("foo", {"bar"}, 2)
+    collector.score_errored("foo", {"bar"})
 
-    eq_(messages,
-        ['precache_request: foo:bar:0.0.1 in 100 seconds',
-         'scores_request: foo:bar:0.0.1 for 50 revisions in 150 seconds',
-         'datasources_extracted: foo:bar:0.0.1 for 10 revisions in 25 seconds',
-         'score_processed: foo:bar:0.0.1 in 1.1 seconds',
-         'score_cache_hit: foo:bar:0.0.1',
-         'score_errored: foo:bar:0.0.1',
-         'score_timed_out: foo:bar:0.0.1'])
+    eq_(set(messages),
+        {"precache_request: foo:{'derp', 'bar'} in 100 seconds",
+         "scores_request: foo:{'bar'} for 50 revisions in 150 seconds",
+         "datasources_extracted: foo:{'bar'} for 10 revisions in 25 secs",
+         "score_processed: foo:{'bar'} in 1.1 seconds",
+         "score_timed_out: foo:{'bar'} in 15.1 seconds",
+         "score_cache_miss: foo:{'derp', 'bar'}",
+         "score_cache_hit: foo:{'bar'}",
+         "score_cache_hit: foo:{'bar'}",
+         "score_errored: foo:{'bar'}"},
+        set())
 
 
 def test_from_config():

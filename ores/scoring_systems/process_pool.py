@@ -29,6 +29,10 @@ class ProcessPool(ScoringSystem):
                     root_cache = root_caches[rev_id]
                     injection_cache = injection_caches.get(rev_id) \
                                       if injection_caches is not None else None
+                    logger.debug("Submitting _process_score_map for" +
+                                 "{0}:{1}:{2} with {3}"
+                                 .format(context_name, set(missing_models),
+                                         rev_id, injection_cache))
                     future = executor.submit(
                         self._process_score_map,
                         context_name, missing_models, rev_id, root_cache,
