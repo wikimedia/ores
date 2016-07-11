@@ -29,6 +29,9 @@ class MetricsCollector:
     def score_errored(self, context, model, version, count=1):
         raise NotImplementedError()
 
+    def score_timed_out(self, context, model, version, count=1):
+        raise NotImplementedError()
+
     @classmethod
     def from_config(cls, config, name, section_key="metrics_collectors"):
         try:

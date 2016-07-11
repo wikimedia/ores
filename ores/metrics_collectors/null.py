@@ -27,6 +27,9 @@ class Null(MetricsCollector):
     def score_errored(self, context, model, version, count=1):
         pass
 
+    def score_timed_out(self, context, model, version, count=1):
+        pass
+
     @classmethod
     def from_config(cls, config, name, section_key="metrics_collectors"):
         """

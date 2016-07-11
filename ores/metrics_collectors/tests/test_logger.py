@@ -17,6 +17,7 @@ def test_logger():
     collector.score_processed("foo", "bar", "0.0.1", 1.1)
     collector.score_cache_hit("foo", "bar", "0.0.1", 2)
     collector.score_errored("foo", "bar", "0.0.1")
+    collector.score_timed_out("foo", "bar", "0.0.1")
 
     eq_(messages,
         ['precache_request: foo:bar:0.0.1 in 100 seconds',
@@ -25,7 +26,8 @@ def test_logger():
          'score_processed: foo:bar:0.0.1 in 1.1 seconds',
          'score_cache_hit: foo:bar:0.0.1',
          'score_cache_hit: foo:bar:0.0.1',
-         'score_errored: foo:bar:0.0.1'])
+         'score_errored: foo:bar:0.0.1',
+         'score_timed_out: foo:bar:0.0.1'])
 
 
 def test_from_config():

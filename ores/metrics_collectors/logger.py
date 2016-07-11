@@ -44,6 +44,11 @@ class Logger(MetricsCollector):
             self.logger.debug("score_errored: {0}:{1}:{2}"
                               .format(context, model, version))
 
+    def score_timed_out(self, context, model, version, count=1):
+        for i in range(count):
+            self.logger.debug("score_timed_out: {0}:{1}:{2}"
+                              .format(context, model, version))
+
     @classmethod
     def from_config(cls, config, name, section_key="metrics_collectors"):
         """

@@ -111,6 +111,16 @@ class Statsd(MetricsCollector):
             pipe.incr("score_errored.{0}".format(context), count=count)
             pipe.incr("score_errored".format(context), count=count)
 
+    def score_timed_out(self, context, model, version, count=1):
+        with self.statsd_client.pipeline() as pipe:
+            pipe.incr("score_timed_out.{0}.{1}.{2}"
+                      .format(context, model, version),
+                      count=count)
+            pipe.incr("score_timed_out.{0}.{1}".format(context, model),
+                      count=count)
+            pipe.incr("score_timed_out.{0}".format(context), count=count)
+            pipe.incr("score_timed_out".format(context), count=count)
+
     @classmethod
     def from_parameters(cls, *args, **kwargs):
         import statsd

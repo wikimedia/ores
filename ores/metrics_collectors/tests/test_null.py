@@ -11,6 +11,7 @@ def test_null():
     collector.score_processed("foo", "bar", "0.0.1", 1.1)
     collector.score_cache_hit("foo", "bar", "0.0.1", 2)
     collector.score_errored("foo", "bar", "0.0.1")
+    collector.score_timed_out("foo", "bar", "0.0.1")
 
 
 def test_from_config():
