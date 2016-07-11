@@ -1,9 +1,0 @@
-[Unit]
-Description=Development web runner for ORES
-
-[Service]
-ExecStart=/srv/ores/venv/bin/python /vagrant/utility dev_server
-WorkingDirectory=/vagrant
-User=vagrant
-Group=vagrant
-Restart=on-failure
