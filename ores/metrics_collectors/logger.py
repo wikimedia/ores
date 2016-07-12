@@ -26,7 +26,7 @@ class Logger(MetricsCollector):
                           .format(context, model, version, rev_id_count,
                                   duration))
 
-    def score_processor_overloaded(self, context, model, version, count=1):
+    def score_processor_overloaded(self, context, model, version):
         self.logger.debug("score_processor_overloaded: " +
                           "{0}:{1}:{2}".format(context, model, version))
 
@@ -34,20 +34,17 @@ class Logger(MetricsCollector):
         self.logger.debug("score_processed: {0}:{1}:{2} in {3} seconds"
                           .format(context, model, version, duration))
 
-    def score_cache_hit(self, context, model, version, count=1):
-        for i in range(count):
-            self.logger.debug("score_cache_hit: {0}:{1}:{2}"
-                              .format(context, model, version))
+    def score_cache_hit(self, context, model, version):
+        self.logger.debug("score_cache_hit: {0}:{1}:{2}"
+                          .format(context, model, version))
 
-    def score_errored(self, context, model, version, count=1):
-        for i in range(count):
-            self.logger.debug("score_errored: {0}:{1}:{2}"
-                              .format(context, model, version))
+    def score_errored(self, context, model, version):
+        self.logger.debug("score_errored: {0}:{1}:{2}"
+                          .format(context, model, version))
 
-    def score_timed_out(self, context, model, version, count=1):
-        for i in range(count):
-            self.logger.debug("score_timed_out: {0}:{1}:{2}"
-                              .format(context, model, version))
+    def score_timed_out(self, context, model, version):
+        self.logger.debug("score_timed_out: {0}:{1}:{2}"
+                          .format(context, model, version))
 
     @classmethod
     def from_config(cls, config, name, section_key="metrics_collectors"):

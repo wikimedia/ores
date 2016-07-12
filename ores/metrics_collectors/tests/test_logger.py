@@ -15,7 +15,7 @@ def test_logger():
     collector.scores_request("foo", "bar", "0.0.1", 50, 150)
     collector.datasources_extracted("foo", "bar", "0.0.1", 10, 25)
     collector.score_processed("foo", "bar", "0.0.1", 1.1)
-    collector.score_cache_hit("foo", "bar", "0.0.1", 2)
+    collector.score_cache_hit("foo", "bar", "0.0.1")
     collector.score_errored("foo", "bar", "0.0.1")
     collector.score_timed_out("foo", "bar", "0.0.1")
 
@@ -24,7 +24,6 @@ def test_logger():
          'scores_request: foo:bar:0.0.1 for 50 revisions in 150 seconds',
          'datasources_extracted: foo:bar:0.0.1 for 10 revisions in 25 seconds',
          'score_processed: foo:bar:0.0.1 in 1.1 seconds',
-         'score_cache_hit: foo:bar:0.0.1',
          'score_cache_hit: foo:bar:0.0.1',
          'score_errored: foo:bar:0.0.1',
          'score_timed_out: foo:bar:0.0.1'])
