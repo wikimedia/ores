@@ -30,8 +30,8 @@ def test_statsd():
     collector.datasources_extracted("foo", {"bar"}, 10, 25)
     collector.score_processed("foo", {"bar"}, 1.1)
     collector.score_timed_out("foo", {"bar"}, 15.1)
-    collector.score_cache_miss("foo", {"bar", "derp"}, 1)
-    collector.score_cache_hit("foo", {"bar"}, 2)
+    collector.score_cache_miss("foo", {"bar", "derp"})
+    collector.score_cache_hit("foo", {"bar"})
     collector.score_errored("foo", {"bar"})
 
     eq_(set(fake_client.messages) -
@@ -60,9 +60,9 @@ def test_statsd():
          ('INCR', 'score_cache_miss.foo.bar', 1),
          ('INCR', 'score_cache_miss.foo', 1),
          ('INCR', 'score_cache_miss', 1),
-         ('INCR', 'score_cache_hit.foo.bar', 2),
-         ('INCR', 'score_cache_hit.foo', 2),
-         ('INCR', 'score_cache_hit', 2),
+         ('INCR', 'score_cache_hit.foo.bar', 1),
+         ('INCR', 'score_cache_hit.foo', 1),
+         ('INCR', 'score_cache_hit', 1),
          ('INCR', 'score_errored.foo.bar', 1),
          ('INCR', 'score_errored.foo', 1),
          ('INCR', 'score_errored', 1)},

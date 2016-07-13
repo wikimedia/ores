@@ -9,20 +9,19 @@ import mwapi.errors
 import revscoring.errors
 from celery.signals import before_task_publish
 
-from ..errors import TimeoutError, ScoreProcessorOverloaded
+from .. import errors
 from .scoring_system import ScoringSystem
 
 logger = logging.getLogger(__name__)
 
-APPLICATIONS = []
+_applications = []
 
 DEFAULT_CELERY_QUEUE = "celery"
 
 
 @before_task_publish.connect
 def update_sent_state(sender=None, body=None, **kwargs):
-
-    for application in APPLICATIONS:
+    for application in _applications:
         task = application.tasks.get(sender)
         backend = task.backend if task else application.backend
 
@@ -34,6 +33,7 @@ class CeleryQueue(ScoringSystem):
 
     def __init__(self, *args, application, queue_maxsize=None, **kwargs):
         super().__init__(*args, **kwargs)
+        global __applications
         self.application = application
         self.queue_maxsize = int(queue_maxsize) if queue_maxsize is not None \
                              else None
@@ -43,34 +43,24 @@ class CeleryQueue(ScoringSystem):
         if self.queue_maxsize is not None and self.redis is None:
             logger.warning("No redis connection.  Can't check queue size")
 
+        self._initialize_tasks()
+
+        _applications.append(application)
+
+    def _initialize_tasks(self):
         expected_errors = (revscoring.errors.RevisionNotFound,
                            revscoring.errors.PageNotFound,
                            revscoring.errors.UserNotFound,
                            revscoring.errors.DependencyError,
                            mwapi.errors.RequestError,
                            mwapi.errors.TimeoutError,
-                           TimeoutError)
+                           errors.TimeoutError)
 
         @self.application.task(throws=expected_errors,
-                               queue=DEFAULT_CELERY_QUEUE,
-                               priority=0)
-        def _lookup_score_in_map(result_id, model_name):
-            logger.info("Looking up {0} in {1}".format(model_name, result_id))
-            score_map_result = self._process_score_map.AsyncResult(result_id)
-            try:
-                score_map = score_map_result.get(timeout=self.timeout)
-            except Exception as e:
-                logger.error(e)
-                raise
-            logger.info("Found up {0} in {1}!".format(model_name, result_id))
-            return score_map[model_name]
-
-        @self.application.task(throws=expected_errors,
-                               queue=DEFAULT_CELERY_QUEUE,
-                               priority=0)
-        def _process_score_map(
-             context_name, model_names, rev_id, root_cache=None,
-             injection_cache=None, include_features=False):
+                               queue=DEFAULT_CELERY_QUEUE)
+        def _process_score_map(context_name, model_names, rev_id,
+                               root_cache=None, injection_cache=None,
+                               include_features=False):
             logger.info("Generating a score map for" +
                         "{0}:{1}:{2}"
                         .format(context_name, set(model_names), rev_id))
@@ -88,7 +78,18 @@ class CeleryQueue(ScoringSystem):
                         .format(context_name, set(model_names), rev_id))
             return score_map
 
-        APPLICATIONS.append(application)
+        @self.application.task(throws=expected_errors,
+                               queue=DEFAULT_CELERY_QUEUE)
+        def _lookup_score_in_map(result_id, model_name):
+            logger.info("Looking up {0} in {1}".format(model_name, result_id))
+            score_map_result = self._process_score_map.AsyncResult(result_id)
+            try:
+                score_map = score_map_result.get(timeout=self.timeout)
+            except Exception as e:
+                logger.error(e)
+                raise
+            logger.info("Found up {0} in {1}!".format(model_name, result_id))
+            return score_map[model_name]
 
         self._process_score_map = _process_score_map
         self._lookup_score_in_map = _lookup_score_in_map
@@ -134,7 +135,7 @@ class CeleryQueue(ScoringSystem):
 
         # Read results
         rev_scores = {}
-        errors = {}
+        score_errors = {}
         combined_results = chain(inprogress_results.items(), results.items())
         for rev_id, model_results in combined_results:
             if rev_id not in rev_scores:
@@ -144,14 +145,15 @@ class CeleryQueue(ScoringSystem):
                     rev_scores[rev_id][model_name] = \
                         score_result.get(timeout=self.timeout)
                 except celery.exceptions.TimeoutError:
-                    errors[rev_id] = TimeoutError(
+                    timeout_error = errors.TimeoutError(
                         "Timed out after {0} seconds.".format(self.timeout))
+                    score_errors[rev_id] = timeout_error
                     self.application.backend.mark_as_failure(
-                        score_result.id, TimeoutError("Timed out"))
+                        score_result.id, timeout_error)
                 except Exception as error:
-                    errors[rev_id] = error
+                    score_errors[rev_id] = error
 
-        return rev_scores, errors
+        return rev_scores, score_errors
 
     def _lookup_inprogress_results(self, context_name, model_names, rev_ids,
                                    injection_caches=None, rev_scores=None):
@@ -206,12 +208,12 @@ class CeleryQueue(ScoringSystem):
         # support it natively.
         # This will result in a race condition, but it should have OK
         # properties.
-        if self.redis is not None:
+        if self.redis is not None and self.queue_maxsize is not None:
             queue_size = self.redis.llen(DEFAULT_CELERY_QUEUE)
             if queue_size > self.queue_maxsize:
                 message = "Queue size is too full {0}".format(queue_size)
                 logger.warning(message)
-                raise ScoreProcessorOverloaded(message)
+                raise errors.ScoreProcessorOverloaded(message)
 
     @classmethod
     def _build_context_map(cls, config, name, section_key="scoring_systems"):

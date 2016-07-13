@@ -63,6 +63,6 @@ def test_scoring_context():
     eq_(root_ds_caches[1][fake_data], "fake")
     assert 5 in errors
 
-    score = scoring_context.process_score(
-        "fake", {characters: 10, is_fake: False})
-    eq_(score['prediction'], "generated")
+    score = scoring_context.process_model_scores(
+        ["fake"], {characters: 10, is_fake: False})
+    eq_(score['fake']['score']['prediction'], "generated")

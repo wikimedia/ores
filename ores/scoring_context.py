@@ -12,19 +12,23 @@ logger = logging.getLogger(__name__)
 
 
 class ScoringContext(dict):
+    """
+    Represents a context in which scoring can take place.  Usually, a wiki is
+    1:1 with a "ScoringContext".
+
+    :Parameters:
+        name : str
+           The name of the context in which scoring will happen.  This is
+           usually a wiki's database name.
+        model_map : dict
+           A mapping between names and
+           :class:`revscoring.ScorerModel`
+           instances
+        extractor : :class:`revscoring.Extractor`
+           An extractor to use for gathering feature values
+    """
 
     def __init__(self, name, model_map, extractor):
-        """
-        :Parameters:
-            name : str
-               The  that this scorer is being used for
-            scorer_models : dict
-               A mapping between names and
-               :class:`revscoring.ScorerModel`
-               instances
-            extractor : :class:`revscoring.Extractor`
-               An extractor to use for gathering feature values
-        """
         super().__init__()
         self.name = str(name)
         self.update(model_map)
@@ -63,7 +67,23 @@ class ScoringContext(dict):
     def model_features(self, model_name):
         return self[model_name].features
 
-    def process_model_scores(self, model_names, root_cache, include_features):
+    def process_model_scores(self, model_names, root_cache,
+                             include_features=False):
+        """
+        Generates a score map for a set of models based on a `root_cache`.
+        This method performs no substantial IO, but may incur substantial CPU
+        usage.
+
+        :Parameters:
+            model_names : `set` ( `str` )
+                A set of models to score
+            root_cache : `dict` ( `str` --> `mixed` )
+                A cache of pre-computed root_dependencies for a specific
+                revision.  See `extract_root_dependency_caches()`
+            include_features : `bool`
+                If True, include a map of basic features used in scoring along
+                with the model score.  If False, just generate the scores.
+        """
         model_scores = {}
 
         for model_name in model_names:
@@ -71,38 +91,43 @@ class ScoringContext(dict):
 
             # Mostly CPU
             model_scores[model_name]['score'] = \
-                self.process_score(model_name, dependency_cache=root_cache)
+                self._process_score(model_name, dependency_cache=root_cache)
 
             # Essentially free
             if include_features:
-                base_feature_map = self.solve_base_feature_map(
+                base_feature_map = self._solve_base_feature_map(
                     model_name, dependency_cache=root_cache)
                 model_scores[model_name]['features'] = base_feature_map
 
         return model_scores
 
-    def solve_features(self, model_name, dependency_cache=None):
+    def _solve_features(self, model_name, dependency_cache=None):
         """
+        Solves the vector (`list`) of features for a given model using
+        the `dependency_cache` and returns them.
         """
         features = self[model_name].features
         return list(self.extractor.solve(features, cache=dependency_cache))
 
-    def solve_base_feature_map(self, model_name, dependency_cache=None):
+    def _solve_base_feature_map(self, model_name, dependency_cache=None):
         """
+        Solves the leaf :class:`revscoring.Feature` from the dependency for
+        `model_name` using `dependency_cache`.  This will return a mapping
+        between the `str` name of the base features and the solved values.
         """
         features = list(trim(self[model_name].features))
         feature_values = self.extractor.solve(features, cache=dependency_cache)
         return {str(f): v
                 for f, v in zip(features, feature_values)}
 
-    def process_score(self, model_name, dependency_cache=None):
+    def _process_score(self, model_name, dependency_cache=None):
         """
+        Generates a score for a given model using the `dependency_cache`.
         """
         version = self[model_name].version
 
         start = time.time()
-        feature_values = list(self.solve_features(
-            model_name, dependency_cache))
+        feature_values = self._solve_features(model_name, dependency_cache)
         logger.debug("Extracted features for {0}:{1}:{2} in {3} secs"
                      .format(self.name, model_name, version,
                              time.time() - start))
@@ -124,12 +149,15 @@ class ScoringContext(dict):
     def extract_root_dependency_caches(
             self, model_names, rev_ids, injection_caches=None):
         """
-        Extracts a mapping of root datasources capable of generating the
-        features needed for a particular set of models.
+        Extracts a mapping of root :class:`revscoring.Datasource`
+        capable of generating the features needed for a particular set of
+        models without additional IO.  This method implements all of the IO
+        heavy operations.  The roots dependency caches produced by calling
+        this method can then be passed to `process_model_scores()` for scoring.
 
         :Parameters:
             model_names : `list` ( `str` )
-                The names of a :class:`~revscoring.ScorerModel` to
+                The names of a :class:`revscoring.ScorerModel` to
                 extract the roots dependencies for
         """
         # Make a copy of dependency_caches
@@ -137,8 +165,7 @@ class ScoringContext(dict):
         for rev_id in rev_ids:
             injection_cache = injection_caches.get(rev_id) \
                               if injection_caches is not None else {}
-            root_caches[rev_id] = {key: value
-                                   for key, value in injection_cache.items()}
+            root_caches[rev_id] = dict(injection_cache.items())
 
         # Find our root datasources
         root_datasources = \
@@ -151,7 +178,7 @@ class ScoringContext(dict):
 
         # Check each extraction for errors
         errors = {}
-        for rev_id, (error, root_vals) in zip(rev_ids, error_root_vals):
+        for rev_id, (error, _) in zip(rev_ids, error_root_vals):
             if error is not None:
                 errors[rev_id] = error
                 del root_caches[rev_id]
@@ -201,6 +228,14 @@ class ScoringContext(dict):
 
 
 class ClientScoringContext(ScoringContext):
+    """
+    A simplistic scoring context that is not capable of performing the scoring
+    itself.  This ScoringContext is intended to be used in clients where an
+    external service actually implements the scoring pattern
+    (e.g. :class:`ores.scoring_systems.CeleryQueue`).  This ScoringContext
+    saves on unnecessary memory usage, but still provides access to basic
+    informational functionality.
+    """
 
     def __init__(self, name, model_map, *args, **kwargs):
         # Load an empty model map
@@ -222,3 +257,6 @@ class ClientScoringContext(ScoringContext):
 
     def model_features(self, model_name):
         return self.features_map[model_name]
+
+    def process_score(self, *args, **kwargs):
+        raise NotImplementedError()
