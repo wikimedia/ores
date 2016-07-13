@@ -26,5 +26,10 @@ def not_found(message=None):
 
 def server_overloaded(message=None):
     return error(503, 'server overloaded',
-                 "Cannot process your request because the server is " +
-                 "overloaded.  Try again in a few minutes.")
+                 message or ("Cannot process your request because the " +
+                             "server is overloaded.  Try again in a" +
+                             "few minutes."))
+
+
+def unknown_error(message):
+    return error(500, 'internal server error', message)

@@ -1,4 +1,5 @@
 from collections import defaultdict
+import traceback
 
 from flask import request
 from flask.ext.jsonpify import jsonify
@@ -70,6 +71,8 @@ def configure(config, bp, score_processor):
                     scores[rev_id][model] = model_scores[rev_id]
         except errors.ScoreProcessorOverloaded:
             return responses.server_overloaded()
+        except Exception:
+            return responses.unknown_error(traceback.format_exc())
 
         return jsonify(scores)
 
@@ -105,6 +108,9 @@ def configure(config, bp, score_processor):
                                                     precache=precache)
         except errors.ScoreProcessorOverloaded:
             return responses.server_overloaded()
+        except Exception:
+            return responses.unknown_error(traceback.format_exc())
+
         return jsonify(model_scores)
 
     # /scores/enwiki/reverted/4567890
@@ -128,6 +134,8 @@ def configure(config, bp, score_processor):
                                                     precache=precache)
         except errors.ScoreProcessorOverloaded:
             return responses.server_overloaded()
+        except Exception:
+            return responses.unknown_error(traceback.format_exc())
 
         return jsonify(model_scores)
 
