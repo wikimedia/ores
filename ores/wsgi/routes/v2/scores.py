@@ -1,3 +1,5 @@
+import traceback
+
 from flask import request
 from flask.ext.jsonpify import jsonify
 
@@ -107,6 +109,8 @@ def configure(config, bp, score_processor):
                     scores_doc[context][model]['scores'] = model_scores
             except errors.ScoreProcessorOverloaded:
                 return responses.server_overloaded()
+            except Exception:
+                return responses.unknown_error(traceback.format_exc())
 
         return jsonify({'scores': scores_doc})
 
@@ -157,6 +161,8 @@ def configure(config, bp, score_processor):
                 scores_doc[context][model]['scores'] = model_scores
             except errors.ScoreProcessorOverloaded:
                 return responses.server_overloaded()
+            except Exception:
+                return responses.unknown_error(traceback.format_exc())
 
         return jsonify({'scores': scores_doc})
 
@@ -210,6 +216,8 @@ def configure(config, bp, score_processor):
                 scores_doc[context][model]['features'] = feature_values
         except errors.ScoreProcessorOverloaded:
             return responses.server_overloaded()
+        except Exception:
+            return responses.unknown_error(traceback.format_exc())
 
         return jsonify({'scores': scores_doc})
 
