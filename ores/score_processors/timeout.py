@@ -7,6 +7,7 @@ import stopit
 from ..metrics_collectors import MetricsCollector
 from ..score_caches import ScoreCache
 from .score_processor import SimpleScoreProcessor
+from ..errors import TimeoutError
 
 logger = logging.getLogger(__name__)
 
@@ -49,10 +50,6 @@ class Timeout(SimpleScoreProcessor):
 
         return cls(scoring_contexts, score_cache=score_cache,
                    metrics_collector=metrics_collector, timeout=timeout)
-
-
-class TimeoutError(Exception):
-    pass
 
 
 def timeout(func, *args, seconds=None, **kwargs):

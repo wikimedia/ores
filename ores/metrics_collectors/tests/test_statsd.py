@@ -29,8 +29,9 @@ def test_statsd():
     collector.scores_request("foo", "bar", "0.0.1", 50, 150)
     collector.datasources_extracted("foo", "bar", "0.0.1", 10, 25)
     collector.score_processed("foo", "bar", "0.0.1", 1.1)
-    collector.score_cache_hit("foo", "bar", "0.0.1", 2)
+    collector.score_cache_hit("foo", "bar", "0.0.1")
     collector.score_errored("foo", "bar", "0.0.1")
+    collector.score_timed_out("foo", "bar", "0.0.1")
 
     eq_(fake_client.messages,
         [('TIMING', 'precache_request.foo.bar.0.0.1', 100000),
@@ -55,14 +56,18 @@ def test_statsd():
          ('TIMING', 'score_processed.foo.bar', 1100),
          ('TIMING', 'score_processed.foo', 1100),
          ('TIMING', 'score_processed', 1100),
-         ('INCR', 'score_cache_hit.foo.bar.0.0.1', 2),
-         ('INCR', 'score_cache_hit.foo.bar', 2),
-         ('INCR', 'score_cache_hit.foo', 2),
-         ('INCR', 'score_cache_hit', 2),
+         ('INCR', 'score_cache_hit.foo.bar.0.0.1', 1),
+         ('INCR', 'score_cache_hit.foo.bar', 1),
+         ('INCR', 'score_cache_hit.foo', 1),
+         ('INCR', 'score_cache_hit', 1),
          ('INCR', 'score_errored.foo.bar.0.0.1', 1),
          ('INCR', 'score_errored.foo.bar', 1),
          ('INCR', 'score_errored.foo', 1),
-         ('INCR', 'score_errored', 1)])
+         ('INCR', 'score_errored', 1),
+         ('INCR', 'score_timed_out.foo.bar.0.0.1', 1),
+         ('INCR', 'score_timed_out.foo.bar', 1),
+         ('INCR', 'score_timed_out.foo', 1),
+         ('INCR', 'score_timed_out', 1)])
 
 
 @raises(socket.gaierror)

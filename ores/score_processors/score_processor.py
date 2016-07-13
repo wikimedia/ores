@@ -6,6 +6,7 @@ from .. import errors
 from ..metrics_collectors import Null
 from ..score_caches import Empty
 from ..util import jsonify_error
+from ..errors import TimeoutError
 
 logger = logging.getLogger(__name__)
 
@@ -93,6 +94,11 @@ class ScoreProcessor(dict):
                          .format(context, model, version, duration))
             self.metrics_collector.score_processed(context, model, version,
                                                    duration)
+        except TimeoutError:
+            self.metrics_collector.score_timed_out(context, model, version)
+            logger.error("Timed out while scoring {0}:{1}:{2}"
+                         .format(context, model, version))
+            raise
         except:
             self.metrics_collector.score_errored(context, model, version)
             logger.error("Errored while scoring {0}:{1}:{2}"

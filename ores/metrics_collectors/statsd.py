@@ -16,100 +16,44 @@ class Statsd(MetricsCollector):
         self.statsd_client = statsd_client
 
     def precache_request(self, context, model, version, duration):
-        with self.statsd_client.pipeline() as pipe:
-            pipe.timing("precache_request.{0}.{1}.{2}"
-                        .format(context, model, version),
-                        duration * 1000)
-            pipe.timing("precache_request.{0}.{1}".format(context, model),
-                        duration * 1000)
-            pipe.timing("precache_request.{0}".format(context),
-                        duration * 1000)
-            pipe.timing("precache_request",
-                        duration * 1000)
+        self.send_timing_event(('precache_request', context, model, version), duration)
 
     def scores_request(self, context, model, version, rev_id_count, duration):
-        with self.statsd_client.pipeline() as pipe:
-            pipe.timing("scores_request.{0}.{1}.{2}.{3}"
-                        .format(context, model, version, rev_id_count),
-                        duration * 1000)
-            pipe.timing("scores_request.{0}.{1}.{2}"
-                        .format(context, model, version),
-                        duration * 1000)
-            pipe.timing("scores_request.{0}.{1}".format(context, model),
-                        duration * 1000)
-            pipe.timing("scores_request.{0}".format(context),
-                        duration * 1000)
-            pipe.timing("scores_request",
-                        duration * 1000)
-            pipe.incr("revision_scored.{0}.{1}.{2}"
-                        .format(context, model, version),
-                      count=rev_id_count)
-            pipe.incr("revision_scored.{0}.{1}".format(context, model),
-                      count=rev_id_count)
-            pipe.incr("revision_scored.{0}".format(context),
-                      count=rev_id_count)
-            pipe.incr("revision_scored", count=rev_id_count)
+        self.send_timing_event(('scores_request', context, model, version, rev_id_count), duration)
+        self.send_increment_event(('revision_scored', context, model, version), count=rev_id_count)
 
-    def datasources_extracted(self, context, model, version, rev_id_count,
-                              duration):
-        with self.statsd_client.pipeline() as pipe:
-            pipe.timing("datasources_extracted.{0}.{1}.{2}.{3}"
-                        .format(context, model, version, rev_id_count),
-                        duration * 1000)
-            pipe.timing("datasources_extracted.{0}.{1}.{2}"
-                        .format(context, model, version),
-                        duration * 1000)
-            pipe.timing("datasources_extracted.{0}.{1}"
-                        .format(context, model),
-                        duration * 1000)
-            pipe.timing("datasources_extracted.{0}".format(context),
-                        duration * 1000)
-            pipe.timing("datasources_extracted",
-                        duration * 1000)
+    def datasources_extracted(self, context, model, version, rev_id_count, duration):
+        self.send_timing_event(('datasources_extracted', context, model, version, rev_id_count), duration)
 
     def score_processed(self, context, model, version, duration):
-        with self.statsd_client.pipeline() as pipe:
-            pipe.timing("score_processed.{0}.{1}.{2}"
-                        .format(context, model, version),
-                        duration * 1000)
-            pipe.timing("score_processed.{0}.{1}".format(context, model),
-                        duration * 1000)
-            pipe.timing("score_processed.{0}".format(context),
-                        duration * 1000)
-            pipe.timing("score_processed", duration * 1000)
+        self.send_timing_event(('score_processed', context, model, version), duration)
 
-    def score_processor_overloaded(self, context, model, version, count=1):
-        with self.statsd_client.pipeline() as pipe:
-            pipe.incr("score_processor_overloaded.{0}.{1}.{2}"
-                      .format(context, model, version),
-                      count=count)
-            pipe.incr("score_processor_overloaded.{0}.{1}"
-                      .format(context, model),
-                      count=count)
-            pipe.incr("score_processor_overloaded.{0}".format(context),
-                      count=count)
-            pipe.incr("score_processor_overloaded",
-                      count=count)
+    def score_processor_overloaded(self, context, model, version):
+        self.send_increment_event(('score_processor_overloaded', context, model, version))
 
-    def score_cache_hit(self, context, model, version, count=1):
-        with self.statsd_client.pipeline() as pipe:
-            pipe.incr("score_cache_hit.{0}.{1}.{2}"
-                      .format(context, model, version),
-                      count=count)
-            pipe.incr("score_cache_hit.{0}.{1}".format(context, model),
-                      count=count)
-            pipe.incr("score_cache_hit.{0}".format(context), count=count)
-            pipe.incr("score_cache_hit".format(context), count=count)
+    def score_cache_hit(self, context, model, version):
+        self.send_increment_event(('score_cache_hit', context, model, version))
 
-    def score_errored(self, context, model, version, count=1):
+    def score_errored(self, context, model, version):
+        self.send_increment_event(('score_errored', context, model, version))
+
+    def score_timed_out(self, context, model, version):
+        self.send_increment_event(('score_timed_out', context, model, version))
+
+    def send_timing_event(self, message_parts, duration_seconds):
         with self.statsd_client.pipeline() as pipe:
-            pipe.incr("score_errored.{0}.{1}.{2}"
-                      .format(context, model, version),
-                      count=count)
-            pipe.incr("score_errored.{0}.{1}".format(context, model),
-                      count=count)
-            pipe.incr("score_errored.{0}".format(context), count=count)
-            pipe.incr("score_errored".format(context), count=count)
+            for message in self.get_messages_from_parts(message_parts):
+                pipe.timing(message, duration_seconds * 1000)
+
+    def send_increment_event(self, message_parts, count=1):
+        with self.statsd_client.pipeline() as pipe:
+            for message in self.get_messages_from_parts(message_parts):
+                pipe.incr(message, count=count)
+
+    @classmethod
+    def get_messages_from_parts(cls, message_parts):
+        for i in range(len(message_parts)):
+            yield '.'.join(['{}'] * (len(message_parts) - i)).format(*message_parts)
 
     @classmethod
     def from_parameters(cls, *args, **kwargs):
