@@ -5,6 +5,7 @@ from itertools import chain
 
 import celery
 import celery.exceptions
+import celery.states
 import mwapi.errors
 import revscoring.errors
 from celery.signals import before_task_publish
@@ -17,6 +18,8 @@ logger = logging.getLogger(__name__)
 _applications = []
 
 DEFAULT_CELERY_QUEUE = "celery"
+SENT = "SENT"
+REQUESTED = "REQUESTED"
 
 
 @before_task_publish.connect
@@ -25,8 +28,8 @@ def update_sent_state(sender=None, body=None, **kwargs):
         task = application.tasks.get(sender)
         backend = task.backend if task else application.backend
 
-        logger.debug("Setting state to 'SENT' for {0}".format(body['id']))
-        backend.store_result(body['id'], result=None, status="SENT")
+        logger.debug("Setting state to {0} for {1}".format(SENT, body['id']))
+        backend.store_result(body['id'], result=None, status=SENT)
 
 
 class CeleryQueue(ScoringSystem):
@@ -173,8 +176,9 @@ class CeleryQueue(ScoringSystem):
                     model_name, rev_id, injection_cache=injection_cache)
                 score_result = \
                     self._lookup_score_in_map.AsyncResult(task_id)
-                if score_result.state in ("REQUESTED", "SENT", "STARTED",
-                                          "SUCCESS"):
+                if score_result.state in (REQUESTED, SENT,
+                                          celery.states.STARTED,
+                                          celery.states.SUCCESS):
                     logger.info("Found in-progress result for {0} -- {1}"
                                 .format(task_id, score_result.state))
                     if rev_id in inprogress_results:
@@ -196,7 +200,7 @@ class CeleryQueue(ScoringSystem):
                     task_id = context.format_id_string(
                         model_name, rev_id, injection_cache=injection_cache)
                     self.application.backend.store_result(
-                        task_id, {}, 'REQUESTED')
+                        task_id, {}, REQUESTED)
 
     def _score(self, *args, **kwargs):
         self._check_queue_full()
