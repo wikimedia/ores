@@ -130,13 +130,13 @@ class ScoringContext(dict):
         feature_values = self._solve_features(model_name, dependency_cache)
         logger.debug("Extracted features for {0}:{1}:{2} in {3} secs"
                      .format(self.name, model_name, version,
-                             time.time() - start))
+                             round(time.time() - start, 3)))
 
         start = time.time()
         score = self[model_name].score(feature_values)
         logger.debug("Scored features for {0}:{1}:{2} in {3} secs"
                      .format(self.name, model_name, version,
-                             time.time() - start))
+                             round(time.time() - start, 3)))
 
         return score
 

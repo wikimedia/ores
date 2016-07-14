@@ -24,15 +24,6 @@ class MetricsCollector:
     def score_processed(self, context_name, model_names, duration):
         raise NotImplementedError()
 
-    def score_cache_hit(self, context, model, version):
-        raise NotImplementedError()
-
-    def score_errored(self, context, model, version):
-        raise NotImplementedError()
-
-    def score_timed_out(self, context_name, model_names, duration):
-        raise NotImplementedError()
-
     def score_cache_hit(self, context_name, model_name):
         raise NotImplementedError()
 
@@ -40,6 +31,9 @@ class MetricsCollector:
         raise NotImplementedError()
 
     def score_errored(self, context_name, model_names):
+        raise NotImplementedError()
+
+    def score_timed_out(self, context_name, model_names, duration):
         raise NotImplementedError()
 
     @classmethod

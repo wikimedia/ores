@@ -4,6 +4,7 @@ from .metrics_collector import MetricsCollector
 
 from .util import format_set
 
+
 class Logger(MetricsCollector):
     """
     A metrics collector that uses :mod:`logging` to report usage metrics.
@@ -48,13 +49,13 @@ class Logger(MetricsCollector):
             "score_timed_out: {0}:{1} in {2} seconds"
             .format(context_name, format_set(model_names), round(duration, 3)))
 
-    def score_cache_hit(self, context_name, model_names):
+    def score_cache_hit(self, context_name, model_name):
         self.logger.debug("score_cache_hit: {0}:{1}"
-                          .format(context_name, format_set(model_names)))
+                          .format(context_name, model_name))
 
-    def score_cache_miss(self, context_name, model_names):
+    def score_cache_miss(self, context_name, model_name):
         self.logger.debug("score_cache_miss: {0}:{1}"
-                          .format(context_name, format_set(model_names)))
+                          .format(context_name, model_name))
 
     def score_errored(self, context_name, model_names):
         self.logger.debug("score_errored: {0}:{1}"

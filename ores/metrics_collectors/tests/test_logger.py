@@ -16,8 +16,8 @@ def test_logger():
     collector.datasources_extracted("foo", {"bar"}, 10, 25)
     collector.score_processed("foo", {"bar"}, 1.1)
     collector.score_timed_out("foo", {"bar"}, 15.1)
-    collector.score_cache_miss("foo", {"bar", "derp"})
-    collector.score_cache_hit("foo", {"bar"})
+    collector.score_cache_miss("foo", "derp")
+    collector.score_cache_hit("foo", "bar")
     collector.score_errored("foo", {"bar"})
 
     eq_(set(messages),
@@ -26,8 +26,8 @@ def test_logger():
          "datasources_extracted: foo:{'bar'} for 10 revisions in 25 secs",
          "score_processed: foo:{'bar'} in 1.1 seconds",
          "score_timed_out: foo:{'bar'} in 15.1 seconds",
-         "score_cache_miss: foo:{'bar', 'derp'}",
-         "score_cache_hit: foo:{'bar'}",
+         "score_cache_miss: foo:derp",
+         "score_cache_hit: foo:bar",
          "score_errored: foo:{'bar'}"},
         set())
 
