@@ -10,8 +10,8 @@ def test_null():
     collector.datasources_extracted("foo", {"bar"}, 10, 25)
     collector.score_processed("foo", {"bar"}, 1.1)
     collector.score_timed_out("foo", {"bar"}, 15.1)
-    collector.score_cache_miss("foo", {"bar", "derp"}, 1)
-    collector.score_cache_hit("foo", {"bar"}, 2)
+    collector.score_cache_miss("foo", "bar")
+    collector.score_cache_hit("foo", "bar")
     collector.score_errored("foo", {"bar"})
 
 

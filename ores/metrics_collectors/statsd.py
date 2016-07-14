@@ -19,13 +19,14 @@ class Statsd(MetricsCollector):
         self.send_timing_event('precache_request', context, model_names,
                                duration=duration)
 
-    def scores_request(self, context, model, rev_id_count, duration):
-        self.send_timing_event('scores_request', context, model, rev_id_count,
-                               duration=duration)
-        self.send_increment_event('scores_request', context, model,
+    def scores_request(self, context, model_names, rev_id_count, duration):
+        self.send_timing_event('scores_request', context, model_names,
+                               rev_id_count, duration=duration)
+        self.send_increment_event('revision_scored', context, model_names,
                                   count=rev_id_count)
 
-    def datasources_extracted(self, context, model_names, rev_id_count, duration):
+    def datasources_extracted(self, context, model_names, rev_id_count,
+                              duration):
         self.send_timing_event('datasources_extracted', context, model_names,
                                rev_id_count, duration=duration)
 
@@ -84,7 +85,7 @@ class Statsd(MetricsCollector):
 
         if i < len(parts):
             for bpart in cls.branch_message_part(parts[i]):
-                yield from cls.generate_messages_parts(
+                yield from cls.generate_message_parts(
                     parts, i=i + 1, message=message + [bpart])
 
     @classmethod
