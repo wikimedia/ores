@@ -14,7 +14,8 @@ def configure(config, bp, score_processor):
 
     @bp.route("/", methods=["GET"])
     def index():
-        return render_template("home.html")
+        return render_template(
+            "home.html", **config['ores'].get('home', {}))
 
     @bp.route("/favicon.ico", methods=["GET"])
     def favicon():
