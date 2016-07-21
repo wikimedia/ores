@@ -4,6 +4,10 @@ ores:
   wsgi:
     application_root: ""
     url_prefix: ""
+  home:
+    footer: >
+      Hosted on localhost &amp; written in
+      <a href="https://python.org">Python 3</a>
 
 # Caching options
 score_caches:
