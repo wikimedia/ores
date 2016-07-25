@@ -243,9 +243,9 @@ class ScoringSystem(dict):
                         context_name, model_name, rev_id,
                         injection_cache=injection_cache)
                     if rev_id in rev_scores:
-                        rev_scores[rev_id][model_name] = rev_score
+                        rev_scores[rev_id][model_name] = {'score': rev_score}
                     else:
-                        rev_scores[rev_id] = {model_name: rev_score}
+                        rev_scores[rev_id] = {model_name: {'score': rev_score}}
                 except KeyError:
                     pass
 
