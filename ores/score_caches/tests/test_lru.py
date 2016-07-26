@@ -27,13 +27,14 @@ def test_lru_cache():
     cache_context = lru.context("foo", "bar")
 
     cache_context.store(1, "foo")
-    cache_context.store(1, "cachedfoo", cache={"cachedvalue": 1})
+    cache_context.store(1, "cachedfoo", injection_cache={"cachedvalue": 1})
 
-    eq_(cache_context.lookup(1, cache={"cachedvalue": 1}), "cachedfoo")
+    eq_(cache_context.lookup(1, injection_cache={"cachedvalue": 1}),
+        "cachedfoo")
     eq_(cache_context.lookup(1), "foo")
 
     # Raises KeyError
-    cache_context.lookup(1, cache={"cachedvalue": 2})
+    cache_context.lookup(1, injection_cache={"cachedvalue": 2})
 
 
 def test_from_config():

@@ -1,4 +1,4 @@
-from collections import defaultdict, namedtuple
+from collections import namedtuple
 
 from nose.tools import eq_
 from revscoring import dependencies
@@ -24,19 +24,21 @@ def test_scoring_context():
     FakeExtractor = namedtuple("Extractor", ['extract', 'solve', 'language'])
 
     def fake_extract(rev_ids, dependents, caches=None):
-        caches = caches or defaultdict(dict)
+        caches = caches if caches is not None else {}
         for rev_id in rev_ids:
-            cache = caches[rev_id]
             if rev_id % 5 != 0:
+                cache = caches.get(rev_id, {})
                 values = dependencies.solve(dependents,
                                             context={len_func: lambda: len},
                                             cache=cache)
-                yield None, list(values)
+                values = list(values)
+                caches[rev_id] = cache
+                yield None, values
             else:
                 yield RuntimeError("extract"), None
 
     def fake_solve(dependents, cache=None):
-        cache = cache or {}
+        cache = cache if cache is not None else {}
         cache.update({len_func: len,
                       literal_fake: "fake"})
         return dependencies.solve(dependents, cache=cache)
@@ -52,10 +54,15 @@ def test_scoring_context():
                                      extractor)
 
     rev_ids = [1, 2, 3, 4, 5]
-    root_ds_caches = scoring_context.extract_roots("fake", rev_ids)
-    eq_(len(root_ds_caches), 5)
-    eq_(root_ds_caches[1][1][fake_data], "fake")
-    assert root_ds_caches[5][0] is not None
+    root_ds_caches, errors = scoring_context.extract_root_dependency_caches(
+        ["fake"], rev_ids)
+    print(root_ds_caches)
+    print(errors)
+    eq_(len(root_ds_caches), 4)
+    eq_(len(errors), 1)
+    eq_(root_ds_caches[1][fake_data], "fake")
+    assert 5 in errors
 
-    score, feature_vals = scoring_context.score("fake", {characters: 10, is_fake: False})
-    eq_(score['prediction'], "generated")
+    score = scoring_context.process_model_scores(
+        ["fake"], {characters: 10, is_fake: False})
+    eq_(score['fake']['score']['prediction'], "generated")

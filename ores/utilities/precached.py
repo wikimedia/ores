@@ -76,8 +76,8 @@ def run(stream_url, ores_url, config, delay, notify, verbose):
         logger.info('Not being ran as a service, watchdog disabled')
     # Build a mapping of wikis and models from the configuration
     score_on = defaultdict(list)
-    sp_name = config['ores']['score_processor']
-    for context in config['score_processors'][sp_name]['scoring_contexts']:
+    ss_name = config['ores']['scoring_system']
+    for context in config['scoring_systems'][ss_name]['scoring_contexts']:
         for model in config['scoring_contexts'][context].get('precache', []):
             precached_config = \
                 config['scoring_contexts'][context]['precache'][model]
@@ -92,9 +92,11 @@ def run(stream_url, ores_url, config, delay, notify, verbose):
                 logger.debug("Setting up precaching for {0} in {1} on {2}"
                              .format(model, context, event))
 
-    def get_score(wiki, model, rev_id):
-        url = ores_url + "/scores/" + wiki + "/" + model + \
-              "/" + str(rev_id) + "/?precache=true"
+    def score_revision(wiki, models, rev_id):
+        url = ores_url + "/scores/" + wiki + "/" + \
+              "?models=" + "|".join(models) + \
+              "&revids=" + str(rev_id) + \
+              "&precache=true"
         try:
             time.sleep(delay)
             start = time.time()
@@ -112,12 +114,12 @@ def run(stream_url, ores_url, config, delay, notify, verbose):
                 if change['type'] in ('new', 'edit'):
                     wikidb = change['wiki']
                     rev_id = change['revision']['new']
-                    for model in score_on[('edit', wikidb)]:
-                        executor.submit(get_score, wikidb, model, rev_id)
+                    models = score_on[('edit', wikidb)]
+                    executor.submit(score_revision, wikidb, models, rev_id)
 
                     if not change.get('bot'):
-                        for model in score_on[('nonbot_edit', wikidb)]:
-                            executor.submit(get_score, wikidb, model, rev_id)
+                        models = score_on[('nonbot_edit', wikidb)]
+                        executor.submit(score_revision, wikidb, models, rev_id)
 
             def on_connect(self):
                 logger.info("Connecting socketIO client to {0}."

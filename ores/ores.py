@@ -1,9 +1,6 @@
 """
 This script provides access to a set of utilities for ORES
 
-* label_reverted -- Labels reverted revisions
-* dev_server -- Starts a development WSGI server
-* celery_worker -- Starts a "ScoreProcessor" celery worker
 * precached -- Starts a daemon that requests scores for revisions as they happen
 
 You can also launch a set of production like applications

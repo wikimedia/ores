@@ -15,45 +15,86 @@ class Statsd(MetricsCollector):
     def __init__(self, statsd_client):
         self.statsd_client = statsd_client
 
-    def precache_request(self, context, model, version, duration):
-        self.send_timing_event(('precache_request', context, model, version), duration)
+    def precache_request(self, context, model_names, duration):
+        self.send_timing_event('precache_request', context, model_names,
+                               duration=duration)
 
-    def scores_request(self, context, model, version, rev_id_count, duration):
-        self.send_timing_event(('scores_request', context, model, version, rev_id_count), duration)
-        self.send_increment_event(('revision_scored', context, model, version), count=rev_id_count)
+    def scores_request(self, context, model_names, rev_id_count, duration):
+        self.send_timing_event('scores_request', context, model_names,
+                               rev_id_count, duration=duration)
+        self.send_increment_event('revision_scored', context, model_names,
+                                  count=rev_id_count)
 
-    def datasources_extracted(self, context, model, version, rev_id_count, duration):
-        self.send_timing_event(('datasources_extracted', context, model, version, rev_id_count), duration)
+    def datasources_extracted(self, context, model_names, rev_id_count,
+                              duration):
+        self.send_timing_event('datasources_extracted', context, model_names,
+                               rev_id_count, duration=duration)
 
-    def score_processed(self, context, model, version, duration):
-        self.send_timing_event(('score_processed', context, model, version), duration)
+    def score_processed(self, context, model_names, duration):
+        self.send_timing_event('score_processed', context, model_names,
+                               duration=duration)
 
-    def score_processor_overloaded(self, context, model, version):
-        self.send_increment_event(('score_processor_overloaded', context, model, version))
+    def score_processor_overloaded(self, context, model_names):
+        self.send_increment_event('score_processor_overloaded', context,
+                                  model_names)
 
-    def score_cache_hit(self, context, model, version):
-        self.send_increment_event(('score_cache_hit', context, model, version))
+    def score_cache_hit(self, context, model_name):
+        self.send_increment_event('score_cache_hit', context, model_name)
 
-    def score_errored(self, context, model, version):
-        self.send_increment_event(('score_errored', context, model, version))
+    def score_cache_miss(self, context, model_name):
+        self.send_increment_event('score_cache_miss', context, model_name)
 
-    def score_timed_out(self, context, model, version):
-        self.send_increment_event(('score_timed_out', context, model, version))
+    def score_errored(self, context, model_names):
+        self.send_increment_event('score_errored', context, model_names)
 
-    def send_timing_event(self, message_parts, duration_seconds):
+    def score_timed_out(self, context, model_names, duration):
+        self.send_timing_event('score_timed_out', context, model_names,
+                               duration=duration)
+
+    def send_timing_event(self, *message_parts, duration=None):
         with self.statsd_client.pipeline() as pipe:
-            for message in self.get_messages_from_parts(message_parts):
-                pipe.timing(message, duration_seconds * 1000)
+            for message in self.generate_messages(message_parts):
+                pipe.timing(message, duration * 1000)
 
-    def send_increment_event(self, message_parts, count=1):
+    def send_increment_event(self, *message_parts, count=1):
         with self.statsd_client.pipeline() as pipe:
-            for message in self.get_messages_from_parts(message_parts):
+            for message in self.generate_messages(message_parts):
                 pipe.incr(message, count=count)
 
     @classmethod
-    def get_messages_from_parts(cls, message_parts):
-        for i in range(len(message_parts)):
-            yield '.'.join(['{}'] * (len(message_parts) - i)).format(*message_parts)
+    def generate_messages(cls, parts):
+        """
+        Performs a deterministic first walk of the tree implied by a list of
+        message parts.
+
+        generate_messages(["foo", "bar", ["herp", "derp"], "baz"]) yields:
+        * "foo"
+        * "foo.bar"
+        * "foo.bar.herp"
+        * "foo.bar.herp.baz"
+        * "foo.bar.derp"
+        * "foo.bar.derp.baz"
+        """
+        for message_parts in cls.generate_message_parts(parts):
+            yield ".".join(message_parts)
+
+    @classmethod
+    def generate_message_parts(cls, parts, i=0, message=[]):
+        if len(message) > 0:
+            yield message
+
+        if i < len(parts):
+            for bpart in cls.branch_message_part(parts[i]):
+                yield from cls.generate_message_parts(
+                    parts, i=i + 1, message=message + [bpart])
+
+    @classmethod
+    def branch_message_part(cls, part):
+        if not isinstance(part, str) and \
+           hasattr(part, "__iter__"):
+            return (str(p) for p in sorted(part))
+        else:
+            return [str(part)]
 
     @classmethod
     def from_parameters(cls, *args, **kwargs):
