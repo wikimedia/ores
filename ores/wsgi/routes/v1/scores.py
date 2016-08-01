@@ -145,7 +145,7 @@ def convert_score_doc(score_doc):
                 error_doc = rev_score_error
                 v1_score_doc[model_name][rev_id] = error_doc
             else:
-                rev_score = rev_score_error
-                v1_score_doc[model_name][rev_id] = rev_score[model_name]
+                rev_score = rev_score_error[model_name]['score']
+                v1_score_doc[model_name][rev_id] = rev_score
 
     return v1_score_doc
