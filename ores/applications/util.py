@@ -1,10 +1,13 @@
 import glob
 import os.path
 import yamlconf
+import logging
 import logging.config
 
 DEFAULT_DIRS = ["config/", "/etc/ores/"]
 
+
+logger = logging.getLogger(__name__)
 
 def build_config(config_dirs=DEFAULT_DIRS,
                  logging_config="logging_config.yaml"):
@@ -15,6 +18,7 @@ def build_config(config_dirs=DEFAULT_DIRS,
         config_file_paths.extend((os.path.basename(path), path)
                                  for path in glob.glob(dir_glob))
     config_file_paths.sort()
+    logger.info("Loading configs from {0}".format(config_file_paths))
     config = yamlconf.load(*(open(p) for fn, p in config_file_paths))
 
     # Load logging config if specified

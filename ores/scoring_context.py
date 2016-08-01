@@ -1,5 +1,6 @@
 import logging
 import time
+import sys
 from hashlib import sha1
 
 from revscoring import dependencies
@@ -214,7 +215,7 @@ class ScoringContext(dict):
                 enwiki_damaging_2014: ...
                 enwiki_good-faith_2014: ...
         """
-        logger.info("Loading ScoringContext '{0}' from config.".format(name))
+        logger.info("Loading {0} '{1}' from config.".format(cls.__name__, name))
         section = config[section_key][name]
 
         model_map = {}

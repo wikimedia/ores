@@ -255,7 +255,7 @@ class CeleryQueue(ScoringSystem):
 
 
 PASS_HOST_PORT = re.compile(
-    r"((?P<password>[^@]+)@)?" +
+    r"(:(?P<password>[^@]+)@)?" +
     r"(?P<host>[^:]+)?" +
     r"(:(?P<port>[0-9]+))?"
 )
