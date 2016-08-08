@@ -65,7 +65,7 @@ def configure(config, bp, scoring_system):
         try:
             score_doc = scoring_system.score(
                 context, models, rev_ids, precache=precache)
-            return jsonify(convert_score_doc(score_doc))
+            return jsonify(convert_score_doc(score_doc, model_flip=True))
         except errors.ScoreProcessorOverloaded:
             return responses.server_overloaded()
         except Exception:
@@ -136,16 +136,28 @@ def configure(config, bp, scoring_system):
     return bp
 
 
-def convert_score_doc(score_doc):
+def convert_score_doc(score_doc, model_flip=False):
     v1_score_doc = {}
-    for model_name in score_doc['models']:
-        v1_score_doc[model_name] = {}
+    if not model_flip:
+        for model_name in score_doc['models']:
+            v1_score_doc[model_name] = {}
+            for rev_id, rev_score_error in score_doc['scores'].items():
+                if 'error' in rev_score_error:
+                    error_doc = rev_score_error
+                    v1_score_doc[model_name][rev_id] = error_doc
+                else:
+                    rev_score = rev_score_error[model_name]['score']
+                    v1_score_doc[model_name][rev_id] = rev_score
+    else:
         for rev_id, rev_score_error in score_doc['scores'].items():
+            v1_score_doc[rev_id] = {}
             if 'error' in rev_score_error:
                 error_doc = rev_score_error
-                v1_score_doc[model_name][rev_id] = error_doc
+                for model_name in score_doc['models']:
+                    v1_score_doc[rev_id][model_name] = error_doc
             else:
-                rev_score = rev_score_error[model_name]['score']
-                v1_score_doc[model_name][rev_id] = rev_score
+                for model_name in score_doc['models']:
+                    v1_score_doc[rev_id][model_name] = \
+                        rev_score_error[model_name]['score']
 
     return v1_score_doc
