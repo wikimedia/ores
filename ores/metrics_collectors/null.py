@@ -21,9 +21,6 @@ class Null(MetricsCollector):
     def score_processed(self, context, model_names, duration):
         pass
 
-    def score_timed_out(self, context, model_names, duration):
-        pass
-
     def score_cache_hit(self, context, model_name):
         pass
 
@@ -31,6 +28,15 @@ class Null(MetricsCollector):
         pass
 
     def score_errored(self, context, model_names):
+        pass
+
+    def score_timed_out(self, context, model_names, duration):
+        pass
+
+    def precache_scores(self, context_name, model_names, duration):
+        pass
+
+    def precache_scoring_error(self, context_name, model_names, status, duration):
         pass
 
     @classmethod

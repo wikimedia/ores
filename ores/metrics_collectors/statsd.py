@@ -15,41 +15,49 @@ class Statsd(MetricsCollector):
     def __init__(self, statsd_client):
         self.statsd_client = statsd_client
 
-    def precache_request(self, context, model_names, duration):
-        self.send_timing_event('precache_request', context, model_names,
+    def precache_request(self, context_name, model_names, duration):
+        self.send_timing_event('precache_request', context_name, model_names,
                                duration=duration)
 
-    def scores_request(self, context, model_names, rev_id_count, duration):
-        self.send_timing_event('scores_request', context, model_names,
+    def scores_request(self, context_name, model_names, rev_id_count, duration):
+        self.send_timing_event('scores_request', context_name, model_names,
                                rev_id_count, duration=duration)
-        self.send_increment_event('revision_scored', context, model_names,
+        self.send_increment_event('revision_scored', context_name, model_names,
                                   count=rev_id_count)
 
-    def datasources_extracted(self, context, model_names, rev_id_count,
+    def datasources_extracted(self, context_name, model_names, rev_id_count,
                               duration):
-        self.send_timing_event('datasources_extracted', context, model_names,
+        self.send_timing_event('datasources_extracted', context_name, model_names,
                                rev_id_count, duration=duration)
 
-    def score_processed(self, context, model_names, duration):
-        self.send_timing_event('score_processed', context, model_names,
+    def score_processed(self, context_name, model_names, duration):
+        self.send_timing_event('score_processed', context_name, model_names,
                                duration=duration)
 
-    def score_processor_overloaded(self, context, model_names):
-        self.send_increment_event('score_processor_overloaded', context,
+    def score_processor_overloaded(self, context_name, model_names):
+        self.send_increment_event('score_processor_overloaded', context_name,
                                   model_names)
 
-    def score_cache_hit(self, context, model_name):
-        self.send_increment_event('score_cache_hit', context, model_name)
+    def score_cache_hit(self, context_name, model_name):
+        self.send_increment_event('score_cache_hit', context_name, model_name)
 
-    def score_cache_miss(self, context, model_name):
-        self.send_increment_event('score_cache_miss', context, model_name)
+    def score_cache_miss(self, context_name, model_name):
+        self.send_increment_event('score_cache_miss', context_name, model_name)
 
-    def score_errored(self, context, model_names):
-        self.send_increment_event('score_errored', context, model_names)
+    def score_errored(self, context_name, model_names):
+        self.send_increment_event('score_errored', context_name, model_names)
 
-    def score_timed_out(self, context, model_names, duration):
-        self.send_timing_event('score_timed_out', context, model_names,
+    def score_timed_out(self, context_name, model_names, duration):
+        self.send_timing_event('score_timed_out', context_name, model_names,
                                duration=duration)
+
+    def precache_score(self, context_name, model_names, duration):
+        self.send_timing_event('precache_score', context_name, model_names,
+                               duration=duration)
+
+    def precache_scoring_error(self, context_name, model_names, status, duration):
+        self.send_timing_event('precache_scoring_error', context_name,
+                               model_names, status, duration=duration)
 
     def send_timing_event(self, *message_parts, duration=None):
         with self.statsd_client.pipeline() as pipe:

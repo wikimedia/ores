@@ -12,9 +12,6 @@ class Logger(MetricsCollector):
     def __init__(self, logger=None):
         self.logger = logger or logging.getLogger(__name__)
 
-    def __init__(self, logger=None):
-        self.logger = logger or logging.getLogger(__name__)
-
     def precache_request(self, context_name, model_names, duration):
         self.logger.debug(
             "precache_request: {0}:{1} in {2} seconds"
@@ -60,6 +57,17 @@ class Logger(MetricsCollector):
     def score_errored(self, context_name, model_names):
         self.logger.debug("score_errored: {0}:{1}"
                           .format(context_name, format_set(model_names)))
+
+    def precache_score(self, context_name, model_names, duration):
+        self.logger.debug("precache_score: {0}:{1} in {2} seconds"
+                          .format(context_name, format_set(model_names),
+                                  round(duration, 3)))
+
+    def precache_scoring_error(self, context_name, model_names, status, duration):
+        self.logger.debug(
+            "precache_scoring_error: {0}:{1} status={2} in {3} seconds"
+            .format(context_name, format_set(model_names), status,
+                    round(duration, 3)))
 
     @classmethod
     def from_config(cls, config, name, section_key="metrics_collectors"):

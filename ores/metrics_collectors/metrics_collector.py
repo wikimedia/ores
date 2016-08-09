@@ -36,6 +36,12 @@ class MetricsCollector:
     def score_timed_out(self, context_name, model_names, duration):
         raise NotImplementedError()
 
+    def precache_scores(self, context_name, model_names, duration):
+        raise NotImplementedError()
+
+    def precache_scoring_error(self, context_name, model_names, status, duration):
+        raise NotImplementedError()
+
     @classmethod
     def from_config(cls, config, name, section_key="metrics_collectors"):
         try:
