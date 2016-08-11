@@ -100,12 +100,17 @@ class ScoringSystem(dict):
             context_name, missing_model_set_revs, root_caches,
             injection_caches, include_features,
             inprogress_results=inprogress_results)
-        for rev_id, model_scores in missing_scores.items():
+        for rev_id, score_map in missing_scores.items():
             if rev_id not in rev_scores:
-                rev_scores[rev_id] = model_scores
+                rev_scores[rev_id] = score_map
             else:
-                for model_name, score in model_scores.items():
+                for model_name, score in score_map.items():
                     rev_scores[rev_id][model_name] = score
+
+            injection_cache = injection_caches.get(rev_id) \
+                              if injection_caches is not None else None
+            self._cache_scores(rev_id, score_map, context_name,
+                               injection_cache=injection_cache)
 
         # 4.5 Record scoring errors
         for rev_id, error in scoring_errors.items():
@@ -164,9 +169,6 @@ class ScoringSystem(dict):
         self.metrics_collector.score_processed(
             context_name, model_names, duration)
 
-        self._cache_scores(rev_id, score_map, context_name,
-                           injection_cache=injection_cache)
-
         return score_map
 
     def _process_missing_scores(self, context_name, missing_model_set_revs,
@@ -221,10 +223,10 @@ class ScoringSystem(dict):
     def _cache_score(self, score_doc, context_name, model_name, rev_id,
                      injection_cache):
         version = self[context_name].model_version(model_name)
-
+        rev_score = score_doc['score']
         self.score_cache.store(
-            score_doc, context_name, model_name, rev_id, version=version,
-            injection_cache=injection_cache)
+            rev_score, context_name, model_name, rev_id,
+            version=version, injection_cache=injection_cache)
 
     def _lookup_inprogress_results(self, context_name, model_names, rev_ids,
                                    injection_caches=None, rev_scores=None):

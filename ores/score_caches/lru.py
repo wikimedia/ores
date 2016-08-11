@@ -29,7 +29,7 @@ class LRU(ScoreCache):
         # Deterministic hash of cache values
         cache_hash = hash(tuple(sorted((injection_cache or {}).items())))
         key = (context_name, model_name, rev_id, version, cache_hash)
-        logger.debug("Storing score at {0}".format(key))
+        logger.debug("Storing score at {0}: {1}".format(key, str(score)[:100]))
         self.lru[key] = score
 
     @classmethod
