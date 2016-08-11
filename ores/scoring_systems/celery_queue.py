@@ -64,7 +64,7 @@ class CeleryQueue(ScoringSystem):
         def _process_score_map(context_name, model_names, rev_id,
                                root_cache=None, injection_cache=None,
                                include_features=False):
-            logger.info("Generating a score map for" +
+            logger.info("Generating a score map for " +
                         "{0}:{1}:{2}"
                         .format(context_name, set(model_names), rev_id))
             try:
@@ -76,7 +76,7 @@ class CeleryQueue(ScoringSystem):
             except Exception as e:
                 logger.error(e)
                 raise
-            logger.info("Completed generating score map for" +
+            logger.info("Completed generating score map for " +
                         "{0}:{1}:{2}"
                         .format(context_name, set(model_names), rev_id))
             return score_map
@@ -91,7 +91,7 @@ class CeleryQueue(ScoringSystem):
             except Exception as e:
                 logger.error(e)
                 raise
-            logger.info("Found up {0} in {1}!".format(model_name, result_id))
+            logger.info("Found {0} in {1}!".format(model_name, result_id))
             return score_map[model_name]
 
         self._process_score_map = _process_score_map
