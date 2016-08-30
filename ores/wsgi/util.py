@@ -1,6 +1,8 @@
 import json
 from collections import defaultdict
+from functools import update_wrapper, wraps
 
+from flask import make_response
 from flask.ext.jsonpify import jsonify
 
 
@@ -82,3 +84,16 @@ def parse_injection(request, rev_id):
         return {rev_id: cache} if len(cache) > 0 else None
     except Exception as e:
         raise CacheParsingError(e)
+
+
+def nocache(route):
+    @wraps(route)
+    def no_cache(*args, **kwargs):
+        response = make_response(route(*args, **kwargs))
+        response.headers['Cache-Control'] = \
+            "no-store, no-cache, max-age=0"
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = 'Thu, 01 Jan 1970 00:00:00 GMT' # Unix epoch
+        return response
+
+    return update_wrapper(no_cache, route)
