@@ -19,5 +19,5 @@ def configure(config, bp, score_processor):
 
 def generate_spec():
     dir_name = os.path.dirname(os.path.abspath(__file__))
-    swagger_doc = yaml.load(open(os.path.join(dir_name, "swagger.yaml")))
+    swagger_doc = yaml.safe_load(open(os.path.join(dir_name, "swagger.yaml")))
     return jsonify(swagger_doc)
