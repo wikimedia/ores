@@ -9,6 +9,7 @@ DEFAULT_DIRS = ["config/", "/etc/ores/"]
 
 logger = logging.getLogger(__name__)
 
+
 def build_config(config_dirs=DEFAULT_DIRS,
                  logging_config="logging_config.yaml"):
     # Loads files in alphabetical order based on the bare filename

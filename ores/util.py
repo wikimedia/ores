@@ -40,5 +40,4 @@ def timeout(func, *args, seconds=None, **kwargs):
     except stopit.TimeoutException as e:
         raise TimeoutError("Timed out after {0} seconds.".format(e.seconds))
 
-
     duration = time.time() - seconds
