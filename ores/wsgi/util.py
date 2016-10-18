@@ -93,7 +93,8 @@ def nocache(route):
         response.headers['Cache-Control'] = \
             "no-store, no-cache, max-age=0"
         response.headers['Pragma'] = 'no-cache'
-        response.headers['Expires'] = 'Thu, 01 Jan 1970 00:00:00 GMT' # Unix epoch
+        # Unix epoch
+        response.headers['Expires'] = 'Thu, 01 Jan 1970 00:00:00 GMT'
         return response
 
     return update_wrapper(no_cache, route)

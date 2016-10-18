@@ -2,7 +2,6 @@ from nose.tools import eq_
 from revscoring.extractors import OfflineExtractor
 
 from ..process_pool import ProcessPool
-from ...metrics_collectors import Logger
 from .util import fakewiki, wait_time, test_scoring_system
 from ...scorer_models import RevIdScorer
 from ...scoring_context import ScoringContext

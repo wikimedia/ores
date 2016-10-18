@@ -1,6 +1,5 @@
 import logging
 from concurrent import futures as cfutures
-import revscoring.errors
 
 from .scoring_system import ScoringSystem
 from ..errors import TimeoutError
