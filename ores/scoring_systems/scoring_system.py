@@ -5,11 +5,10 @@ import revscoring.errors
 import stopit
 
 from .. import errors
+from ..errors import TimeoutError
 from ..metrics_collectors import Null
 from ..score_caches import Empty
 from ..util import jsonify_error, timeout
-from ..errors import TimeoutError
-
 
 logger = logging.getLogger(__name__)
 
@@ -92,8 +91,8 @@ class ScoringSystem(dict):
 
         # 3.5. Record extraction errors
         for rev_id, error in extraction_errors.items():
-
             rev_scores[rev_id] = jsonify_error(error)
+            self.metrics_collector.score_errored(context_name, model_names)
 
         # 4. Generate scores (Heavy CPU)
         missing_scores, scoring_errors = self._process_missing_scores(
@@ -115,6 +114,7 @@ class ScoringSystem(dict):
         # 4.5 Record scoring errors
         for rev_id, error in scoring_errors.items():
             rev_scores[rev_id] = jsonify_error(error)
+            self.metrics_collector.score_errored(context_name, model_names)
 
         return {
             'models': model_info,
