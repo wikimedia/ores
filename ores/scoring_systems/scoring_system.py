@@ -85,9 +85,14 @@ class ScoringSystem(dict):
             context_name, missing_model_set_revs, injection_caches)
 
         # 3. Extract base datasources for missing models (Slow IO)
+        start = time.time()
         root_caches, extraction_errors = self._extract_root_caches(
             context_name, missing_model_set_revs, rev_ids,
             injection_caches=injection_caches)
+        self.metrics_collector.datasources_extracted(
+            context_name, model_names,
+            sum(len(ids) for ids in missing_model_set_revs.values()),
+            time.time() - start)
 
         # 3.5. Record extraction errors
         for rev_id, error in extraction_errors.items():
