@@ -14,6 +14,10 @@ Then you can easily run a test server by:
 
 ``ores dev_server``
 
+Use the ``-h`` argument to view its usage.
+
+``ores dev_server -h``
+
 Authors
 =======
 * [Aaron Halfaker](http://halfaker.info)
