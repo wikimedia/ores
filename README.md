@@ -6,9 +6,9 @@ A webserver for hosting scoring services. For more information, see `https://met
 
 Installation
 ============
-Use pip to install ORES:
+ORES is based on Python 3. Use pip to install ORES:
 
-``pip install ores``
+``pip install ores`` (or ``pip3 install ores`` if your distribution defaults to Python 2)
 
 Then you can easily run a test server by:
 
