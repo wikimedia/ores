@@ -57,7 +57,8 @@ class CeleryQueue(ScoringSystem):
                            revscoring.errors.DependencyError,
                            mwapi.errors.RequestError,
                            mwapi.errors.TimeoutError,
-                           errors.TimeoutError)
+                           errors.TimeoutError,
+                           celery.exceptions.TimeoutError)
 
         @self.application.task(throws=expected_errors,
                                queue=DEFAULT_CELERY_QUEUE)
