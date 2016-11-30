@@ -1,3 +1,5 @@
+import time
+
 from revscoring import ScorerModel
 from revscoring.datasources.revision_oriented import revision
 from revscoring.features import Feature
@@ -9,13 +11,17 @@ def process_reversed_last_two_in_rev_id(rev_id):
         return int(last_two + "0")
     else:
         return int("".join(reversed(last_two)))
-
 reversed_last_two_in_rev_id = Feature(
     "revision.reversed_last_two_in_rev_id",
     process_reversed_last_two_in_rev_id,
     returns=int,
     depends_on=[revision.id]
 )
+
+
+def process_delay():
+    return 0.0
+delay = Feature("delay", process_delay, returns=float)
 
 
 class RevIdScorer(ScorerModel):
@@ -26,10 +32,12 @@ class RevIdScorer(ScorerModel):
     E.g. 974623 = 32 and 23754929 = 92
     """
     def __init__(self, version=None):
-        super().__init__([reversed_last_two_in_rev_id], version=version)
+        super().__init__([reversed_last_two_in_rev_id, delay], version=version)
 
     def score(self, feature_values):
-        probability = feature_values[0] / 100
+        last_two_in_rev_id, delay = feature_values
+        time.sleep(delay)
+        probability = last_two_in_rev_id / 100
 
         if probability > 0.5:
             prediction = True
