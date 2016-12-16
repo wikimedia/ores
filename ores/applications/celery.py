@@ -46,6 +46,7 @@ def run(verbose, debug, **kwargs):
                .setLevel(logging.INFO)
 
     logging.getLogger("ores.metrics_collectors.logger").setLevel(logging.DEBUG)
+    logging.getLogger("stopit").setLevel(logging.ERROR)
 
     application = build(**kwargs)
     logging.getLogger('ores').setLevel(logging.DEBUG)

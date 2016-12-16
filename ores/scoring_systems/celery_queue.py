@@ -1,7 +1,7 @@
 import logging
 import re
-from urllib.parse import urlparse
 from itertools import chain
+from urllib.parse import urlparse
 
 import celery
 import celery.exceptions
@@ -57,8 +57,7 @@ class CeleryQueue(ScoringSystem):
                            revscoring.errors.DependencyError,
                            mwapi.errors.RequestError,
                            mwapi.errors.TimeoutError,
-                           errors.TimeoutError,
-                           celery.exceptions.TimeoutError)
+                           errors.TimeoutError)
 
         @self.application.task(throws=expected_errors,
                                queue=DEFAULT_CELERY_QUEUE)
@@ -68,15 +67,13 @@ class CeleryQueue(ScoringSystem):
             logger.info("Generating a score map for " +
                         "{0}:{1}:{2}"
                         .format(context_name, set(model_names), rev_id))
-            try:
-                score_map = ScoringSystem._process_score_map(
-                    self, context_name, model_names, rev_id,
-                    root_cache=root_cache,
-                    injection_cache=injection_cache,
-                    include_features=include_features)
-            except Exception as e:
-                logger.error(e)
-                raise
+
+            score_map = ScoringSystem._process_score_map(
+                self, context_name, model_names, rev_id,
+                root_cache=root_cache,
+                injection_cache=injection_cache,
+                include_features=include_features)
+
             logger.info("Completed generating score map for " +
                         "{0}:{1}:{2}"
                         .format(context_name, set(model_names), rev_id))
@@ -89,9 +86,10 @@ class CeleryQueue(ScoringSystem):
             score_map_result = self._process_score_map.AsyncResult(result_id)
             try:
                 score_map = score_map_result.get(timeout=self.timeout)
-            except Exception as e:
-                logger.error(e)
-                raise
+
+            except celery.exceptions.TimeoutError:
+                raise errors.TimeoutError(
+                    "Timed out after {0} seconds.".format(self.timeout))
             logger.info("Found {0} in {1}!".format(model_name, result_id))
             return score_map[model_name]
 
