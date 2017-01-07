@@ -3,6 +3,9 @@ import re
 
 from setuptools import find_packages, setup
 
+about_path = os.path.join(os.path.dirname(__file__), "ores/about.py")
+exec(compile(open(about_path).read(), about_path, "exec"))
+
 
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
@@ -24,18 +27,18 @@ def requirements(fname):
 
 
 setup(
-    name="ores",
-    version="0.8.0",  # Update in ores/__init__.py too.
-    author="Aaron Halfaker",
-    author_email="ahalfaker@wikimedia.org",
-    description=("A webserver for hosting scorer models."),
-    license="MIT",
+    name=__name__,  # noqa
+    version=__version__,  # noqa
+    author=__author__,  # noqa
+    author_email=__author_email__,  # noqa
+    description=__description__,  # noqa
+    url=__url__,  # noqa
+    license=__license__,  # noqa
     entry_points={
         'console_scripts': [
             'ores = ores.ores:main',
         ],
     },
-    url="https://github.com/wiki-ai/ores",
     packages=find_packages(),
     include_package_data=True,
     long_description=read('README.md'),

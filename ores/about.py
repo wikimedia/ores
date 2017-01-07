@@ -1,0 +1,7 @@
+__name__ = "ores"
+__version__ = "0.8.0"
+__author__ = "Aaron Halfaker"
+__author_email__ = "ahalfaker@wikimedia.org"
+__description__ = "A webserver for hosting scorer models."
+__url__ = "https://github.com/wiki-ai/ores"
+__license__ = "MIT"
