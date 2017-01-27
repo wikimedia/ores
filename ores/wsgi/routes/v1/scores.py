@@ -3,7 +3,7 @@ import traceback
 from flask import request
 from flask.ext.jsonpify import jsonify
 
-from ... import responses
+from ... import preprocessors, responses
 from .... import errors
 from ...util import ParamError, nocache, read_bar_split_param
 
@@ -14,6 +14,7 @@ def configure(config, bp, scoring_system):
     @bp.route("/scores/", methods=["GET"])
     @bp.route("/v1/scores/", methods=["GET"])
     @nocache
+    @preprocessors.minifiable
     def scores():
         contexts = [context for context in scoring_system]
 
@@ -25,6 +26,7 @@ def configure(config, bp, scoring_system):
     @bp.route("/scores/<context>/", methods=["GET"])
     @bp.route("/v1/scores/<context>/", methods=["GET"])
     @nocache
+    @preprocessors.minifiable
     def score_model_revisions(context):
 
         # Check to see if we have the context available in our score_processor
@@ -76,6 +78,7 @@ def configure(config, bp, scoring_system):
     @bp.route("/scores/<context>/<model>/", methods=["GET"])
     @bp.route("/v1/scores/<context>/<model>/", methods=["GET"])
     @nocache
+    @preprocessors.minifiable
     def score_revisions(context, model):
 
         # Check to see if we have the context available in our score_processor
@@ -114,6 +117,7 @@ def configure(config, bp, scoring_system):
     @bp.route("/scores/<context>/<model>/<int:rev_id>/", methods=["GET", "POST"])
     @bp.route("/v1/scores/<context>/<model>/<int:rev_id>/", methods=["GET", "POST"])
     @nocache
+    @preprocessors.minifiable
     def score_revision(context, model, rev_id):
 
         # Check to see if we have the context available in our score_processor

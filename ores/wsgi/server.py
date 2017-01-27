@@ -18,7 +18,6 @@ def configure(config):
                 template_folder=os.path.join(directory, 'templates'))
 
     app.config['APPLICATION_ROOT'] = config['ores']['wsgi']['application_root']
-    app.config['JSONIFY_PRETTYPRINT_REGULAR'] = False
     app.url_map.strict_slashes = False
     # Configure routes
     bp = Blueprint('ores', __name__,
