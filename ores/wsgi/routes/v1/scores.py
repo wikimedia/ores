@@ -5,7 +5,7 @@ from flask.ext.jsonpify import jsonify
 
 from ... import preprocessors, responses
 from .... import errors
-from ...util import ParamError, nocache, read_bar_split_param
+from ...util import ParamError, read_bar_split_param
 
 
 def configure(config, bp, scoring_system):
@@ -13,7 +13,7 @@ def configure(config, bp, scoring_system):
     # /scores/
     @bp.route("/scores/", methods=["GET"])
     @bp.route("/v1/scores/", methods=["GET"])
-    @nocache
+    @preprocessors.nocache
     @preprocessors.minifiable
     def scores():
         contexts = [context for context in scoring_system]
@@ -25,7 +25,7 @@ def configure(config, bp, scoring_system):
     # /scores/enwiki/?models=reverted&revids=456789|4567890
     @bp.route("/scores/<context>/", methods=["GET"])
     @bp.route("/v1/scores/<context>/", methods=["GET"])
-    @nocache
+    @preprocessors.nocache
     @preprocessors.minifiable
     def score_model_revisions(context):
 
@@ -77,7 +77,7 @@ def configure(config, bp, scoring_system):
     # /scores/enwiki/reverted/?revids=456789|4567890
     @bp.route("/scores/<context>/<model>/", methods=["GET"])
     @bp.route("/v1/scores/<context>/<model>/", methods=["GET"])
-    @nocache
+    @preprocessors.nocache
     @preprocessors.minifiable
     def score_revisions(context, model):
 
@@ -116,7 +116,7 @@ def configure(config, bp, scoring_system):
     # /scores/enwiki/reverted/4567890
     @bp.route("/scores/<context>/<model>/<int:rev_id>/", methods=["GET", "POST"])
     @bp.route("/v1/scores/<context>/<model>/<int:rev_id>/", methods=["GET", "POST"])
-    @nocache
+    @preprocessors.nocache
     @preprocessors.minifiable
     def score_revision(context, model, rev_id):
 
