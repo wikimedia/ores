@@ -3,14 +3,14 @@ import os
 import yaml
 from flask.ext.jsonpify import jsonify
 
-from ...util import nocache
+from ... import preprocessors
 
 
 def configure(config, bp, score_processor):
 
     # /spec/
     @bp.route("/v1/spec/", methods=["GET"])
-    @nocache
+    @preprocessors.nocache
     def v1_spec():
         return generate_spec()
 
