@@ -6,9 +6,8 @@ from flask import current_app, request
 def minifiable(f):
     @wraps(f)
     def wrapped_f(*args, **kwargs):
-        format_ = request.args.get('format')
-        if format_ == 'json':
-            current_app.config['JSONIFY_PRETTYPRINT_REGULAR'] = False
+        current_app.config['JSONIFY_PRETTYPRINT_REGULAR'] = \
+            request.args.get('format') != 'json'
 
         return f(*args, **kwargs)
 
