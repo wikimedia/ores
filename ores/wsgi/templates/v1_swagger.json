@@ -1,0 +1,359 @@
+{
+
+  "info": {
+    "version": "1",
+    "title": "ORES scoring interface",
+    "description": "A webserver for hosting scoring services (v1 paths)"
+  },
+  "basePath": "/",
+  "swagger": "2.0",
+  "schemes": [
+    "{{scheme|safe}}"
+  ],
+  "host": "{{host|safe}}",
+  "produces": [
+    "application/json"
+  ],
+  "definitions": {
+    "ModelResponse": {
+      "$ref": "#/definitions/ModelInfo"
+    },
+    "ErrorResponse": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "object",
+          "properties": {
+            "code": {
+              "description": "A short string identifying the error",
+              "type": "string"
+            },
+            "message": {
+              "description": "A human-readable explanation of what went wrong",
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "ContextsResponse": {
+      "type": "object",
+      "properties": {
+        "contexts": {
+          "description": "A list of contexts (wiki database names)",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      }
+    },
+    "ModelInfo": {
+      "required": [
+        "type",
+        "version"
+      ],
+      "type": "object",
+      "properties": {
+        "version": {
+          "description": "A semantic version string",
+          "type": "string"
+        },
+        "trained": {
+          "description": "The datetime at which the model was trained (in seconds since Jan. 1st 1970)",
+          "type": "number"
+        },
+        "params": {
+          "description": "A list of parameters used when constructing the model",
+          "additionalProperties": true,
+          "type": "object"
+        },
+        "type": {
+          "description": "The type of model used to score",
+          "type": "string"
+        },
+        "test_stats": {
+          "description": "A list of test statistics used on the model.",
+          "additionalProperties": true,
+          "type": "object"
+        }
+      }
+    },
+    "ModelScoresResponse": {
+      "additionalProperties": {
+        "$ref": "#/definitions/ScoresResponse"
+      },
+      "type": "object"
+    },
+    "ScoresResponse": {
+      "additionalProperties": true,
+      "type": "object"
+    },
+    "ModelsResponse": {
+      "additionalProperties": {
+        "$ref": "#/definitions/ModelResponse"
+      },
+      "type": "object"
+    }
+  },
+  "paths": {
+    "/v1/scores/{context}/?models={models}&revids={revids}": {
+      "get": {
+        "summary": "Provides a means of scoring *revids* using multiple *models* in the same request.",
+        "parameters": [
+          {
+            "required": true,
+            "name": "context",
+            "in": "path",
+            "description": "The name of the context to find {models}",
+            "type": "string",
+            "format": "string"
+          },
+          {
+            "required": true,
+            "name": "models",
+            "in": "path",
+            "description": "The name of a model(s) to apply (split multiple names with \"|\")",
+            "type": "string",
+            "format": "string"
+          },
+          {
+            "required": true,
+            "name": "revids",
+            "in": "path",
+            "description": "The revision IDs to score (split multiple ids with \"|\")",
+            "type": "number",
+            "format": "integer"
+          }
+        ],
+        "description": "This route provides either a list a models available in {context} if no {models} or {revids}\nare provided.  If both *models* and {revids} are provided, ModelScoreResponse will be returned.\n",
+        "responses": {
+          "503": {
+            "description": "Server overloaded -- Slow down and/or please try again later",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "200": {
+            "description": "A JSON document containing scores or information about the available models",
+            "schema": {
+              "$ref": "#/definitions/ModelScoresResponse"
+            }
+          },
+          "default": {
+            "description": "An error occurred that prevented any scores from being generated",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/v1/scores/{context}/?models={models}": {
+      "get": {
+        "summary": "Provides access to information about {models}.",
+        "parameters": [
+          {
+            "required": true,
+            "name": "context",
+            "in": "path",
+            "description": "The name of the context to find {models}",
+            "type": "string",
+            "format": "string"
+          },
+          {
+            "required": true,
+            "name": "models",
+            "in": "path",
+            "description": "The name of a model(s) to get information for (split multiple names with \"|\")",
+            "type": "string",
+            "format": "string"
+          }
+        ],
+        "description": "This route provides access to information about {models}.\n",
+        "responses": {
+          "503": {
+            "description": "Server overloaded -- Slow down and/or please try again later",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "200": {
+            "description": "A JSON document containing scores or information about the available models",
+            "schema": {
+              "$ref": "#/definitions/ModelsResponse"
+            }
+          },
+          "default": {
+            "description": "An error occurred that prevented any scores from being generated",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/v1/scores/": {
+      "get": {
+        "summary": "Provides access to a list of available contexts.",
+        "description": "This route provides a list of available contexts.  Generally a wiki is 1:1 with a context and a context is expressed\nas the database name of the wiki.  For example \"enwiki\" is English Wikipedia and \"wikidatawiki\" is Wikidata.\n",
+        "responses": {
+          "200": {
+            "description": "A JSON document containing an array of contexts",
+            "schema": {
+              "$ref": "#/definitions/ContextsResponse"
+            }
+          },
+          "default": {
+            "description": "An error occurred that prevented contexts from being retrieved",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/v1/scores/{context}/{model}/?revids={revids}": {
+      "get": {
+        "summary": "Provides a means of scoring *revids* using {model} in the same request.",
+        "parameters": [
+          {
+            "required": true,
+            "name": "context",
+            "in": "path",
+            "description": "The name of the context to find {model}",
+            "type": "string",
+            "format": "string"
+          },
+          {
+            "required": true,
+            "name": "model",
+            "in": "path",
+            "description": "The name of a model to apply",
+            "type": "string",
+            "format": "string"
+          },
+          {
+            "required": true,
+            "name": "revids",
+            "in": "path",
+            "description": "The revision IDs to score (split multiple ids with \"|\")",
+            "type": "number",
+            "format": "integer"
+          }
+        ],
+        "description": "Provides a means of scoring *revids* using {model} in the same request. A\nScoreResponse will be returned.\n",
+        "responses": {
+          "503": {
+            "description": "Server overloaded -- Slow down and/or please try again later",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "200": {
+            "description": "A JSON document containing scores",
+            "schema": {
+              "$ref": "#/definitions/ScoresResponse"
+            }
+          },
+          "default": {
+            "description": "An error occurred that prevented any scores from being generated",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/v1/scores/{context}/{model}/": {
+      "get": {
+        "summary": "Provides access to information about a {model} or allows scoring multiple *revids*.",
+        "parameters": [
+          {
+            "required": true,
+            "name": "context",
+            "in": "path",
+            "description": "The name of the context to find {model}",
+            "type": "string",
+            "format": "string"
+          },
+          {
+            "required": true,
+            "name": "model",
+            "in": "path",
+            "description": "The name of a model to apply",
+            "type": "string",
+            "format": "string"
+          }
+        ],
+        "description": "This route provides information about a single model if no *revids* are provided\nIf *revids* are provided, ScoreResponse will be returned.\n",
+        "responses": {
+          "200": {
+            "description": "A JSON document containing scores or information about the available models",
+            "schema": {
+              "$ref": "#/definitions/ModelResponse"
+            }
+          },
+          "default": {
+            "description": "An error occurred that prevented any scores from being generated",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/v1/scores/{context}/{model}/{revid}": {
+      "get": {
+        "summary": "Provides a means of scoring a single {revid} using {model}.",
+        "parameters": [
+          {
+            "required": true,
+            "name": "context",
+            "in": "path",
+            "description": "The name of the context to find {model}",
+            "type": "string",
+            "format": "string"
+          },
+          {
+            "required": true,
+            "name": "model",
+            "in": "path",
+            "description": "The name of a model to apply",
+            "type": "string",
+            "format": "string"
+          },
+          {
+            "required": true,
+            "name": "revid",
+            "in": "path",
+            "description": "The revision ID to score",
+            "type": "number",
+            "format": "integer"
+          }
+        ],
+        "description": "Provides a means of scoring {revid} using {model}. A ScoreResponse will be returned.\n",
+        "responses": {
+          "503": {
+            "description": "Server overloaded -- Slow down and/or please try again later",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "200": {
+            "description": "A JSON document containing scores",
+            "schema": {
+              "$ref": "#/definitions/ScoresResponse"
+            }
+          },
+          "default": {
+            "description": "An error occurred that prevented any scores from being generated",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    }
+  }
+}

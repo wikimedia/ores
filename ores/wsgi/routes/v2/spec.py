@@ -1,6 +1,7 @@
-import os
+import json
+from urllib.parse import urlparse
 
-import yaml
+from flask import render_template, request
 from flask.ext.jsonpify import jsonify
 
 from ... import preprocessors
@@ -11,6 +12,7 @@ def configure(config, bp, score_processor):
     # /spec/
     @bp.route("/v2/spec/", methods=["GET"])
     @preprocessors.nocache
+    @preprocessors.minifiable
     def v2_spec():
         return generate_spec()
 
@@ -18,6 +20,7 @@ def configure(config, bp, score_processor):
 
 
 def generate_spec():
-    dir_name = os.path.dirname(os.path.abspath(__file__))
-    swagger_doc = yaml.safe_load(open(os.path.join(dir_name, "swagger.yaml")))
-    return jsonify(swagger_doc)
+    return jsonify(json.loads(render_template(
+        "v2_swagger.json",
+        host=urlparse(request.url_root).netloc,
+        scheme=urlparse(request.url_root).scheme)))
