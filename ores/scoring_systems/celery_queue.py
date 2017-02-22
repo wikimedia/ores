@@ -36,7 +36,7 @@ class CeleryQueue(ScoringSystem):
 
     def __init__(self, *args, application, queue_maxsize=None, **kwargs):
         super().__init__(*args, **kwargs)
-        global __applications
+        global _applications
         self.application = application
         self.queue_maxsize = int(queue_maxsize) if queue_maxsize is not None \
                              else None
