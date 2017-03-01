@@ -156,6 +156,61 @@
     }
   },
   "paths": {
+    "/v2/precache": {
+      "get": {
+        "summary": "Precache scores of {revids} based on precaching configs.",
+        "parameters": [
+          {
+            "required": true,
+            "name": "context",
+            "in": "query",
+            "description": "The name of the {context} to find {model}.  This is usually the\ndbname of a wiki project.\n",
+            "type": "string",
+            "format": "string"
+          },
+          {
+            "required": false,
+            "name": "bot",
+            "in": "query",
+            "description": "If the edit is made by a bot",
+            "type": "string",
+            "format": "Empty string if true"
+          },
+          {
+            "required": true,
+            "name": "revids",
+            "in": "query",
+            "description": "The revision IDs to score (split multiple ids with \"|\")",
+            "type": "number",
+            "format": "integer"
+          },
+        ],
+        "description": "This route provides access to all {models} configured for precaching within a {context}.",
+        "tags": [
+          "scoring"
+        ],
+        "responses": {
+          "503": {
+            "description": "Server overloaded -- Slow down and/or please try again later",
+            "schema": {
+              "$ref": "#/definitions/ResponseDocument"
+            }
+          },
+          "200": {
+            "description": "A JSON document containing scores or information about the available models",
+            "schema": {
+              "$ref": "#/definitions/ResponseDocument"
+            }
+          },
+          "default": {
+            "description": "An error occurred that prevented any scores from being generated",
+            "schema": {
+              "$ref": "#/definitions/ResponseDocument"
+            }
+          }
+        }
+      }
+    },
     "/v2/scores/{context}": {
       "get": {
         "summary": "Score {revids} using multiple {models} in the same request.",
