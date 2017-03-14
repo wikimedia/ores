@@ -1,6 +1,9 @@
 from flask.ext.jsonpify import jsonify
 
 
+def no_content():
+    return "", 204
+
 def error(status, code, message):
     return jsonify({'error': {'code': code, 'message': message}}), status
 

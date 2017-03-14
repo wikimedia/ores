@@ -1,47 +1,52 @@
 import json
+import logging
 import traceback
+from urllib.parse import unquote
 
 from flask import request
 from flask.ext.jsonpify import jsonify
 
-from urllib.parse import unquote
-
 from ... import preprocessors, responses
 from .... import errors
 
+logger = logging.getLogger(__name__)
+
 
 def configure(config, bp, scoring_system):
+
+    precache_map = build_precache_map(config)
 
     @bp.route("/v2/precache/", methods=["GET"])
     @preprocessors.nocache
     @preprocessors.minifiable
     def precache_v2():
         try:
-            data = json.loads(unquote(request.args.get('data', '{}')).strip())
+            event = json.loads(unquote(request.args.get('event', '{}')).strip())
         except json.JSONDecodeError:
-            return responses.bad_request("Can not parse data argument")
-        if 'database' not in data or 'rev_id' not in data:
-            return responses.bad_request("'database' and 'rev_id' arguments are required")
-        context = data['database']
+            return responses.bad_request("Can not parse event argument as JSON blob")
+        try:
+            context = event['database']
+        except KeyError:
+            return responses.bad_request("'database' missing from event data")
+        try:
+            rev_id = event['rev_id']
+        except KeyError:
+            return responses.bad_request("'rev_id' midding from event data")
+
         # Check to see if we have the context available in our score_processor
         if context not in scoring_system:
-            return responses.not_found("No scorers available for {0}"
-                                       .format(context))
+            return responses.no_content()
 
-        # Read the rev_ids
-        rev_id = data['rev_id']
-
+        # Start building the response document
         response_doc = {context: {}}
-        precache_config = config['scoring_contexts'].get(context, {}).get('precache', {})
-        performer_user_groups = data.get('performer', {}).get('user_groups', [])
-        if precache_config and performer_user_groups:
-            models = []
-            for model in precache_config:
-                if ('nonbot_edit' not in precache_config[model]['on'] and
-                        'bot' not in performer_user_groups):
-                    models.append(model)
-        else:
-            models = precache_config.keys()
+
+        event_set = build_event_set(event)
+
+        models = {precache_map[context][e] for e in event_set
+                  if e in precache_map[context]}
+
+        if len(models) == 0:
+            return responses.no_content()
 
         for model_name in models:
             response_doc[context][model_name] = \
@@ -68,3 +73,57 @@ def configure(config, bp, scoring_system):
         return jsonify({'scores': response_doc})
 
     return bp
+
+
+# TODO: This strategy for building up events is not sustainable.
+def build_event_set(event):
+    """
+    Turn an EventStream event into a set of event types that ORES
+    uses internally.
+    """
+    event_set = set()
+    if event['meta']['topic'] == "mediawiki.revision-create":
+        event_set.add('edit')
+
+        user_groups = event.get('performer', {}).get('user_groups', [])
+        if 'bot' in user_groups:
+            event_set.add('bot_edit')
+        else:
+            event_set.add('nonbot_edit')
+
+        if event['rev_parent_id'] == 0:
+            event_set.add('page_creation')
+            if 'bot' in user_groups:
+                event_set.add('bot_page_creation')
+            else:
+                event_set.add('nonbot_page_creation')
+
+    return event_set
+
+
+AVAILABLE_EVENTS = {'edit', 'bot_edit', 'nonbot_edit', 'page_creation',
+                    'bot_page_creation', 'nonbot_page_creation'}
+
+
+def build_precache_map(config):
+    """
+    Build a mapping of contexts and models from the configuration
+    """
+    precache_map = {}
+    ss_name = config['ores']['scoring_system']
+    for context in config['scoring_systems'][ss_name]['scoring_contexts']:
+        precache_map[context] = {}
+        for model in config['scoring_contexts'][context].get('precache', []):
+            precached_config = \
+                config['scoring_contexts'][context]['precache'][model]
+
+            events = precached_config['on']
+            if len(set(events) - AVAILABLE_EVENTS) > 0:
+                logger.error("{0} events are not available"
+                             .format(set(events) - AVAILABLE_EVENTS))
+            for event in precached_config['on']:
+                precache_map[context][event] = model
+                logger.debug("Setting up precaching for {0} in {1} on {2}"
+                             .format(model, context, event))
+
+    return precache_map
