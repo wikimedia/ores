@@ -2,6 +2,7 @@ import os
 
 from flask import render_template, send_file
 
+from . import versions
 from . import ui
 from . import v1
 from . import v2
@@ -23,6 +24,7 @@ def configure(config, bp, score_processor):
         return send_file(config['ores'].get('favicon', GEAR_FAVICON))
 
     bp = ui.configure(config, bp)
+    bp = versions.configure(config, bp)
     bp = v1.configure(config, bp, score_processor)
     bp = v2.configure(config, bp, score_processor)
 

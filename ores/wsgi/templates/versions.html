@@ -1,0 +1,67 @@
+<html>
+<head>
+  <title>Objective Revision Evaluation Service</title>
+  <link rel="stylesheet" href="wikimedia-ui-static/MW/mediawiki.min.css">
+  <meta name="description" content="The Objective Revision Evaluation Service (ORES) is a web service that provides machine learning as a service for Wikimedia Projects"/>
+  <meta property="og:image" content="https://ores.wikimedia.org/static/images/ores_logo.svg"/>
+  <style type="text/css">
+    html {
+      background: #eaecf0;
+    }
+    body {
+      max-width: 50em;
+      margin: 0px auto;
+      padding: 1em 2em;
+      background: #fff;
+    }
+    /**
+     * wikitable class for skinning normal tables
+     * keep in sync with commonPrint.css
+     */
+    table.wikitable {
+      margin: 1em 0;
+      background-color: #f8f9fa;
+      border: 1px solid #a2a9b1;
+      border-collapse: collapse;
+      color: #000;
+    }
+
+    table.wikitable > tr > th,
+    table.wikitable > tr > td,
+    table.wikitable > * > tr > th,
+    table.wikitable > * > tr > td {
+      border: 1px solid #a2a9b1;
+      padding: 0.2em 0.4em;
+    }
+
+    table.wikitable > tr > th,
+    table.wikitable > * > tr > th {
+      background-color: #eaecf0;
+      text-align: center;
+    }
+
+    table.wikitable > caption {
+      font-weight: bold;
+    }
+
+    td.component {
+      font-weight: bold;
+    }
+  </style>
+</head>
+  <h1>Versions</h1>
+  <table class="wikitable">
+    <tr>
+      <th class="component">component</th>
+      <th class="version">version</th>
+    </tr>
+    {% for component, version in versions.items() %}
+    <tr>
+      <td class="component">{{ component }}</td>
+      <td class="version">{{ version }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+<body>
+</body>
+</html>
