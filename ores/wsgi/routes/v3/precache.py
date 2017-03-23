@@ -14,10 +14,10 @@ def configure(config, bp, scoring_system):
 
     precache_map = util.build_precache_map(config)
 
-    @bp.route("/v2/precache/", methods=["GET"])
+    @bp.route("/v3/precache/", methods=["GET"])
     @preprocessors.nocache
     @preprocessors.minifiable
-    def precache_v2():
+    def precache_v3():
         if 'event' not in request.args:
             return responses.bad_request(
                 "Must provide an 'event' parameter")

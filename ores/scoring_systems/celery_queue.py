@@ -61,22 +61,16 @@ class CeleryQueue(ScoringSystem):
 
         @self.application.task(throws=expected_errors,
                                queue=DEFAULT_CELERY_QUEUE)
-        def _process_score_map(context_name, model_names, rev_id,
-                               root_cache=None, injection_cache=None,
-                               include_features=False):
-            logger.info("Generating a score map for " +
-                        "{0}:{1}:{2}"
-                        .format(context_name, set(model_names), rev_id))
+        def _process_score_map(request, model_names, rev_id, root_cache):
+            logger.info("Generating a score map for {0}"
+                        .format(request.format(rev_id, model_names)))
 
             score_map = ScoringSystem._process_score_map(
-                self, context_name, model_names, rev_id,
-                root_cache=root_cache,
-                injection_cache=injection_cache,
-                include_features=include_features)
+                self, request, model_names, rev_id,
+                root_cache=root_cache)
 
-            logger.info("Completed generating score map for " +
-                        "{0}:{1}:{2}"
-                        .format(context_name, set(model_names), rev_id))
+            logger.info("Completed generating score map for {0}"
+                        .format(request.format(rev_id, model_names)))
             return score_map
 
         @self.application.task(throws=expected_errors,
@@ -96,12 +90,11 @@ class CeleryQueue(ScoringSystem):
         self._process_score_map = _process_score_map
         self._lookup_score_in_map = _lookup_score_in_map
 
-    def _process_missing_scores(self, context_name, missing_model_set_revs,
-                                root_caches, injection_caches,
-                                include_features, inprogress_results=None):
+    def _process_missing_scores(self, request, missing_model_set_revs,
+                                root_caches, inprogress_results=None):
         logger.debug("Processing missing scores {0}:{1}."
-                     .format(context_name, missing_model_set_revs))
-        context = self[context_name]
+                     .format(request.context_name, missing_model_set_revs))
+        context = self[request.context_name]
 
         inprogress_results = inprogress_results or {}
 
@@ -109,8 +102,7 @@ class CeleryQueue(ScoringSystem):
         results = {}
         for missing_models, rev_ids in missing_model_set_revs.items():
             for rev_id in rev_ids:
-                injection_cache = injection_caches.get(rev_id) \
-                                  if injection_caches is not None else None
+                injection_cache = request.injection_caches.get(rev_id)
                 if rev_id not in root_caches:
                     for model_name in missing_models:
                         task_id = context.format_id_string(
@@ -120,9 +112,7 @@ class CeleryQueue(ScoringSystem):
                     continue
                 root_cache = {str(k): v for k, v in root_caches[rev_id].items()}
                 result = self._process_score_map.delay(
-                    context_name, missing_models, rev_id, root_cache,
-                    injection_cache=injection_cache,
-                    include_features=include_features)
+                    request, missing_models, rev_id, root_cache)
 
                 for model_name in missing_models:
                     task_id = context.format_id_string(
@@ -157,18 +147,16 @@ class CeleryQueue(ScoringSystem):
 
         return rev_scores, score_errors
 
-    def _lookup_inprogress_results(self, context_name, model_names, rev_ids,
-                                   injection_caches=None, rev_scores=None):
-        context = self[context_name]
+    def _lookup_inprogress_results(self, request, response):
+        context = self[request.context_name]
 
         inprogress_results = {}
-        for rev_id in rev_ids:
-            injection_cache = injection_caches.get(rev_id) \
-                              if injection_caches is not None else None
+        for rev_id in request.rev_ids:
+            injection_cache = request.injection_caches.get(rev_id)
 
-            for model_name in model_names:
-                if rev_id in rev_scores and \
-                   model_name in rev_scores[rev_id]:
+            for model_name in request.model_names:
+                if rev_id in response.scores and \
+                   model_name in response.scores[rev_id]:
                     continue
 
                 task_id = context.format_id_string(
@@ -187,15 +175,13 @@ class CeleryQueue(ScoringSystem):
 
         return inprogress_results
 
-    def _register_model_set_revs_to_process(self, context_name, model_set_revs,
-                                            injection_caches):
-        context = self[context_name]
+    def _register_model_set_revs_to_process(self, request, model_set_revs):
+        context = self[request.context_name]
 
         for model_set, rev_ids in model_set_revs.items():
             for rev_id in rev_ids:
                 for model_name in model_set:
-                    injection_cache = injection_caches.get(rev_id) \
-                                      if injection_caches is not None else None
+                    injection_cache = request.injection_caches.get(rev_id)
                     task_id = context.format_id_string(
                         model_name, rev_id, injection_cache=injection_cache)
                     self.application.backend.store_result(

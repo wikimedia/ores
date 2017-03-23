@@ -10,18 +10,19 @@ from ...util import build_score_request
 
 def configure(config, bp, scoring_system):
 
-    # /v2/scores/
-    @bp.route("/v2/scores/", methods=["GET"])
+    # /v3/scores/
+    @bp.route("/v3/scores/", methods=["GET"])
     @preprocessors.nocache
     @preprocessors.minifiable
-    def scores_v2():
+    def scores_v3():
         score_request = build_score_request(scoring_system, request)
-        return util.build_v2_context_model_map(score_request, scoring_system)
+        return util.build_v3_context_model_map(score_request, scoring_system)
 
     def process_score_request(score_request):
+        score_request.model_info = score_request.model_info or ['version']
         try:
             score_response = scoring_system.score(score_request)
-            return util.format_v2_score_response(score_request, score_response)
+            return util.format_v3_score_response(score_response)
         except errors.ScoreProcessorOverloaded:
             return responses.server_overloaded()
         except errors.MissingContext as e:
@@ -35,28 +36,28 @@ def configure(config, bp, scoring_system):
         except Exception:
             return responses.unknown_error(traceback.format_exc())
 
-    # /v2/scores/enwiki/?models=reverted&revids=456789|4567890
-    @bp.route("/v2/scores/<context>/", methods=["GET"])
+    # /v3/scores/enwiki/?models=reverted&revids=456789|4567890
+    @bp.route("/v3/scores/<context>/", methods=["GET"])
     @preprocessors.nocache
     @preprocessors.minifiable
-    def score_model_revisions_v2(context):
+    def score_model_revisions_v3(context):
         score_request = build_score_request(scoring_system, request, context)
         return process_score_request(score_request)
 
-    # /v2/scores/enwiki/reverted/?revids=456789|4567890
-    @bp.route("/v2/scores/<context>/<model>/", methods=["GET"])
+    # /v3/scores/enwiki/reverted/?revids=456789|4567890
+    @bp.route("/v3/scores/<context>/<int:revid>/", methods=["GET"])
     @preprocessors.nocache
     @preprocessors.minifiable
-    def score_revisions_v2(context, model):
+    def score_revisions_v3(context, revid):
         score_request = build_score_request(
-            scoring_system, request, context, model_name=model)
+            scoring_system, request, context, rev_id=revid)
         return process_score_request(score_request)
 
-    # /v2/scores/enwiki/reverted/4567890
-    @bp.route("/v2/scores/<context>/<model>/<int:rev_id>/", methods=["GET", "POST"])
+    # /v3/scores/enwiki/reverted/4567890
+    @bp.route("/v3/scores/<context>/<int:rev_id>/<model>/", methods=["GET", "POST"])
     @preprocessors.nocache
     @preprocessors.minifiable
-    def score_revision_v2(context, model, rev_id):
+    def score_revision_v3(context, model, rev_id):
         score_request = build_score_request(
             scoring_system, request, context, rev_id=rev_id, model_name=model)
         return process_score_request(score_request)

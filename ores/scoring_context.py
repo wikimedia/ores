@@ -34,18 +34,13 @@ class ScoringContext(dict):
         self.update(model_map)
         self.extractor = extractor
 
-    def format_model_info(self, model_names, fields=None):
-        fields = fields or ['version']
+    def format_model_info(self, model_name, fields=None):
         model_info = {}
-        for model_name in model_names:
-            formatted_info = self._get_model_info_for(model_name)
-            filtered_info = {field: value
-                             for field, value in formatted_info.items()
-                             if fields == "all" or field in fields}
-
-            model_info[model_name] = filtered_info
-
-        return model_info
+        formatted_info = self._get_model_info_for(model_name)
+        filtered_info = {field: value
+                         for field, value in formatted_info.items()
+                         if fields == [""] or field in fields}
+        return filtered_info
 
     def format_id_string(self, model_name, rev_id, injection_cache=None):
         version = self.model_version(model_name)
@@ -163,8 +158,7 @@ class ScoringContext(dict):
         # Make a copy of dependency_caches
         root_caches = {}
         for rev_id in rev_ids:
-            injection_cache = injection_caches.get(rev_id) \
-                              if injection_caches is not None else {}
+            injection_cache = injection_caches.get(rev_id, {})
             root_caches[rev_id] = dict(injection_cache.items())
 
         # Find our root datasources

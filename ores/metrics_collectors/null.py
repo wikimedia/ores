@@ -5,38 +5,37 @@ class Null(MetricsCollector):
     """
     A non-metrics collector that does nothing.
     """
-    def precache_request(self, context, model_names, duration):
+    def precache_request(self, request, duration):
         pass
 
-    def scores_request(self, context, model_names, rev_id_count, duration):
+    def scores_request(self, request, duration):
         pass
 
-    def datasources_extracted(self, context, model_names, rev_id_count,
-                              duration):
+    def datasources_extracted(self, request, duration):
         pass
 
-    def score_processor_overloaded(self, context, model_names):
+    def score_processor_overloaded(self, request):
         pass
 
-    def score_processed(self, context, model_names, duration):
+    def score_processed(self, request, duration):
         pass
 
-    def score_cache_hit(self, context, model_name):
+    def score_cache_hit(self, request, model_name):
         pass
 
-    def score_cache_miss(self, context, model_name):
+    def score_cache_miss(self, request, model_name):
         pass
 
-    def score_errored(self, context, model_names):
+    def score_errored(self, request):
         pass
 
-    def score_timed_out(self, context, model_names, duration):
+    def score_timed_out(self, request, duration):
         pass
 
-    def precache_scores(self, context_name, model_names, duration):
+    def precache_scores(self, request, duration):
         pass
 
-    def precache_scoring_error(self, context_name, model_names, status, duration):
+    def precache_scoring_error(self, request, status, duration):
         pass
 
     @classmethod

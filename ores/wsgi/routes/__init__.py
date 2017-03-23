@@ -6,6 +6,7 @@ from . import versions
 from . import ui
 from . import v1
 from . import v2
+from . import v3
 
 PWD = os.path.dirname(os.path.abspath(__file__))
 GEAR_FAVICON = os.path.join(PWD, "../static/favicon/gear/favicon.ico")
@@ -27,5 +28,6 @@ def configure(config, bp, score_processor):
     bp = versions.configure(config, bp)
     bp = v1.configure(config, bp, score_processor)
     bp = v2.configure(config, bp, score_processor)
+    bp = v3.configure(config, bp, score_processor)
 
     return bp

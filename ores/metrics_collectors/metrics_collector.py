@@ -7,39 +7,37 @@ class MetricsCollector:
     """
     Collects metrics about usage of ORES.
     """
-    def precache_request(self, context_name, model_names, duration):
+    def precache_request(self, request, duration):
         raise NotImplementedError()
 
-    def scores_request(self, context_name, model_names, rev_id_count,
-                       duration):
+    def scores_request(self, request, duration):
         raise NotImplementedError()
 
-    def datasources_extracted(self, context_name, model_names, rev_id_count,
-                              duration):
+    def datasources_extracted(self, request, rev_id_count, duration):
         raise NotImplementedError()
 
-    def score_processor_overloaded(self, context_name, model_names):
+    def score_processor_overloaded(self, request):
         raise NotImplementedError()
 
-    def score_processed(self, context_name, model_names, duration):
+    def score_processed(self, request, duration):
         raise NotImplementedError()
 
-    def score_cache_hit(self, context_name, model_name):
+    def score_cache_hit(self, request, model_name):
         raise NotImplementedError()
 
-    def score_cache_miss(self, context_name, model_name):
+    def score_cache_miss(self, request, model_name):
         raise NotImplementedError()
 
-    def score_errored(self, context_name, model_names):
+    def score_errored(self, request):
         raise NotImplementedError()
 
-    def score_timed_out(self, context_name, model_names, duration):
+    def score_timed_out(self, request, duration):
         raise NotImplementedError()
 
-    def precache_scores(self, context_name, model_names, duration):
+    def precache_scores(self, request, duration):
         raise NotImplementedError()
 
-    def precache_scoring_error(self, context_name, model_names, status, duration):
+    def precache_scoring_error(self, request, status, duration):
         raise NotImplementedError()
 
     @classmethod
