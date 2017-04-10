@@ -1,9 +1,10 @@
-from nose.tools import eq_, nottest
 import time
 
+from nose.tools import eq_, nottest
+from revscoring import Extractor, ScorerModel
 from revscoring.features import Feature
-from revscoring import ScorerModel
-from revscoring import Extractor
+
+from ...score_request import ScoreRequest
 from ...scoring_context import ScoringContext
 
 wait_time = Feature("wait_time", returns=float)
@@ -42,16 +43,22 @@ fakewiki = ScoringContext(
 @nottest
 def test_scoring_system(scoring_system):
 
-    score_doc = scoring_system.score(
-            "fakewiki", ["fake"], [1], injection_caches={1: {wait_time: 0.01}})
-    eq_(score_doc['scores'], {1: {'fake': {'score': True}}})
-    eq_(score_doc['models'], {'fake': {'version': 'fake version'}})
+    response = scoring_system.score(
+        ScoreRequest("fakewiki", [1], ["fake"],
+                     injection_caches={1: {wait_time: 0.05}},
+                     model_info=['version']))
+    eq_(response.errors, {})
+    eq_(response.scores, {1: {'fake': True}})
+    eq_(response.model_info, {'fake': {'version': 'fake version'}})
 
-    score_doc = scoring_system.score(
-            "fakewiki", ["fake", "other_fake"], [1, 2],
-            injection_caches={1: {wait_time: 0.01}, 2: {wait_time: 0.01}})
-    eq_(score_doc['scores'],
-        {1: {'fake': {'score': True}, 'other_fake': {'score': True}},
-         2: {'fake': {'score': True}, 'other_fake': {'score': True}}})
-    eq_(score_doc['models'], {'fake': {'version': 'fake version'},
+    response = scoring_system.score(
+        ScoreRequest("fakewiki", [1, 2], ["fake", "other_fake"],
+                     injection_caches={1: {wait_time: 0.05},
+                                       2: {wait_time: 0.01}},
+                     model_info=['version']))
+    eq_(response.errors, {})
+    eq_(response.scores,
+        {1: {'fake': True, 'other_fake': True},
+         2: {'fake': True, 'other_fake': True}})
+    eq_(response.model_info, {'fake': {'version': 'fake version'},
                               'other_fake': {'version': 'fake version'}})

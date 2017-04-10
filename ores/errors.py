@@ -5,3 +5,11 @@ class ScoreProcessorOverloaded(RuntimeError):
 
 class TimeoutError(RuntimeError):
     pass
+
+
+class MissingContext(RuntimeError):
+    pass
+
+
+class MissingModels(RuntimeError):
+    pass

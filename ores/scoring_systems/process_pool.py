@@ -1,8 +1,8 @@
 import logging
 from concurrent import futures as cfutures
 
-from .scoring_system import ScoringSystem
 from ..errors import TimeoutError
+from .scoring_system import ScoringSystem
 
 logger = logging.getLogger(__name__)
 
@@ -13,9 +13,8 @@ class ProcessPool(ScoringSystem):
         super().__init__(*args, **kwargs)
         self.workers = int(workers) if workers is not None else None
 
-    def _process_missing_scores(self, context_name, missing_model_set_revs,
-                                root_caches, injection_caches,
-                                include_features, inprogress_results=None):
+    def _process_missing_scores(self, request, missing_model_set_revs,
+                                root_caches, inprogress_results=None):
         rev_scores = {}
         errors = {}
 
@@ -26,16 +25,11 @@ class ProcessPool(ScoringSystem):
                     if rev_id not in root_caches:
                         continue
                     root_cache = root_caches[rev_id]
-                    injection_cache = injection_caches.get(rev_id) \
-                                      if injection_caches is not None else None
-                    logger.debug("Submitting _process_score_map for" +
-                                 "{0}:{1}:{2} with {3}"
-                                 .format(context_name, set(missing_models),
-                                         rev_id, injection_cache))
+                    logger.debug("Submitting _process_score_map for {0}"
+                                 .format(request.format(rev_id, missing_models)))
                     future = executor.submit(
-                        self._process_score_map,
-                        context_name, missing_models, rev_id, root_cache,
-                        injection_cache, include_features)
+                        self._process_score_map, request, rev_id, missing_models,
+                        root_cache)
                     futures[rev_id] = future
 
             for rev_id, future in futures.items():

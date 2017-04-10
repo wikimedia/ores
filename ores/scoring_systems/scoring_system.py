@@ -5,10 +5,11 @@ import revscoring.errors
 import stopit
 
 from .. import errors
-from ..errors import TimeoutError
+from ..errors import MissingContext, MissingModels, TimeoutError
 from ..metrics_collectors import Null
 from ..score_caches import Empty
-from ..util import jsonify_error, timeout
+from ..score_response import ScoreResponse
+from ..util import timeout
 
 logger = logging.getLogger(__name__)
 
@@ -23,177 +24,156 @@ class ScoringSystem(dict):
         self.metrics_collector = metrics_collector or Null()
         self.timeout = timeout
 
-    def score(self, context_name, model_names, rev_ids, injection_caches=None,
-              precache=False, include_features=False, include_model_info=None):
-        model_names = set(model_names)
+    def check_context_models(self, request):
+
+        if request.context_name not in self:
+            raise MissingContext(request.context_name)
+
+        missing_models = request.model_names - self[request.context_name].keys()
+        if len(missing_models) > 0:
+            raise MissingModels(request.context_name, missing_models)
+
+    def score(self, request):
+        self.check_context_models(request)
         start = time.time()
-        logger.debug("Scoring {0}:{1}:{2}{3}"
-                     .format(context_name, set(model_names), rev_ids,
-                             " w/cache = {0}".format(injection_caches)
-                             if injection_caches else ""))
+        logger.debug("Scoring {0}".format(request))
 
         try:
-            scores_doc = self._score(
-                context_name, model_names, rev_ids,
-                injection_caches=injection_caches,
-                include_features=include_features,
-                include_model_info=include_model_info)
+            response = self._score(request)
         except errors.ScoreProcessorOverloaded:
-            self.metrics_collector.score_processor_overloaded(
-                context_name, model_names)
+            self.metrics_collector.score_processor_overloaded(request)
             raise
 
         duration = time.time() - start
-        if not precache:
-            self.metrics_collector.scores_request(
-                context_name, model_names, len(rev_ids), duration)
+        if not request.precache:
+            self.metrics_collector.scores_request(request, duration)
         else:
-            self.metrics_collector.precache_request(
-                context_name, model_names, duration)
+            self.metrics_collector.precache_request(request, duration)
 
-        return scores_doc
+        return response
 
-    def _score(self, context_name, model_names, rev_ids, injection_caches=None,
-               include_features=False, include_model_info=None):
-        rev_ids = set(rev_ids)
+    def _score(self, request):
+        context = self[request.context_name]
+        response = ScoreResponse(context, request)
 
-        # 0. Get model information
-        model_info = self.format_model_info(
-            context_name, model_names, include_model_info)
+        # 0. Get model info (if applicable)
+        if request.model_info:
+            self._build_model_info(request, response)
 
         # 1. Lookup cached and inprogress scores (Fast IO)
-        if not include_features:
+        if not request.include_features:
             # Can't use cached score if we want feature values since those
             # will need to be regenerated
-            rev_scores = self._lookup_cached_scores(
-                context_name, model_names, rev_ids,
-                injection_caches=injection_caches)
+            self._lookup_cached_scores(request, response)
             inprogress_results = self._lookup_inprogress_results(
-                context_name, model_names, rev_ids,
-                injection_caches=injection_caches, rev_scores=rev_scores)
+                request, response)
         else:
-            rev_scores = {}
             inprogress_results = {}
 
         # 2. Get missing rev_model sets
         missing_model_set_revs = self._filter_missing_model_set_revs(
-            context_name, model_names, rev_ids, rev_scores=rev_scores,
-            inprogress_results=inprogress_results)
+            request, response, inprogress_results=inprogress_results)
 
         # 2.5 Register inprogress work
         self._register_model_set_revs_to_process(
-            context_name, missing_model_set_revs, injection_caches)
+            request, missing_model_set_revs)
 
         # 3. Extract base datasources for missing models (Slow IO)
         start = time.time()
         root_caches, extraction_errors = self._extract_root_caches(
-            context_name, missing_model_set_revs, rev_ids,
-            injection_caches=injection_caches)
+            request, missing_model_set_revs)
         self.metrics_collector.datasources_extracted(
-            context_name, model_names,
-            sum(len(ids) for ids in missing_model_set_revs.values()),
+            request, sum(len(ids) for ids in missing_model_set_revs.values()),
             time.time() - start)
 
         # 3.5. Record extraction errors
         for rev_id, error in extraction_errors.items():
-            rev_scores[rev_id] = jsonify_error(error)
-            self.metrics_collector.score_errored(context_name, model_names)
+            for model in request.model_names:
+                response.add_error(rev_id, model, error)
+                self.metrics_collector.score_errored(request, model)
 
         # 4. Generate scores (Heavy CPU)
         missing_scores, scoring_errors = self._process_missing_scores(
-            context_name, missing_model_set_revs, root_caches,
-            injection_caches, include_features,
+            request, missing_model_set_revs, root_caches,
             inprogress_results=inprogress_results)
         for rev_id, score_map in missing_scores.items():
-            if rev_id not in rev_scores:
-                rev_scores[rev_id] = score_map
-            else:
-                for model_name, score in score_map.items():
-                    rev_scores[rev_id][model_name] = score
+            for model_name, model_score in score_map.items():
+                response.add_score(rev_id, model_name, model_score['score'])
+                if request.include_features:
+                    response.add_features(
+                        rev_id, model_name, model_score['features'])
 
-            injection_cache = injection_caches.get(rev_id) \
-                              if injection_caches is not None else None
-            self._cache_scores(rev_id, score_map, context_name,
-                               injection_cache=injection_cache)
+            # Store scores in cache
+            self._cache_scores(request, rev_id, score_map)
 
         # 4.5 Record scoring errors
         for rev_id, error in scoring_errors.items():
-            rev_scores[rev_id] = jsonify_error(error)
-            self.metrics_collector.score_errored(context_name, model_names)
+            for model in request.model_names:
+                response.add_error(rev_id, model, error)
+                self.metrics_collector.score_errored(request, model)
 
-        return {
-            'models': model_info,
-            'scores': rev_scores
-        }
+        return response
 
-    def _extract_root_caches(self, context_name, missing_model_set_revs,
-                             rev_ids, injection_caches=None):
-        context = self[context_name]
+    def _build_model_info(self, request, response):
+        context = self[request.context_name]
+        for model_name in request.model_names:
+            response.add_model_info(
+                model_name,
+                context.format_model_info(model_name, request.model_info))
+
+    def _extract_root_caches(self, request, missing_model_set_revs):
+        context = self[request.context_name]
 
         root_caches = {}
         errors = {}
         for model_set, rev_ids in missing_model_set_revs.items():
-
             ms_root_caches, ms_errors = context.extract_root_dependency_caches(
-                model_set, rev_ids, injection_caches=injection_caches)
+                model_set, rev_ids, injection_caches=request.injection_caches)
             root_caches.update(ms_root_caches)
             errors.update(ms_errors)
 
         return root_caches, errors
 
-    def _process_score_map(self, context_name, model_names, rev_id, root_cache,
-                           injection_cache, include_features):
-        context = self[context_name]
+    def _process_score_map(self, request, rev_id, model_names, root_cache):
+        context = self[request.context_name]
 
         start = time.time()
         # Runs a timeout function so that we don't get stuck here
         try:
             score_map = timeout(
                 context.process_model_scores, model_names, root_cache,
-                include_features=include_features, seconds=self.timeout)
+                include_features=request.include_features,
+                seconds=self.timeout)
         except revscoring.errors.CaughtDependencyError as e:
             if isinstance(e.exception, stopit.TimeoutException):
                 duration = time.time() - start
-                self.metrics_collector.score_timed_out(
-                    context_name, model_names, duration)
+                self.metrics_collector.score_timed_out(request, duration)
                 raise TimeoutError("Timed out after {0} seconds."
                                    .format(duration))
             else:
                 raise
         except TimeoutError:
             duration = time.time() - start
-            self.metrics_collector.score_timed_out(
-                context_name, model_names, duration)
+            self.metrics_collector.score_timed_out(request, duration)
             raise
 
         duration = time.time() - start
 
         logger.debug("Score generated for {0}:{1} in {2} seconds"
-                     .format(context_name, set(model_names),
+                     .format(request.context_name, set(request.model_names),
                              round(duration, 3)))
-        self.metrics_collector.score_processed(
-            context_name, model_names, duration)
+        self.metrics_collector.score_processed(request, duration)
 
         return score_map
 
-    def _process_missing_scores(self, context_name, missing_model_set_revs,
-                                root_caches, injection_caches,
-                                include_features):
+    def _process_missing_scores(self, request, missing_model_set_revs,
+                                root_caches):
         raise NotImplementedError()
 
-    def format_model_info(self, context_name, model_names=None,
-                          include_model_info=None):
-        context = self[context_name]
-        model_names = model_names or context.keys()
-        return context.format_model_info(model_names, fields=include_model_info)
-
-    def _filter_missing_model_set_revs(self, context_name, model_names, rev_ids,
-                                       rev_scores=None,
+    def _filter_missing_model_set_revs(self, request, response,
                                        inprogress_results=None):
-        rev_scores = rev_scores or {}
-        inprogress_results = inprogress_results or {}
         missing_model_set_rev_pairs = self._filter_missing_model_pairs(
-            model_names, rev_ids, rev_scores, inprogress_results)
+            request, response, inprogress_results)
         missing_model_set_revs = {}
         for model_set, rev_id in missing_model_set_rev_pairs:
             if len(model_set) == 0:
@@ -205,77 +185,59 @@ class ScoringSystem(dict):
 
         return missing_model_set_revs
 
-    def _filter_missing_model_pairs(self, model_names, rev_ids, rev_scores,
+    def _filter_missing_model_pairs(self, request, response,
                                     inprogress_results):
-        for rev_id in rev_ids:
-            missing_models = model_names - (
-                set(rev_scores.get(rev_id, {}).keys()) |
+        for rev_id in request.rev_ids:
+            missing_models = request.model_names - (
+                set(response.scores.get(rev_id, {}).keys()) |
                 set(inprogress_results.get(rev_id, {}).keys()))
 
             yield frozenset(missing_models), rev_id
 
-    def _register_model_set_revs_to_process(self, context_name,
-                                            missing_model_set_revs,
-                                            injection_caches):
+    def _register_model_set_revs_to_process(self, request,
+                                            missing_model_set_revs):
         return None
 
-    def _cache_scores(self, rev_id, score_map, context_name,
-                      injection_cache=None):
+    def _cache_scores(self, request, rev_id, score_map):
         for model_name, score_doc in score_map.items():
-            self._cache_score(score_doc, context_name, model_name, rev_id,
-                              injection_cache=injection_cache)
+            self._cache_score(request, rev_id, model_name, score_doc)
 
-    def _cache_score(self, score_doc, context_name, model_name, rev_id,
-                     injection_cache):
-        version = self[context_name].model_version(model_name)
-        rev_score = score_doc['score']
+    def _cache_score(self, request, rev_id, model_name, score_doc):
+        version = self[request.context_name].model_version(model_name)
+        injection_cache = request.injection_caches.get(rev_id)
         self.score_cache.store(
-            rev_score, context_name, model_name, rev_id,
-            version=version, injection_cache=injection_cache)
+            score_doc['score'], request.context_name, model_name,
+            rev_id, version=version, injection_cache=injection_cache)
 
-    def _lookup_inprogress_results(self, context_name, model_names, rev_ids,
-                                   injection_caches=None, rev_scores=None):
+    def _lookup_inprogress_results(self, request, response):
         return {}
 
-    def _lookup_cached_scores(self, context_name, model_names, rev_ids,
-                              injection_caches=None):
+    def _lookup_cached_scores(self, request, response):
 
-        rev_scores = {}
-        for rev_id in rev_ids:
-            for model_name in model_names:
-                injection_cache = injection_caches.get(rev_id) \
-                                  if injection_caches is not None else None
+        for rev_id in request.rev_ids:
+            for model_name in request.model_names:
                 try:
                     rev_score = self._lookup_cached_score(
-                        context_name, model_name, rev_id,
-                        injection_cache=injection_cache)
-                    if rev_id in rev_scores:
-                        rev_scores[rev_id][model_name] = {'score': rev_score}
-                    else:
-                        rev_scores[rev_id] = {model_name: {'score': rev_score}}
+                        request, rev_id, model_name)
+                    response.add_score(model_name, rev_id, rev_score)
                 except KeyError:
                     pass
 
-        return rev_scores
-
-    def _lookup_cached_score(self, context_name, model_name, rev_id,
-                             injection_cache=None):
-        version = self[context_name].model_version(model_name)
+    def _lookup_cached_score(self, request, rev_id, model_name):
+        version = self[request.context_name].model_version(model_name)
+        injection_cache = request.injection_caches.get(rev_id)
         try:
             score = self.score_cache.lookup(
-                context_name, model_name, rev_id,
+                request.context_name, model_name, rev_id,
                 version=version, injection_cache=injection_cache)
 
-            logger.debug("Found cached score for {0}:{1}:{2}{3}"
-                         .format(context_name, model_name, rev_id,
-                                 ":w/cache" if injection_cache else ""))
+            logger.debug("Found cached score for {0}"
+                         .format(request.format(rev_id, model_name)))
 
-            self.metrics_collector.score_cache_hit(
-                context_name, model_name)
+            self.metrics_collector.score_cache_hit(request, model_name)
             return score
         except KeyError:
-            self.metrics_collector.score_cache_miss(
-                context_name, model_name)
+            self.metrics_collector.score_cache_miss(request, model_name)
             raise
 
     @classmethod
