@@ -46,6 +46,24 @@ def format_error(error):
 
 def build_score_request(scoring_system, request, context_name=None, rev_id=None,
                         model_name=None):
+    """
+    Build an :class:`ores.ScoreRequest` from information contained in a
+    request.
+
+    :Parameters:
+        scoring_system : :class:`ores.ScoringSystem`
+            A scoring system to build request with
+        request : :class:`flask.Request`
+            A web request to extract information from
+        context_name : `str`
+            The name of the context to perform scoring
+        rev_id : int
+            The revision ID to score.  Note that multiple IDs can be provided
+            in `request.args`
+        model_name = `str`
+            The name of the model to score.  Note that multiple models can be
+            provided in `request.args`
+    """
     rev_ids = parse_rev_ids(request, rev_id)
     model_names = parse_model_names(request, model_name)
     precache = 'precache' in request.args
