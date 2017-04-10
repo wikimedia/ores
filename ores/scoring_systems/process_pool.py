@@ -25,12 +25,11 @@ class ProcessPool(ScoringSystem):
                     if rev_id not in root_caches:
                         continue
                     root_cache = root_caches[rev_id]
-                    logger.debug("Submitting _process_score_map for" +
-                                 "{0}:{1}:{2} with {3}"
+                    logger.debug("Submitting _process_score_map for {0}"
                                  .format(request.format(rev_id, missing_models)))
                     future = executor.submit(
-                        self._process_score_map, request, missing_models,
-                        rev_id, root_cache)
+                        self._process_score_map, request, rev_id, missing_models,
+                        root_cache)
                     futures[rev_id] = future
 
             for rev_id, future in futures.items():

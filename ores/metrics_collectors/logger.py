@@ -63,10 +63,9 @@ class Logger(MetricsCollector):
             self.logger.debug("score_cache_miss: {0}:{1}"
                               .format(request.context_name, model_name))
 
-    def score_errored(self, request):
+    def score_errored(self, request, model_name):
         self.logger.debug("score_errored: {0}:{1}"
-                          .format(request.context_name,
-                                  format_set(request.model_names)))
+                          .format(request.context_name, model_name))
 
     def precache_score(self, request, duration):
         self.logger.debug("precache_score: {0}:{1} in {2} seconds"

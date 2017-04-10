@@ -28,7 +28,7 @@ class MetricsCollector:
     def score_cache_miss(self, request, model_name):
         raise NotImplementedError()
 
-    def score_errored(self, request):
+    def score_errored(self, request, model_name):
         raise NotImplementedError()
 
     def score_timed_out(self, request, duration):

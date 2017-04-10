@@ -35,7 +35,6 @@ class ScoringContext(dict):
         self.extractor = extractor
 
     def format_model_info(self, model_name, fields=None):
-        model_info = {}
         formatted_info = self._get_model_info_for(model_name)
         filtered_info = {field: value
                          for field, value in formatted_info.items()
@@ -158,7 +157,8 @@ class ScoringContext(dict):
         # Make a copy of dependency_caches
         root_caches = {}
         for rev_id in rev_ids:
-            injection_cache = injection_caches.get(rev_id, {})
+            injection_cache = injection_caches.get(rev_id, {}) \
+                              if injection_caches is not None else {}
             root_caches[rev_id] = dict(injection_cache.items())
 
         # Find our root datasources

@@ -56,9 +56,9 @@ class Statsd(MetricsCollector):
             self.send_increment_event(
                 'score_cache_miss', request.context_name, model_name)
 
-    def score_errored(self, request, model_names):
+    def score_errored(self, request, model_name):
         self.send_increment_event('score_errored', request.context_name,
-                                  request.model_names)
+                                  model_name)
 
     def score_timed_out(self, request, duration):
         self.send_timing_event('score_timed_out', request.context_name,

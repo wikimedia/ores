@@ -90,7 +90,7 @@ class ScoringSystem(dict):
         for rev_id, error in extraction_errors.items():
             for model in request.model_names:
                 response.add_error(rev_id, model, error)
-            self.metrics_collector.score_errored(request)
+                self.metrics_collector.score_errored(request, model)
 
         # 4. Generate scores (Heavy CPU)
         missing_scores, scoring_errors = self._process_missing_scores(
@@ -110,7 +110,7 @@ class ScoringSystem(dict):
         for rev_id, error in scoring_errors.items():
             for model in request.model_names:
                 response.add_error(rev_id, model, error)
-            self.metrics_collector.score_errored(request)
+                self.metrics_collector.score_errored(request, model)
 
         return response
 

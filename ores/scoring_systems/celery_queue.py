@@ -66,7 +66,7 @@ class CeleryQueue(ScoringSystem):
                         .format(request.format(rev_id, model_names)))
 
             score_map = ScoringSystem._process_score_map(
-                self, request, model_names, rev_id,
+                self, request, rev_id, model_names,
                 root_cache=root_cache)
 
             logger.info("Completed generating score map for {0}"

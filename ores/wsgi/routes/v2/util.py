@@ -54,13 +54,17 @@ def format_v2_model(request, response, model_name):
         model_doc['info'] = response.model_info[model_name]
 
     for rev_id, rev_scores in response.scores.items():
-        model_score = rev_scores[model_name]
-        if isinstance(model_score, Exception):
-            model_doc['scores'][rev_id] = util.format_error(model_score)
-        else:
-            model_doc['scores'][rev_id] = model_score['score']
-            if 'features' in model_score:
-                model_doc['features'][rev_id] = model_score['features']
+        if model_name in rev_scores:
+            model_doc['scores'][rev_id] = rev_scores[model_name]
+
+    for rev_id, rev_errors in response.errors.items():
+        if model_name in rev_errors:
+            model_doc['scores'][rev_id] = \
+                util.format_error(rev_errors[model_name])
+
+    for rev_id, rev_features in response.features.items():
+        if model_name in rev_features:
+                model_doc['features'][rev_id] = rev_features[model_name]
 
     return model_doc
 

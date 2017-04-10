@@ -22,13 +22,12 @@ def format_v1_score_response(response, limit_to_model=None):
     """
     response_doc = defaultdict(dict)
     for rev_id, rev_scores in response.scores.items():
-        for model_name in rev_scores:
-            if isinstance(rev_scores[model_name], Exception):
-                response_doc[rev_id][model_name] = \
-                    util.format_error(rev_scores[model_name])
-            else:
-                response_doc[rev_id][model_name] = \
-                    rev_scores[model_name]['score']
+        for model_name, score in rev_scores.items():
+            response_doc[rev_id][model_name] = score
+
+    for rev_id, rev_errors in response.errors.items():
+        for model_name, error in rev_errors:
+            response_doc[rev_id][model_name] = util.format_error(error)
 
     if limit_to_model is not None:
         return jsonify({rev_id: model_scores[limit_to_model]

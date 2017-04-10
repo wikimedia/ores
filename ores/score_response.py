@@ -7,7 +7,9 @@ class ScoreResponse:
                  errors=None, features=None):
         self.context = context
         self.request = request
-        self.scores = defaultdict(lambda: defaultdict(dict))
+        self.scores = defaultdict(dict)
+        self.errors = defaultdict(dict)
+        self.features = defaultdict(dict)
         self.model_info = {}
 
         scores = scores or []
@@ -25,13 +27,13 @@ class ScoreResponse:
             self.add_model_info(model_name, info_doc)
 
     def add_score(self, rev_id, model_name, score):
-        self.scores[rev_id][model_name]['score'] = score
+        self.scores[rev_id][model_name] = score
 
     def add_error(self, rev_id, model_name, error):
-        self.scores[rev_id][model_name] = error
+        self.errors[rev_id][model_name] = error
 
     def add_features(self, rev_id, model_name, features):
-        self.scores[rev_id][model_name]['features'] = features
+        self.features[rev_id][model_name] = features
 
     def add_model_info(self, model_name, info_doc):
         self.model_info[model_name] = info_doc

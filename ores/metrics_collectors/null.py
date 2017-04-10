@@ -11,7 +11,7 @@ class Null(MetricsCollector):
     def scores_request(self, request, duration):
         pass
 
-    def datasources_extracted(self, request, duration):
+    def datasources_extracted(self, request, rev_id_count, duration):
         pass
 
     def score_processor_overloaded(self, request):
@@ -26,7 +26,7 @@ class Null(MetricsCollector):
     def score_cache_miss(self, request, model_name):
         pass
 
-    def score_errored(self, request):
+    def score_errored(self, request, model_name):
         pass
 
     def score_timed_out(self, request, duration):
