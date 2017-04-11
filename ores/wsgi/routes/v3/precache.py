@@ -14,15 +14,15 @@ def configure(config, bp, scoring_system):
 
     precache_map = util.build_precache_map(config)
 
-    @bp.route("/v3/precache/", methods=["GET"])
+    @bp.route("/v3/precache/", methods=["POST"])
     @preprocessors.nocache
     @preprocessors.minifiable
     def precache_v3():
-        if 'event' not in request.args:
+        if 'event' not in request.form:
             return responses.bad_request(
                 "Must provide an 'event' parameter")
         try:
-            event = json.loads(unquote(request.args['event']).strip())
+            event = json.loads(unquote(request.form['event']).strip())
         except json.JSONDecodeError:
             return responses.bad_request(
                 "Can not parse event argument as JSON blob")
