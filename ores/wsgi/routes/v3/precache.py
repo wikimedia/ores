@@ -1,6 +1,4 @@
-import json
 import logging
-from urllib.parse import unquote
 
 from flask import request
 
@@ -18,17 +16,17 @@ def configure(config, bp, scoring_system):
     @preprocessors.nocache
     @preprocessors.minifiable
     def precache_v3():
-        if 'event' not in request.form:
+        event = request.get_json()
+        if event is None:
             return responses.bad_request(
-                "Must provide an 'event' parameter")
+                "Must provide a POST'ed json as an event")
+
         try:
-            event = json.loads(unquote(request.form['event']).strip())
-        except json.JSONDecodeError:
+            score_request = util.build_score_request_from_event(
+                precache_map, event)
+        except KeyError as e:
             return responses.bad_request(
-                "Can not parse event argument as JSON blob")
-
-        score_request = util.build_score_request_from_event(precache_map, event)
-
+                "Must provide the '{key}' parameter".format(key=e.args[0]))
         if not score_request:
             return responses.no_content()
         else:
