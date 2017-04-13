@@ -206,7 +206,7 @@
             "description": "The revision IDs to score (split multiple ids with \"|\")",
             "type": "number",
             "format": "integer"
-          },
+          }
         ],
         "description": "This route provides access to all {models} configured for precaching within a {context}.",
         "tags": [
