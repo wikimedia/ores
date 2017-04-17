@@ -2,7 +2,7 @@
 
 Objective Revision Evaluation Service
 =====================================
-A webserver for hosting scoring services. For more information, see [Meta-Wiki](https://meta.wikimedia.org/wiki/ORES).
+A webserver for hosting scoring services. For more information, see [the ORES documentation on Meta-Wiki](https://meta.wikimedia.org/wiki/ORES).
 
 Installation
 ============
