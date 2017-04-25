@@ -1,8 +1,6 @@
 import traceback
 from collections import defaultdict
 
-from flask.ext.jsonpify import jsonify
-
 from ... import responses, util
 
 
@@ -61,7 +59,7 @@ def format_v3_score_response(response):
             model_name: info_doc
             for model_name, info_doc in response.model_info.items()}
 
-    return jsonify({response.context.name: context_doc})
+    return util.jsonify({response.context.name: context_doc})
 
 
 def build_v3_context_model_map(score_request, scoring_system):
@@ -89,6 +87,6 @@ def build_v3_context_model_map(score_request, scoring_system):
                 model_doc = context.format_model_info(
                     model_name, score_request.model_info or ['version'])
                 context_models_doc[context_name]['models'][model_name] = model_doc
-        return jsonify(context_models_doc)
+        return util.jsonify(context_models_doc)
     except Exception:
         return responses.unknown_error(traceback.format_exc())

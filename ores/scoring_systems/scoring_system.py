@@ -219,7 +219,7 @@ class ScoringSystem(dict):
                 try:
                     rev_score = self._lookup_cached_score(
                         request, rev_id, model_name)
-                    response.add_score(model_name, rev_id, rev_score)
+                    response.add_score(rev_id, model_name, rev_score)
                 except KeyError:
                     pass
 

@@ -1,12 +1,11 @@
 import traceback
 
 from flask import request
-from flask.ext.jsonpify import jsonify
 
 from . import util
 from ... import preprocessors, responses
 from .... import errors
-from ...util import build_score_request
+from ...util import build_score_request, jsonify
 
 
 def configure(config, bp, scoring_system):
