@@ -48,7 +48,7 @@ def format_v2_score_response(request, response):
 def format_v2_model(request, response, model_name):
 
     model_doc = defaultdict(dict)
-    model_doc['version'] = response.context[model_name].version
+    model_doc['version'] = response.context.model_version(model_name)
 
     if request.model_info and model_name in response.model_info:
         model_doc['info'] = response.model_info[model_name]

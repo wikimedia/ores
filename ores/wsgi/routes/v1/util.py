@@ -26,7 +26,7 @@ def format_v1_score_response(response, limit_to_model=None):
             response_doc[rev_id][model_name] = score
 
     for rev_id, rev_errors in response.errors.items():
-        for model_name, error in rev_errors:
+        for model_name, error in rev_errors.items():
             response_doc[rev_id][model_name] = util.format_error(error)
 
     if limit_to_model is not None:
