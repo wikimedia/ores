@@ -1,4 +1,5 @@
 import traceback
+from collections import defaultdict
 
 from flask.ext.jsonpify import jsonify
 
@@ -38,12 +39,12 @@ def format_v3_score_response(response):
         }
     }
     """
-    context_doc = {}
+    context_doc = defaultdict(lambda: defaultdict(dict))
     if len(response.scores) > 0 or len(response.errors) > 0:
-        context_doc['scores'] = {
-            rev_id: {model_name: {'score': score}
-                     for model_name, score in rev_scores.items()}
-            for rev_id, rev_scores in response.scores.items()}
+        for rev_id, rev_scores in response.scores.items():
+            for model_name, score in rev_scores.items():
+                context_doc['scores'][rev_id][model_name] = \
+                    {'score': score}
 
         for rev_id, rev_errors in response.errors.items():
             for model_name, error in rev_errors.items():

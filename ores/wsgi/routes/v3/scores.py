@@ -27,7 +27,7 @@ def configure(config, bp, scoring_system):
             return responses.server_overloaded()
         except errors.MissingContext as e:
             return responses.not_found("No scorers available for {0}"
-                                       .format(e[0]))
+                                       .format(e))
         except errors.MissingModels as e:
             context_name, model_names = e.args
             return responses.not_found(
