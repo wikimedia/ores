@@ -1,7 +1,5 @@
 from collections import defaultdict
 
-from flask.ext.jsonpify import jsonify
-
 from ... import util
 
 
@@ -30,10 +28,10 @@ def format_v1_score_response(response, limit_to_model=None):
             response_doc[rev_id][model_name] = util.format_error(error)
 
     if limit_to_model is not None:
-        return jsonify({rev_id: model_scores[limit_to_model]
+        return util.jsonify({rev_id: model_scores[limit_to_model]
                         for rev_id, model_scores in response_doc.items()})
     else:
-        return jsonify(response_doc)
+        return util.jsonify(response_doc)
 
 
 def format_some_model_info(scoring_system, request, limit_to_model=None):
@@ -46,6 +44,6 @@ def format_some_model_info(scoring_system, request, limit_to_model=None):
         model_infos[model_name] = model_info
 
     if limit_to_model is None:
-        return jsonify({'models': model_infos})
+        return util.jsonify({'models': model_infos})
     else:
-        return jsonify(model_infos[model_name])
+        return util.jsonify(model_infos[model_name])

@@ -1,6 +1,8 @@
 import json
 import logging
 
+from flask.ext.jsonpify import jsonify as flask_jsonify
+
 from ..score_request import ScoreRequest
 
 logger = logging.getLogger(__name__)
@@ -12,6 +14,24 @@ class CacheParsingError(Exception):
 
 class ParamError(Exception):
     pass
+
+
+def jsonify(doc):
+    return flask_jsonify(normalize_json(doc))
+
+
+def normalize_json(doc):
+    if isinstance(doc, dict):
+        return {_ensure_str_key(k): normalize_json(v) for k, v in doc.items()}
+    else:
+        return doc
+
+
+def _ensure_str_key(key):
+    if isinstance(key, bool):
+        return "true" if key else "false"
+    else:
+        return str(key)
 
 
 def read_param(request, param, default=None, type=str):

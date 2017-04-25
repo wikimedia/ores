@@ -2,9 +2,8 @@ import json
 from urllib.parse import urlparse
 
 from flask import render_template, request
-from flask.ext.jsonpify import jsonify
 
-from ... import preprocessors
+from ... import preprocessors, util
 
 
 def configure(config, bp, score_processor):
@@ -20,7 +19,7 @@ def configure(config, bp, score_processor):
 
 
 def generate_spec():
-    return jsonify(json.loads(render_template(
+    return util.jsonify(json.loads(render_template(
         "v1_swagger.json",
         host=urlparse(request.url_root).netloc,
         scheme=urlparse(request.url_root).scheme)))
