@@ -13,13 +13,13 @@ def configure(config, bp, score_processor):
     @preprocessors.nocache
     @preprocessors.minifiable
     def v2_spec():
-        return generate_spec()
+        return generate_spec(config)
 
     return bp
 
 
-def generate_spec():
+def generate_spec(config):
     return jsonify(json.loads(render_template(
         "v2_swagger.json",
         host=urlparse(request.url_root).netloc,
-        scheme=urlparse(request.url_root).scheme)))
+        scheme=config['ores']['wsgi']['scheme'])))
