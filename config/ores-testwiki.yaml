@@ -4,6 +4,7 @@ ores:
   wsgi:
     application_root: ""
     url_prefix: ""
+    scheme: 'http'
   home:
     footer: >
       Hosted on localhost &amp; written in

@@ -11,7 +11,7 @@ def configure(config, bp, score_processor):
     @bp.route("/v2/", methods=["GET"])
     def v2_index():
         if "spec" in request.args:
-            return spec.generate_spec()
+            return spec.generate_spec(config)
         else:
             return render_swaggerui(swagger_spec_path="/v2/spec/")
 
