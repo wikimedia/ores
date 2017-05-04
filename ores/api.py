@@ -35,7 +35,7 @@ class Session:
             The maximum number of retries for basic HTTP errors before giving
             up
     """
-    DEFAULT_USERAGENT = "ORESapi default user-agent"
+    DEFAULT_USERAGENT = "ores.api default user-agent"
 
     def __init__(self, host, user_agent=None, batch_size=50,
                  parallel_requests=4, retries=5):
@@ -56,15 +56,15 @@ class Session:
         else:
             self.headers['User-Agent'] = user_agent
 
-    def score(self, context, model, revids):
+    def score(self, context, models, revids):
         """
         Genetate scores for model applied to a sequence of revisions.
 
         :Parameters:
             context : str
                 The name of the context -- usually the database name of a wiki
-            model : str
-                The name of a model to apply
+            models : `iterable`
+                The names of a models to apply
             revids : `iterable`
                 A sequence of revision IDs to score.
         """
@@ -73,9 +73,9 @@ class Session:
         else:
             rev_ids = [int(rid) for rid in revids]
 
-        return self._score(context, model, rev_ids)
+        return self._score(context, models, rev_ids)
 
-    def _score(self, context, model, rev_ids):
+    def _score(self, context, models, rev_ids):
         logging.debug("Starting up thread pool with {0} workers"
                       .format(self.workers))
         with ThreadPoolExecutor(max_workers=self.workers) as executor:
@@ -85,19 +85,19 @@ class Session:
                 logging.debug("Starting batch of {0} revids"
                               .format(len(rev_id_batch)))
                 futures.append(executor.submit(self._score_request,
-                                               context, model,
-                                               rev_id_batch))
+                                               context, rev_id_batch,
+                                               models))
 
             for future in futures:
                 for score in future.result():
                     yield score
 
-    def _score_request(self, context, model, rev_ids):
-        url = self.host + "/v2/scores/{0}/{1}/" \
-                          .format(urllib.parse.quote(context),
-                                  urllib.parse.quote(model))
+    def _score_request(self, context, rev_ids, models):
+        url = self.host + "/v3/scores/{0}/".format(urllib.parse.quote(context))
 
-        params = {'revids': "|".join(str(rid) for rid in rev_ids)}
+        params = {'revids': "|".join(str(rid) for rid in rev_ids),
+                  'models': "|".join(urllib.parse.quote(model)
+                                     for model in models)}
         logging.debug("Sending score request for {0} revisions"
                       .format(len(rev_ids)))
         start = time.time()
@@ -121,5 +121,5 @@ class Session:
             for warning_doc in doc['warnings']:
                 logger.warn(warning_doc)
 
-        return [doc['scores'][context][model]['scores'][str(rev_id)]
+        return [doc[context]['scores'][str(rev_id)]
                 for rev_id in rev_ids]
