@@ -22,4 +22,4 @@ def generate_spec(config):
     return util.jsonify(json.loads(render_template(
         "v3_swagger.json",
         host=urlparse(request.url_root).netloc,
-        scheme=config['ores']['wsgi']['scheme']))
+        scheme=config['ores']['wsgi']['scheme'])))
