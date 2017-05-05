@@ -2,6 +2,7 @@
 This script provides access to a set of utilities for ORES
 
 * precached -- Starts a daemon that requests scores for revisions as they happen
+* score_revisions -- Scores a set of revisions using an ORES API
 
 You can also launch a set of production like applications
 
