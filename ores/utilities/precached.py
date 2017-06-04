@@ -20,17 +20,17 @@ If ran by systemd, it uses watchdog to stay alive.
                      [default: config]
     --verbose        Print debugging information
 """
-import concurrent.futures
+import json
 import glob
 import logging
 import os
 import sys
 import time
 from collections import defaultdict
+from sseclient import SSEClient as EventSource
 
 import docopt
 import requests
-import socketIO_client
 import yamlconf
 
 from ..metrics_collectors import MetricsCollector, Null
@@ -76,9 +76,7 @@ def run(stream_url, ores_url, metrics_collector, config, delay, notify, verbose)
         format='%(asctime)s %(levelname)s:%(name)s -- %(message)s'
     )
 
-    # Make requests and socketIO_client be quiet.  They are very noisy.
     logging.getLogger("requests").setLevel(logging.WARNING)
-    logging.getLogger("socketIO_client").setLevel(logging.ERROR)  # SHUT UP!
     requests.packages.urllib3.disable_warnings()
     # If we're using logging for metrics collection, show it.
     logging.getLogger("ores.metrics_collectors").setLevel(logging.DEBUG)
@@ -91,14 +89,14 @@ def run(stream_url, ores_url, metrics_collector, config, delay, notify, verbose)
         stream_url, score_on, ores_url, MAX_WORKERS, metrics_collector, delay,
         notify)
 
-    socketIO = socketIO_client.SocketIO(stream_url, 80)
-    socketIO.define(RCNamespace, '/rc')
-
-    try:
-        socketIO.wait(seconds=sys.maxsize)
-    except KeyboardInterrupt:
-        print("Keyboard interrupt detected.  Shutting down.")
-        socketIO.disconnect()
+    for event in EventSource(stream_url):
+        if event.event == 'message':
+            try:
+                change = json.loads(event.data)
+            except ValueError:
+                pass
+            else:
+                RCNamespace.on_change(change)
 
 
 def build_score_on(config):
@@ -126,38 +124,18 @@ def build_score_on(config):
 def build_RCNamespace(stream_url, score_on, ores_url, max_workers,
                        metrics_collector, delay, notify):
 
-    class _RCNamespace(socketIO_client.BaseNamespace):
-        def __init__(self, *args, **kwargs):
-            super().__init__(*args, **kwargs)
-            print("RecentChanges.__init__", args, kwargs)
-            self.executor = concurrent.futures.ThreadPoolExecutor(max_workers=10)
+    class _RCNamespace():
 
         def on_change(self, change):
             if change['type'] in ('new', 'edit'):
                 wikidb = change['wiki']
                 rev_id = change['revision']['new']
                 models = score_on.get(('edit', wikidb), [])
-                self.score_revision(wikidb, models, rev_id)
+                self._score_revision(wikidb, models, rev_id)
 
                 if not change.get('bot'):
                     models = score_on.get(('nonbot_edit', wikidb), [])
-                    self.score_revision(wikidb, models, rev_id)
-
-        def on_connect(self):
-            logger.info("Connecting socketIO client to {0}."
-                        .format(stream_url))
-
-            # TODO: This should be limited to the wikis we actually care about
-            # but we identify a wiki by it's dbname and this pattern matching
-            # uses a domain name.
-            self.emit('subscribe', '*')  # Subscribes to all wikis
-
-        def on_disconnect(self):
-            self.executor.shutdown(wait=False)
-
-        def score_revision(self, context_name, model_names, rev_id):
-            self.executor.submit(
-                self._score_revision, context_name, model_names, rev_id)
+                    self._score_revision(wikidb, models, rev_id)
 
         def _score_revision(self, context_name, model_names, rev_id):
             if not model_names:
