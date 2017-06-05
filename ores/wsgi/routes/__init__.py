@@ -1,6 +1,6 @@
 import os
 
-from flask import render_template, send_file
+from flask import render_template, send_file, request
 
 from . import versions
 from . import ui
@@ -23,6 +23,14 @@ def configure(config, bp, score_processor):
     def favicon():
         # Tries to read from config or just loads the gear..
         return send_file(config['ores'].get('favicon', GEAR_FAVICON))
+
+    @bp.app_errorhandler(404)
+    def page_not_found(e):
+        return render_template(
+            '404.html',
+            title=request.path,
+            host=config['ores']['wsgi']['error_host'],
+            alt=config['ores']['wsgi']['error_alt']), 404
 
     bp = ui.configure(config, bp)
     bp = versions.configure(config, bp)
