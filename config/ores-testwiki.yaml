@@ -5,6 +5,8 @@ ores:
     application_root: ""
     url_prefix: ""
     scheme: 'http'
+    error_host: 'https://www.wikimedia.org'
+    error_alt: 'Wikimedia'
   home:
     footer: >
       Hosted on localhost &amp; written in
