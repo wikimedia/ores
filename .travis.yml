@@ -37,4 +37,4 @@ after_success:
     codecov
 group: stable
 dist: jessie
-os:linux
+os: linux
