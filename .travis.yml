@@ -36,5 +36,5 @@ script:
 after_success:
     codecov
 group: stable
-dist: trustty
+dist: trusty
 os: linux
