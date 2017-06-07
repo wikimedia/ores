@@ -35,3 +35,6 @@ script:
   - nosetests -v --with-coverage --cover-package=revscoring
 after_success:
     codecov
+group: stable
+dist: trusty
+os: linux
