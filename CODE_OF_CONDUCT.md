@@ -1,2 +1,7 @@
 The development of this software is covered by a [Code of Conduct](https://www.mediawiki.org/wiki/Code_of_Conduct).
 
+## Credit
+
+This Code of Conduct is adapted from the [Contributor Covenant](http://contributor-covenant.org/) ([revision 49054013](https://github.com/CoralineAda/contributor_covenant/blob/490540137a39fa746a1708a2188015b12b17249b/CODE_OF_CONDUCT.md)), the jQuery Code of Conduct ([revision 91777886](https://github.com/jquery/jquery.org/commit/9177788605c1846c14326ed0074f1bafac480dbd)), the [Open Code of Conduct](http://todogroup.org/opencodeofconduct/) ([v1.0](https://github.com/todogroup/opencodeofconduct/blob/gh-pages/index.md)), and the [Citizen Code of Conduct](http://citizencodeofconduct.org/), along with the [WMF Friendly space policy](https://wikimediafoundation.org/wiki/Friendly_space_policy).
+
+Text from the Contributor Covenant and the jQuery Code of Conduct is used under the [MIT License](https://github.com/CoralineAda/contributor_covenant/blob/master/LICENSE). The text from the Open Code of Conduct is used under a [Creative Commons Attribution license](https://github.com/todogroup/opencodeofconduct/blob/gh-pages/LICENSE). The text from the Citizen Code of Conduct is used under a [Creative Commons Share-alike Attribution license](https://creativecommons.org/licenses/by-sa/3.0/). The overall text is under MediaWiki.org's standard license ([CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/)).
