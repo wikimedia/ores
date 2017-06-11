@@ -59,7 +59,7 @@ def main(argv=None):
     config = yamlconf.load(*(open(p) for p in
                              sorted(glob.glob(config_paths))))
     delay = float(args['--delay'])
-    verbose = bool(args['--verbose'])
+    verbose = bool(args['--debug'])
     notify = notify_socket()
     if not notify:
         logger.info('Not being ran as a service, watchdog disabled')
@@ -83,9 +83,7 @@ def run(stream_url, ores_url, metrics_collector, config, delay, notify, verbose)
         if notify:
             watchdog_ping(*notify)
         start = time.time()
-        response = requests.post(
-            ores_url + "/v3/precache/", data=json.dumps(change))
-
+        response = requests.post(ores_url + "/v3/precache/", json=change)
         if response.status == 200:
             logger.info("Scored {0} in {1} seconds."
                         .format(json.dumps(change), round(time.time() - start, 3)))
@@ -102,6 +100,6 @@ def run(stream_url, ores_url, metrics_collector, config, delay, notify, verbose)
                 try:
                     change = json.loads(event.data)
                 except ValueError:
-                    pass
+                    continue
 
                 executor.submit(precache_a_change, change)
