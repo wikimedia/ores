@@ -164,7 +164,7 @@ def build_score_request_from_event(precache_map, event):
     if len(model_names) == 0:
         return None
 
-    return ScoreRequest(context_name, model_names, rev_id)
+    return ScoreRequest(context_name, [rev_id], model_names)
 
 
 # TODO: This strategy for building up events is not sustainable.
