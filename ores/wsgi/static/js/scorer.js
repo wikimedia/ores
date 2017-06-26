@@ -85,7 +85,7 @@ function getResults() {
 		} else {
 			$('#afterThis').after(createTable(data));
 		}
-		$('.sortable.table').tablesort();
+		$('.sortable.table').tablesorter();
 	}, datatype='jsonp');
 }
 
