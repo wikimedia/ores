@@ -13,6 +13,8 @@ wait_time = Feature("wait_time", returns=float)
 def process_wait(wait_time):
     time.sleep(wait_time)
     return wait_time
+
+
 wait = Feature("wait", process=process_wait, returns=float,
                depends_on=[wait_time])
 

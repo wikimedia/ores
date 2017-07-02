@@ -11,6 +11,8 @@ def process_reversed_last_two_in_rev_id(rev_id):
         return int(last_two + "0")
     else:
         return int("".join(reversed(last_two)))
+
+
 reversed_last_two_in_rev_id = Feature(
     "revision.reversed_last_two_in_rev_id",
     process_reversed_last_two_in_rev_id,
@@ -21,6 +23,8 @@ reversed_last_two_in_rev_id = Feature(
 
 def process_delay():
     return 0.0
+
+
 delay = Feature("delay", process_delay, returns=float)
 
 

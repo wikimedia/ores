@@ -3,7 +3,7 @@ from urllib.parse import urlparse
 
 from flask import jsonify, render_template, request
 
-from ... import preprocessors, util
+from ... import preprocessors
 
 
 def configure(config, bp, score_processor):
