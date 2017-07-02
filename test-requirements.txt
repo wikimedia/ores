@@ -3,4 +3,5 @@ nose
 pylru
 statsd
 redis
+flake8
 threadpool
