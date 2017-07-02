@@ -29,7 +29,7 @@ def format_v1_score_response(response, limit_to_model=None):
 
     if limit_to_model is not None:
         return util.jsonify({rev_id: model_scores[limit_to_model]
-                        for rev_id, model_scores in response_doc.items()})
+                            for rev_id, model_scores in response_doc.items()})
     else:
         return util.jsonify(response_doc)
 
