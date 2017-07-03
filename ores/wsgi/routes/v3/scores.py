@@ -15,7 +15,11 @@ def configure(config, bp, scoring_system):
     @preprocessors.nocache
     @preprocessors.minifiable
     def scores_v3():
-        score_request = build_score_request(scoring_system, request)
+        try:
+            score_request = build_score_request(scoring_system, request)
+        except Exception as e:
+            return responses.bad_request(str(e))
+
         return util.build_v3_context_model_map(score_request, scoring_system)
 
     def process_score_request(score_request):
@@ -41,7 +45,12 @@ def configure(config, bp, scoring_system):
     @preprocessors.nocache
     @preprocessors.minifiable
     def score_model_revisions_v3(context):
-        score_request = build_score_request(scoring_system, request, context)
+        try:
+            score_request = build_score_request(
+                scoring_system, request, context)
+        except Exception as e:
+            return responses.bad_request(str(e))
+
         return process_score_request(score_request)
 
     # /v3/scores/enwiki/reverted/?revids=456789|4567890
@@ -49,8 +58,12 @@ def configure(config, bp, scoring_system):
     @preprocessors.nocache
     @preprocessors.minifiable
     def score_revisions_v3(context, revid):
-        score_request = build_score_request(
-            scoring_system, request, context, rev_id=revid)
+        try:
+            score_request = build_score_request(
+                scoring_system, request, context, rev_id=revid)
+        except Exception as e:
+            return responses.bad_request(str(e))
+
         return process_score_request(score_request)
 
     # /v3/scores/enwiki/reverted/4567890
@@ -58,8 +71,13 @@ def configure(config, bp, scoring_system):
     @preprocessors.nocache
     @preprocessors.minifiable
     def score_revision_v3(context, model, rev_id):
-        score_request = build_score_request(
-            scoring_system, request, context, rev_id=rev_id, model_name=model)
+        try:
+            score_request = build_score_request(
+                scoring_system, request, context, rev_id=rev_id,
+                model_name=model)
+        except Exception as e:
+            return responses.bad_request(str(e))
+
         return process_score_request(score_request)
 
     return bp
