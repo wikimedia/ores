@@ -27,8 +27,7 @@ function enableResult() {
 	$('#resultButton').removeAttr('disabled');
 }
 function createTable(data) {
-	var htm = '<div class="col-md-6 col-md-offset-3" style="margin-top: 3em; margin-bottom: 3em;">';
-	htm += '<table class="celled table sortable"><thead><tr><th>Wiki</th><th>Model</th><th>Revision ID</th>';
+	var htm = '<table class="celled table sortable"><thead><tr><th>Wiki</th><th>Model</th><th>Revision ID</th>';
 	htm += '<th>Value</th><th>Score</th></tr></thead>';
         if ( data.responseJSON && data.responseJSON.error) {
             return error(data.responseJSON.error.message);
@@ -49,7 +48,7 @@ function createTable(data) {
 			}
 		}
 	}
-	htm += '</tbody></table></div>';
+	htm += '</tbody></table>';
 	return htm;
 }
 function loadModels(wiki) {
@@ -78,13 +77,11 @@ function getResults() {
 		models_url += $(this).val() + '|';
 	});
 	models_url = models_url.slice(0, -1);
+	var container = '<div id="tableContainer" class="col-md-6 col-md-offset-3" style="margin-top: 3em; margin-bottom: 3em;">';
 	var url = "/scores/" + $('#wikiDropDownInput').attr('value') + "/?models=" + models_url + "&revids=" + revs;
 	$.get({ url: url, datatype: 'jsonp' }).always(function(data) {
-		if ($('.table').length) {
-			$('.table').html(createTable(data));
-		} else {
-			$('#afterThis').after(createTable(data));
-		}
+		$('#tableContainer').remove();
+		$('#afterThis').after(container + createTable(data) + '</div>');
 		$('.sortable.table').tablesorter();
 	});
 }
