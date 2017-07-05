@@ -1,0 +1,4 @@
+node_modules/**
+build/**
+ores/wsgi/static/lib/**
+ores/wsgi/static/WikimediaUI/**
