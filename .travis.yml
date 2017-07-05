@@ -20,6 +20,7 @@ before_install:
   - export PATH=/home/travis/miniconda3/bin:$PATH
   - ls -l /home/travis/miniconda3/bin
   - conda update --yes conda
+  - npm install -g eslint
 # Install packages
 install:
   - conda install --yes python=$TRAVIS_PYTHON_VERSION numpy scipy=0.16.1
@@ -34,6 +35,7 @@ install:
 script:
   - nosetests -v --with-coverage --cover-package=revscoring
   - flake8 .
+  - eslint .
 after_success:
     codecov
 group: stable

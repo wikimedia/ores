@@ -1,7 +1,15 @@
 {
   "extends": "eslint:recommended",
-  "env": {},
-  "globals": {},
+  "env": {
+    "browser": true,
+    "jquery": true
+	},
+  "globals": {
+    "mediaWiki": false,
+    "OO": false,
+    "require": false,
+    "util": false
+	},
   "rules": {
     "array-bracket-spacing": [ "error", "always" ],
     "block-spacing": "error",
@@ -36,7 +44,7 @@
     "no-extra-label": "error",
     "no-floating-decimal": "error",
     "no-implicit-coercion": [ "error", { "string": true, "boolean": false, "number": false } ],
-    "no-implicit-globals": "error",
+    "no-implicit-globals": "off",
     "no-implied-eval": "error",
     "no-label-var": "error",
     "no-loop-func": "error",
