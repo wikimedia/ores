@@ -61,6 +61,17 @@ def main(argv=None):
     response = requests.get(ores_url + "/404/")
     assert response.status_code == 404, "/404/ didn't get a 404!"
 
+    make_request(
+        ores_url,
+        "/v3/scores/testwiki/2342342/revid/?features&feature.delay=16",
+        is_json=True,
+        equal_to={"testwiki": {
+            "models": {"revid": {"version": "0.0.0"}},
+            "scores": {"2342342": {
+                "revid": {"error": {'message': 'Timed out after 15 seconds.',
+                                    'type': 'TimeoutError'}}
+            }}}})
+
 
 def make_request(ores_url, path, is_json=False, equal_to=None):
     logger.debug("Requesting {0}".format(path))
