@@ -10,13 +10,22 @@ ORES is based on Python 3. Use pip to install ORES:
 
 ``pip install ores`` (or ``pip3 install ores`` if your distribution defaults to Python 2)
 
+If you're running with the default configuration, you'll need to install a few more optional libraries,
+
+``pip install pylru``
+
 Then you can easily run a test server by:
 
-``ores dev_server``
+``ores applications.wsgi``
 
 Use the ``-h`` argument to view its usage.
 
-``ores dev_server -h``
+``ores applications.wsgi -h``
+
+Visit these pages to see if your installation works,
+
+``http://localhost:8080/``
+``http://localhost:8080/v2/scores/testwiki/revid/641962088?features=true``
 
 Authors
 =======
