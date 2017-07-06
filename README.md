@@ -12,11 +12,11 @@ ORES is based on Python 3. Use pip to install ORES:
 
 Then you can easily run a test server by:
 
-``ores dev_server``
+``ores applications.wsgi``
 
 Use the ``-h`` argument to view its usage.
 
-``ores dev_server -h``
+``ores applications.wsgi -h``
 
 Authors
 =======
