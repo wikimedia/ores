@@ -1,3 +1,6 @@
+# Secret and other types of files that shouldn't be included
+*DONOTCOMMIT*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

@@ -43,6 +43,7 @@ scoring_systems:
     workers: 8
   local_celery:
     class: ores.scoring_systems.CeleryQueue
+    score_cache: local_redis
     BROKER_URL: redis://localhost
     BROKER_TRANSPORT_OPTIONS: {'socket_timeout': 15} # seconds
     CELERY_RESULT_BACKEND: redis://localhost
