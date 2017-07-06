@@ -22,7 +22,7 @@ def timeout(func, *args, seconds=None, **kwargs):
 
     try:
         start = time.time()
-        with stopit.ThreadingTimeout(seconds) as to_ctx_mgr:
+        with stopit.SignalTimeout(seconds) as to_ctx_mgr:
             result = func(*args, **kwargs)
         duration = time.time() - start
 
