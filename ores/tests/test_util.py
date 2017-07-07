@@ -2,8 +2,8 @@ import time
 
 from nose.tools import raises
 
-from ..util import timeout
 from ..errors import TimeoutError
+from ..util import timeout
 
 
 def test_timeout():
@@ -12,4 +12,4 @@ def test_timeout():
 
 @raises(TimeoutError)
 def test_timeout_error():
-    timeout(time.sleep, 0.1, seconds=0.05)
+    timeout(time.sleep, 2, seconds=1)
