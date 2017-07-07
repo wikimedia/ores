@@ -1,0 +1,72 @@
+# Top level configuration
+ores:
+  scoring_system: local_single_thread
+  wsgi:
+    application_root: ""
+    url_prefix: ""
+    scheme: 'http'
+  home:
+    footer: >
+      Hosted on localhost &amp; written in
+      <a href="https://python.org">Python 3</a>
+
+# Caching options
+score_caches:
+  memory_lru:
+    class: ores.score_caches.LRU
+    size: 1024
+  local_redis:
+    class: ores.score_caches.Redis
+    host: localhost
+    prefix: ores
+    socket_timeout: 15 # seconds
+
+# Metrics collection options
+metrics_collectors:
+  local_logging:
+    class: ores.metrics_collectors.Logger
+
+# Scoring systems do the actual work
+scoring_systems:
+  defaults:
+    metrics_collector: local_logging
+    score_cache: memory_lru
+    scoring_contexts:
+      - testwiki
+    timeout: 15 # seconds
+  local_single_thread:
+    class: ores.scoring_systems.SingleThread
+  local_process_pool:
+    class: ores.scoring_systems.ProcessPool
+    workers: 8
+  local_celery:
+    class: ores.scoring_systems.CeleryQueue
+    BROKER_URL: redis://localhost
+    BROKER_TRANSPORT_OPTIONS: {'socket_timeout': 15} # seconds
+    CELERY_RESULT_BACKEND: redis://localhost
+    CELERY_ACCEPT_CONTENT: ['pickle']
+    CELERY_TASK_SERIALIZER: 'pickle'
+    CELERY_RESULT_SERIALIZER: 'pickle'
+    CELERYD_CONCURRENCY: 8
+    queue_maxsize: 100 # pending tasks
+
+# Scoring contexts
+scoring_contexts:
+  testwiki:
+    extractor: testwiki_offline
+    scorer_models:
+      revid: testwiki_revid
+    precache:
+      revid:
+        "on": ['edit']
+
+# Available feature extractors
+extractors:
+  testwiki_offline:
+    class: revscoring.extractors.OfflineExtractor
+
+# Scorer models
+scorer_models:
+  testwiki_revid:
+    class: ores.scorer_models.RevIdScorer
+    version: 0.0.0
