@@ -1,9 +1,7 @@
 import celery
 
-from ... import errors
-from ...score_request import ScoreRequest
 from ..celery_queue import CeleryQueue
-from .util import fakewiki, test_scoring_system, wait_time
+from .util import fakewiki
 
 
 def test_score():
