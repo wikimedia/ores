@@ -3,6 +3,8 @@ This script provides access to a set of utilities for ORES
 
 * precached -- Starts a daemon that requests scores for revisions as they happen
 * score_revisions -- Scores a set of revisions using an ORES API
+* stress_test -- Scores a large set of revisions at a configurable rate
+* test_api -- Runs a series of tests against a live ORES API
 
 You can also launch a set of production like applications
 
