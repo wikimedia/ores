@@ -161,7 +161,8 @@ def request_and_stat(ores_url, context, models, rev_ids, stats, verbose):
             stats['revisions_scored'] += 1
             for name, score_doc in doc[context]['scores'][rev_id_str].items():
                 if 'error' in score_doc:
-                    stats['model_errored'][name][score_doc['type']] += 1
+                    type_name = score_doc['error']['type']
+                    stats['model_errored'][name][type_name] += 1
                 else:
                     stats['model_scored'][name] += 1
 
