@@ -1,9 +1,8 @@
 import time
 
-from revscoring import ScorerModel
+from revscoring import Model
 from revscoring.datasources.revision_oriented import revision
 from revscoring.features import Feature
-
 
 def process_reversed_last_two_in_rev_id(rev_id):
     last_two = str(rev_id)[-2:]
@@ -28,7 +27,7 @@ def process_delay():
 delay = Feature("delay", process_delay, returns=float)
 
 
-class RevIdScorer(ScorerModel):
+class RevIdScorer(Model):
     """
     Implements a basic, testing scorer that predicts whether a revision ID's
     reversed last two digits are greater than 50.

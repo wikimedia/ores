@@ -3,10 +3,10 @@ import time
 from hashlib import sha1
 
 from revscoring import dependencies
+from revscoring import Model
 from revscoring.datasources import Datasource
 from revscoring.extractors import Extractor
 from revscoring.features import trim
-from revscoring.scorer_models import ScorerModel
 
 logger = logging.getLogger(__name__)
 
@@ -34,12 +34,9 @@ class ScoringContext(dict):
         self.update(model_map)
         self.extractor = extractor
 
-    def format_model_info(self, model_name, fields=None):
-        formatted_info = self._get_model_info_for(model_name)
-        filtered_info = {field: value
-                         for field, value in formatted_info.items()
-                         if fields == [""] or field in fields}
-        return filtered_info
+    def format_model_info(self, model_name, paths=None):
+        model_info = self._get_model_info_for(model_name)
+        return model_info.format(paths, formatting="json")
 
     def format_id_string(self, model_name, rev_id, injection_cache=None):
         version = self.model_version(model_name)
@@ -53,7 +50,7 @@ class ScoringContext(dict):
             return score_id + ":" + cache_hash
 
     def _get_model_info_for(self, model_name):
-        return self[model_name].format_info(format='json')
+        return self[model_name].info
 
     def model_version(self, model_name):
         return self[model_name].version
@@ -213,7 +210,7 @@ class ScoringContext(dict):
 
         model_map = {}
         for model_name, key in section['scorer_models'].items():
-            scorer_model = ScorerModel.from_config(config, key)
+            scorer_model = Model.from_config(config, key)
             model_map[model_name] = scorer_model
 
         extractor = Extractor.from_config(config, section['extractor'])
@@ -238,7 +235,7 @@ class ClientScoringContext(ScoringContext):
         super().__init__(name, bare_model_map, *args, **kwargs)
 
         # Create an info map for use when formatting information
-        self.info_map = {model_name: model.format_info(format='json')
+        self.info_map = {model_name: model.info
                          for model_name, model in model_map.items()}
         self.features_map = {model_name: model.features
                              for model_name, model in model_map.items()}
