@@ -4,7 +4,7 @@ from revscoring.extractors import OfflineExtractor
 from ... import errors
 from ...score_caches import LRU
 from ...score_request import ScoreRequest
-from ...scorer_models import RevIdScorer
+from ...scoring.models import RevIdScorer
 from ...scoring_context import ScoringContext
 from ..process_pool import ProcessPool
 from .util import fakewiki, test_scoring_system, wait_time

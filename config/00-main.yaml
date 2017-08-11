@@ -71,5 +71,5 @@ extractors:
 # Scorer models
 scorer_models:
   testwiki_revid:
-    class: ores.scorer_models.RevIdScorer
+    class: ores.scoring.models.RevIdScorer
     version: 0.0.0
