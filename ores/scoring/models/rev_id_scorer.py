@@ -4,6 +4,7 @@ from revscoring import Model
 from revscoring.datasources.revision_oriented import revision
 from revscoring.features import Feature
 
+
 def process_reversed_last_two_in_rev_id(rev_id):
     last_two = str(rev_id)[-2:]
     if len(last_two) == 1:

@@ -15,20 +15,11 @@ addons:
     - redis-server
 
 before_install:
-  - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
-  - chmod +x miniconda.sh
-  - ./miniconda.sh -b
-  - export PATH=/home/travis/miniconda3/bin:$PATH
-  - ls -l /home/travis/miniconda3/bin
-  - conda update --yes conda
   - npm install -g eslint
 # Install packages
 install:
-  - conda install --yes python=$TRAVIS_PYTHON_VERSION numpy scipy=0.16.1
-  - python --version
-  - python -c "import numpy;print(numpy.__version__)"
-  - python -c "import scipy;print(scipy.__version__)"
-  - touch /home/travis/miniconda3/lib/python3.5/site-packages/easy-install.pth
+  - pip install pip --upgrade
+  - pip install wheel
   - travis_wait pip install -r requirements.txt || date
   - travis_wait pip install -r test-requirements.txt || date
   - python -m nltk.downloader stopwords
