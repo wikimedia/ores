@@ -9,4 +9,4 @@ sseclient >= 0.0.18
 stopit >= 1.1.1, < 1.1.999
 yamlconf >= 0.2.2, < 0.2.999
 pyyaml == 3.11
-revscoring >= 1.3.3, < 1.3.999
+revscoring >= 2.0.2, < 2.0.999
