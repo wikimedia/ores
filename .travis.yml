@@ -26,7 +26,7 @@ install:
   - pip install codecov
   - sudo service redis-server start
 script:
-  - nosetests -v --with-coverage --cover-package=ores
+  - pytest -v
   - flake8 .
   - eslint .
   - ./utility applications.wsgi --config ./config/celery-test/ &
@@ -34,7 +34,7 @@ script:
   - sleep 5
   - ./utility test_api http://localhost:8080 --debug
 after_success:
-    codecov
+  codecov
 group: stable
 dist: trusty
 os: linux

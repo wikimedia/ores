@@ -1,7 +1,7 @@
 import socket
 from contextlib import contextmanager
 
-from nose.tools import eq_, raises
+from nose.tools import raises
 
 from ...score_request import ScoreRequest
 from ..statsd import Statsd
@@ -35,7 +35,7 @@ def test_statsd():
     collector.score_cache_hit(ScoreRequest("foo", [1], {"bar"}), "bar")
     collector.score_errored(ScoreRequest("foo", [1], {"bar"}), "bar")
 
-    eq_(set(fake_client.messages) -
+    assert set(fake_client.messages) - \
         {('TIMING', 'precache_request.foo.derp', 100000),
          ('TIMING', 'precache_request.foo.bar', 100000),
          ('TIMING', 'precache_request.foo', 100000),
@@ -65,8 +65,7 @@ def test_statsd():
          ('INCR', 'score_cache_hit', 1),
          ('INCR', 'score_errored.foo.bar', 1),
          ('INCR', 'score_errored.foo', 1),
-         ('INCR', 'score_errored', 1)},
-        set())
+         ('INCR', 'score_errored', 1)} == set()
 
 
 @raises(socket.gaierror)

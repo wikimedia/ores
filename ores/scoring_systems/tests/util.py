@@ -1,6 +1,6 @@
 import time
 
-from nose.tools import eq_, nottest
+from nose.tools import nottest
 from revscoring import Extractor, Model
 from revscoring.features import Feature
 from revscoring.scoring import ModelInfo
@@ -49,18 +49,19 @@ def test_scoring_system(scoring_system):
         ScoreRequest("fakewiki", [1], ["fake"],
                      injection_caches={1: {wait_time: 0.05}},
                      model_info=['version']))
-    eq_(response.errors, {})
-    eq_(response.scores, {1: {'fake': True}})
-    eq_(response.model_info, {'fake': {'version': 'fake version'}})
+    assert response.errors == {}
+    assert response.scores == {1: {'fake': True}}
+    assert response.model_info == {'fake': {'version': 'fake version'}}
 
     response = scoring_system.score(
         ScoreRequest("fakewiki", [1, 2], ["fake", "other_fake"],
                      injection_caches={1: {wait_time: 0.05},
                                        2: {wait_time: 0.01}},
                      model_info=['version']))
-    eq_(response.errors, {})
-    eq_(response.scores,
+    assert response.errors == {}
+    assert response.scores == \
         {1: {'fake': True, 'other_fake': True},
-         2: {'fake': True, 'other_fake': True}})
-    eq_(response.model_info, {'fake': {'version': 'fake version'},
-                              'other_fake': {'version': 'fake version'}})
+         2: {'fake': True, 'other_fake': True}}
+    assert response.model_info == \
+        {'fale': {'version': 'fake version'},
+         'other_fake': {'version': 'fake version'}}

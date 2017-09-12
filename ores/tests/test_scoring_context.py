@@ -1,6 +1,5 @@
 from collections import namedtuple
 
-from nose.tools import eq_
 from revscoring import dependencies
 
 from ..scoring_context import ScoringContext
@@ -58,11 +57,11 @@ def test_scoring_context():
         ["fake"], rev_ids)
     print(root_ds_caches)
     print(errors)
-    eq_(len(root_ds_caches), 4)
-    eq_(len(errors), 1)
-    eq_(root_ds_caches[1][fake_data], "fake")
+    assert len(root_ds_caches) == 4
+    assert len(errors) == 1
+    assert root_ds_caches[1][fake_data] == "fake"
     assert 5 in errors
 
     score = scoring_context.process_model_scores(
         ["fake"], {characters: 10, is_fake: False})
-    eq_(score['fake']['score']['prediction'], "generated")
+    assert score['fake']['score']['prediction'] == "generated"
