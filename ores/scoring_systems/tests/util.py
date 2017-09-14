@@ -63,5 +63,5 @@ def test_scoring_system(scoring_system):
         {1: {'fake': True, 'other_fake': True},
          2: {'fake': True, 'other_fake': True}}
     assert response.model_info == \
-        {'fale': {'version': 'fake version'},
+        {'fake': {'version': 'fake version'},
          'other_fake': {'version': 'fake version'}}
