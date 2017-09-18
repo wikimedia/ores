@@ -27,8 +27,8 @@ def test_rev_id_scorer():
         ScoreRequest("fakewiki", [1, 19], ["revid"], model_info=['']))
     print(response.scores, response.errors)
     assert response.model_info['revid']['version'] == '0.0.1'
-    assert response.scores[1]['revid']['prediction'] == False
-    assert response.scores[19]['revid']['prediction'] == True
+    assert response.scores[1]['revid']['prediction'] is False
+    assert response.scores[19]['revid']['prediction'] is True
 
 
 def test_timeout():
