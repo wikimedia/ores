@@ -26,15 +26,16 @@ install:
   - pip install codecov
   - sudo service redis-server start
 script:
-  - pytest -v
   - flake8 .
   - eslint .
   - ./utility applications.wsgi --config ./config/celery-test/ &
   - ./utility applications.celery --config ./config/celery-test/ &
   - sleep 5
   - ./utility test_api http://localhost:8080 --debug
+  - coverage run --source ores -m py.test
 after_success:
-  codecov
+  - coverage report
+  - codecov
 group: stable
 dist: trusty
 os: linux
