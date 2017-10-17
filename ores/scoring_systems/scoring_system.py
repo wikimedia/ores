@@ -250,7 +250,8 @@ class ScoringSystem(dict):
                 for name in section['scoring_contexts']}
 
     @classmethod
-    def _kwargs_from_config(cls, config, name, section_key="scoring_systems"):
+    def _kwargs_from_config(cls, config, name,
+                            section_key="scoring_systems"):
         from ..metrics_collectors import MetricsCollector
         from ..score_caches import ScoreCache
 
