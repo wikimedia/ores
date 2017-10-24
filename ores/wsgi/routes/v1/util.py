@@ -40,7 +40,7 @@ def format_some_model_info(scoring_system, request, limit_to_model=None):
     for model_name in request.model_names:
         model_info = \
             scoring_system[request.context_name].format_model_info(
-                model_name, fields=[''])
+                model_name, request.model_info)
         model_infos[model_name] = model_info
 
     if limit_to_model is None:

@@ -3,6 +3,7 @@ import time
 from revscoring import Model
 from revscoring.datasources.revision_oriented import revision
 from revscoring.features import Feature
+from revscoring.scoring import ModelInfo
 
 
 def process_reversed_last_two_in_rev_id(rev_id):
@@ -37,6 +38,11 @@ class RevIdScorer(Model):
     """
     def __init__(self, version=None):
         super().__init__([reversed_last_two_in_rev_id, delay], version=version)
+        self.info = ModelInfo()
+        self.info['version'] = version
+        self.info['type'] = "RevIDScorer"
+        self.info['behavior'] = "Returns the last two digits in a rev_id " + \
+                                "as a score."
 
     def score(self, feature_values):
         last_two_in_rev_id, delay = feature_values
@@ -55,21 +61,6 @@ class RevIdScorer(Model):
                 False: 1 - probability
             }
         }
-
-    def info(self):
-        return {
-            'type': "RevIDScorer",
-            'version': self.version,
-            'behavior': "Returns the last two digits in a rev_id as a score."
-        }
-
-    def format_info(self, format="str"):
-        if format == 'str':
-            return str(self.info())
-        elif format == 'json':
-            return self.info()
-        else:
-            raise TypeError("Format {0} not supported".format(format))
 
     @classmethod
     def from_config(cls, config, name, section_key='scorer_models'):
