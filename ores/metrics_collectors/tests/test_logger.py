@@ -1,7 +1,5 @@
 from collections import namedtuple
 
-from nose.tools import eq_
-
 from ...score_request import ScoreRequest
 from ..logger import Logger
 
@@ -21,7 +19,7 @@ def test_logger():
     collector.score_cache_hit(ScoreRequest("foo", [1], {"bar"}), "bar")
     collector.score_errored(ScoreRequest("foo", [1], {"bar"}), "bar")
 
-    eq_(set(messages),
+    assert set(messages) == \
         {"precache_request: foo:{'bar', 'derp'} in 100 seconds",
          "scores_request: foo:{'bar'} for 50 revisions in 150 seconds",
          "datasources_extracted: foo:{'bar'} for 10 revisions in 25 secs",
@@ -29,8 +27,7 @@ def test_logger():
          "score_timed_out: foo:{'bar'} in 15.1 seconds",
          "score_cache_miss: foo:derp",
          "score_cache_hit: foo:bar",
-         "score_errored: foo:bar"},
-        set())
+         "score_errored: foo:bar"}
 
 
 def test_from_config():

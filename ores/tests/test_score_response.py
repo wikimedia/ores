@@ -1,5 +1,3 @@
-from nose.tools import eq_
-
 from ..score_request import ScoreRequest
 from ..score_response import ScoreResponse
 
@@ -24,4 +22,4 @@ def test_score_request():
     sr.add_score(3, "baz", {"prediction": False})
     sr.add_features(3, "baz", {"feature.rev_id": 3})
 
-    eq_(sr.scores[3]['baz']['prediction'], False)
+    assert sr.scores[3]['baz']['prediction'] is False

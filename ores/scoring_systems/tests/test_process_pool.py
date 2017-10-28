@@ -1,4 +1,3 @@
-from nose.tools import eq_
 from revscoring.extractors import OfflineExtractor
 
 from ... import errors
@@ -27,9 +26,9 @@ def test_rev_id_scorer():
     response = scoring_system.score(
         ScoreRequest("fakewiki", [1, 19], ["revid"], model_info=['']))
     print(response.scores, response.errors)
-    eq_(response.model_info['revid']['version'], '0.0.1')
-    eq_(response.scores[1]['revid']['prediction'], False)
-    eq_(response.scores[19]['revid']['prediction'], True)
+    assert response.model_info['revid']['version'] == '0.0.1'
+    assert response.scores[1]['revid']['prediction'] is False
+    assert response.scores[19]['revid']['prediction'] is True
 
 
 def test_timeout():
