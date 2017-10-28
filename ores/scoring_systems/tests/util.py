@@ -1,6 +1,6 @@
 import time
 
-from nose.tools import nottest
+from pytest import mark
 from revscoring import Extractor, Model
 from revscoring.features import Feature
 from revscoring.scoring import ModelInfo
@@ -42,7 +42,7 @@ fakewiki = ScoringContext(
     "fakewiki", {'fake': FakeSM(), 'other_fake': FakeSM()}, FakeExtractor())
 
 
-@nottest
+@mark.skip('Not test')
 def test_scoring_system(scoring_system):
 
     response = scoring_system.score(

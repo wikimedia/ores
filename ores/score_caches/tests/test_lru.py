@@ -1,4 +1,4 @@
-from nose.tools import raises
+from pytest import raises
 
 from ..lru import LRU
 from ..score_cache import ScoreCache
@@ -20,7 +20,6 @@ def test_lru():
     assert cache_context.lookup(4) == "fez"  # Moves 4 to the front
 
 
-@raises(KeyError)
 def test_lru_cache():
     lru = LRU(2)
 
@@ -33,8 +32,8 @@ def test_lru_cache():
         "cachedfoo"
     assert cache_context.lookup(1) == "foo"
 
-    # Raises KeyError
-    cache_context.lookup(1, injection_cache={"cachedvalue": 2})
+    with raises(KeyError):
+        cache_context.lookup(1, injection_cache={"cachedvalue": 2})
 
 
 def test_from_config():

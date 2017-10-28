@@ -1,7 +1,7 @@
 import socket
 from contextlib import contextmanager
 
-from nose.tools import raises
+from pytest import raises
 
 from ...score_request import ScoreRequest
 from ..statsd import Statsd
@@ -68,7 +68,6 @@ def test_statsd():
          ('INCR', 'score_errored', 1)} == set()
 
 
-@raises(socket.gaierror)
 def test_from_config():
     # Should throw a socket connection error and no others
     config = {
@@ -81,4 +80,5 @@ def test_from_config():
             }
         }
     }
-    Statsd.from_config(config, 'wmflabs_statsd')
+    with raises(socket.gaierror):
+        Statsd.from_config(config, 'wmflabs_statsd')
