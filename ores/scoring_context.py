@@ -2,7 +2,8 @@ import logging
 import time
 from hashlib import sha1
 
-from revscoring import Model, dependencies
+from revscoring import dependencies
+from revscoring import Model
 from revscoring.datasources import Datasource
 from revscoring.extractors import Extractor
 from revscoring.features import trim
