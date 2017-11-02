@@ -23,14 +23,13 @@ REQUESTED = "REQUESTED"
 
 
 @before_task_publish.connect
-def update_sent_state(sender=None, body=None, properties=None, **kwargs):
+def update_sent_state(sender=None, body=None, **kwargs):
     for application in _applications:
         task = application.tasks.get(sender)
         backend = task.backend if task else application.backend
 
-        task_id = properties['correlation_id']
-        logger.debug("Setting state to {0} for {1}".format(SENT, task_id))
-        backend.store_result(task_id, result=None, state=SENT)
+        logger.debug("Setting state to {0} for {1}".format(SENT, body['id']))
+        backend.store_result(body['id'], result=None, status=SENT)
 
 
 class CeleryQueue(ScoringSystem):
@@ -80,8 +79,7 @@ class CeleryQueue(ScoringSystem):
             logger.info("Looking up {0} in {1}".format(model_name, result_id))
             score_map_result = self._process_score_map.AsyncResult(result_id)
             try:
-                score_map = score_map_result.get(
-                    timeout=self.timeout, disable_sync_subtasks=False)
+                score_map = score_map_result.get(timeout=self.timeout)
 
             except celery.exceptions.TimeoutError:
                 raise errors.TimeoutError(
