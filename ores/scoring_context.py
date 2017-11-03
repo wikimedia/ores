@@ -38,10 +38,12 @@ class ScoringContext(dict):
         model_info = self._get_model_info_for(model_name)
         return model_info.format(paths, formatting="json")
 
-    def format_id_string(self, model_name, rev_id, injection_cache=None):
+    def format_id_string(self, model_name, rev_id, request, injection_cache=None):
         version = self.model_version(model_name)
         score_id = ":".join(
             str(v) for v in [self.name, model_name, version, rev_id])
+        if request.include_features:
+            score_id += ":features"
         if injection_cache is None:
             return score_id
         else:
