@@ -1,6 +1,7 @@
 import traceback
 
 from flask import request
+from revscoring.errors import ModelInfoLookupError
 
 from . import util
 from ... import preprocessors, responses
@@ -40,6 +41,8 @@ def configure(config, bp, scoring_system):
             return responses.not_found(
                 "Models {0} not available for {1}"
                 .format(tuple(model_names), context_name))
+        except ModelInfoLookupError as e:
+            return responses.model_info_lookup_error(e)
         except Exception:
             return responses.unknown_error(traceback.format_exc())
 
