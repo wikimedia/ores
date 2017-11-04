@@ -127,11 +127,15 @@ class CeleryQueue(ScoringSystem):
                 except celery.exceptions.TimeoutError:
                     timeout_error = errors.TimeoutError(
                         "Timed out after {0} seconds.".format(self.timeout))
-                    score_errors[rev_id] = timeout_error
+                    if rev_id not in score_errors:
+                        score_errors[rev_id] = {}
+                    score_errors[rev_id][model_name] = timeout_error
                     self.application.backend.mark_as_failure(
                         score_result.id, timeout_error)
                 except Exception as error:
-                    score_errors[rev_id] = error
+                    if rev_id not in score_errors:
+                        score_errors[rev_id] = {}
+                    score_errors[rev_id][model_name] = error
 
         return rev_scores, score_errors
 
