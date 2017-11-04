@@ -14,6 +14,11 @@ def not_implemented(message=None):
                  message or "Route not implemented yet.")
 
 
+def model_info_lookup_error(exc):
+    return bad_request("Model information could not be retrieved for {0}"
+                       .format(exc))
+
+
 def bad_request(message):
     return error(400, 'bad request', message)
 
