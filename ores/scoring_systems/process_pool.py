@@ -25,21 +25,31 @@ class ProcessPool(ScoringSystem):
                     if rev_id not in root_caches:
                         continue
                     root_cache = root_caches[rev_id]
-                    logger.debug("Submitting _process_score_map for {0}"
-                                 .format(request.format(rev_id, missing_models)))
-                    future = executor.submit(
-                        self._process_score_map, request, rev_id, missing_models,
-                        root_cache)
-                    futures[rev_id] = future
+                    if rev_id not in futures:
+                        futures[rev_id] = {}
+                    for model_name in missing_models:
+                        logger.debug("Submitting _process_score_map for {0}"
+                                     .format(request.format(rev_id, model_name)))
+                        future = executor.submit(
+                            self._process_score_map, request, rev_id, model_name,
+                            root_cache)
+                        futures[rev_id][model_name] = future
 
-            for rev_id, future in futures.items():
-                try:
-                    rev_scores[rev_id] = future.result(timeout=self.timeout)
-                except cfutures.TimeoutError:
-                    errors[rev_id] = TimeoutError(
-                        "Timed out after {0} seconds.".format(self.timeout))
-                except Exception as error:
-                    errors[rev_id] = error
+            for rev_id, model_futures in futures.items():
+                for model_name, future in model_futures.items():
+                    try:
+                        if rev_id not in rev_scores:
+                            rev_scores[rev_id] = {}
+                        rev_scores[rev_id][model_name] = future.result(timeout=self.timeout)
+                    except cfutures.TimeoutError:
+                        if rev_id not in errors:
+                            errors[rev_id] = {}
+                        errors[rev_id][model_name] = TimeoutError(
+                            "Timed out after {0} seconds.".format(self.timeout))
+                    except Exception as error:
+                        if rev_id not in errors:
+                            errors[rev_id] = {}
+                        errors[rev_id][model_name] = error
 
         return rev_scores, errors
 

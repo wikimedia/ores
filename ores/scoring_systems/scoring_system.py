@@ -107,8 +107,8 @@ class ScoringSystem(dict):
             self._cache_scores(request, rev_id, score_map)
 
         # 4.5 Record scoring errors
-        for rev_id, error in scoring_errors.items():
-            for model in request.model_names:
+        for rev_id, model_errors in scoring_errors.items():
+            for model, error in model_errors.items():
                 response.add_error(rev_id, model, error)
                 self.metrics_collector.score_errored(request, model)
 

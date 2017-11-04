@@ -63,5 +63,5 @@ def test_scoring_context():
     assert 5 in errors
 
     score = scoring_context.process_model_scores(
-        ["fake"], {characters: 10, is_fake: False})
-    assert score['fake']['score']['prediction'] == "generated"
+        "fake", {characters: 10, is_fake: False})
+    assert score['score']['prediction'] == "generated"

@@ -17,12 +17,17 @@ class SingleThread(ScoringSystem):
                 if rev_id not in root_caches:
                     continue
                 root_cache = root_caches[rev_id]
-                try:
-                    score_map = self._process_score_map(
-                        request, rev_id, missing_models, root_cache)
-                    rev_scores[rev_id] = score_map
-                except Exception as error:
-                    errors[rev_id] = error
+                if rev_id not in rev_scores:
+                    rev_scores[rev_id] = {}
+                for model_name in missing_models:
+                    try:
+                        score_map = self._process_score_map(
+                            request, rev_id, model_name, root_cache)
+                        rev_scores[rev_id][model_name] = score_map
+                    except Exception as error:
+                        if rev_id not in errors:
+                            errors[rev_id] = {}
+                        errors[rev_id][model_name] = error
 
         return rev_scores, errors
 
