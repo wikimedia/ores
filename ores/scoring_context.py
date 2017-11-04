@@ -60,16 +60,16 @@ class ScoringContext(dict):
     def model_features(self, model_name):
         return self[model_name].features
 
-    def process_model_scores(self, model_names, root_cache,
+    def process_model_scores(self, model_name, root_cache,
                              include_features=False):
         """
-        Generates a score map for a set of models based on a `root_cache`.
+        Generates a score map for a model based on a `root_cache`.
         This method performs no substantial IO, but may incur substantial CPU
         usage.
 
         :Parameters:
-            model_names : `set` ( `str` )
-                A set of models to score
+            model_name : `str`
+                A model to score
             root_cache : `dict` ( `str` --> `mixed` )
                 A cache of pre-computed root_dependencies for a specific
                 revision.  See `extract_root_dependency_caches()`
@@ -77,22 +77,20 @@ class ScoringContext(dict):
                 If True, include a map of basic features used in scoring along
                 with the model score.  If False, just generate the scores.
         """
-        model_scores = {}
 
-        for model_name in model_names:
-            model_scores[model_name] = {}
+        model_score = {}
 
-            # Mostly CPU
-            model_scores[model_name]['score'] = \
-                self._process_score(model_name, dependency_cache=root_cache)
+        # Mostly CPU
+        model_score['score'] = \
+            self._process_score(model_name, dependency_cache=root_cache)
 
-            # Essentially free
-            if include_features:
-                base_feature_map = self._solve_base_feature_map(
-                    model_name, dependency_cache=root_cache)
-                model_scores[model_name]['features'] = base_feature_map
+        # Essentially free
+        if include_features:
+            base_feature_map = self._solve_base_feature_map(
+                model_name, dependency_cache=root_cache)
+            model_score['features'] = base_feature_map
 
-        return model_scores
+        return model_score
 
     def _solve_features(self, model_name, dependency_cache=None):
         """
