@@ -4,6 +4,7 @@ from revscoring import Model
 from revscoring.datasources.revision_oriented import revision
 from revscoring.features import Feature
 from revscoring.scoring import ModelInfo
+from revscoring.scoring.statistics import Classification
 
 
 def process_reversed_last_two_in_rev_id(rev_id):
@@ -43,6 +44,7 @@ class RevIdScorer(Model):
         self.info['type'] = "RevIDScorer"
         self.info['behavior'] = "Returns the last two digits in a rev_id " + \
                                 "as a score."
+        self.info['statistics'] = self.quick_statistics()
 
     def score(self, feature_values):
         last_two_in_rev_id, delay = feature_values
@@ -61,6 +63,17 @@ class RevIdScorer(Model):
                 False: 1 - probability
             }
         }
+
+    def quick_statistics(self):
+        '''Jam some data through to generate statistics'''
+        rev_ids = range(0, 100, 10)
+        feature_values = zip(rev_ids, [ 0 ] * 10)
+        scores = [ self.score(f) for f in feature_values ]
+        labels = [ s['prediction'] for s in scores ]
+        statistics = Classification(labels, threshold_ndigits=1, decision_key='probability')
+        score_labels = zip(scores, labels)
+        statistics.fit(score_labels)
+        return statistics
 
     @classmethod
     def from_config(cls, config, name, section_key='scorer_models'):
