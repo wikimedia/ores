@@ -66,12 +66,12 @@ class RevIdScorer(Model):
 
     def quick_statistics(self):
         '''Jam some data through to generate statistics'''
-        rev_ids = range(0, 100, 10)
-        feature_values = zip(rev_ids, [ 0 ] * 10)
-        scores = [ self.score(f) for f in feature_values ]
-        labels = [ s['prediction'] for s in scores ]
+        rev_ids = range(0, 100, 1)
+        feature_values = zip(rev_ids, [0] * 100)
+        scores = [self.score(f) for f in feature_values]
+        labels = [s['prediction'] for s in scores]
         statistics = Classification(labels, threshold_ndigits=1, decision_key='probability')
-        score_labels = zip(scores, labels)
+        score_labels = list(zip(scores, labels))
         statistics.fit(score_labels)
         return statistics
 
