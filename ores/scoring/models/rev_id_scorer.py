@@ -44,7 +44,7 @@ class RevIdScorer(Model):
         self.info['type'] = "RevIDScorer"
         self.info['behavior'] = "Returns the last two digits in a rev_id " + \
                                 "as a score."
-        self.info['statistics'] = self.quick_statistics()
+        self.info['statistics'] = self.calculate_statistics()
 
     def score(self, feature_values):
         last_two_in_rev_id, delay = feature_values
@@ -64,8 +64,8 @@ class RevIdScorer(Model):
             }
         }
 
-    def quick_statistics(self):
-        '''Jam some data through to generate statistics'''
+    def calculate_statistics(self):
+        "Jam some data through to generate statistics"
         rev_ids = range(0, 100, 1)
         feature_values = zip(rev_ids, [0] * 100)
         scores = [self.score(f) for f in feature_values]
