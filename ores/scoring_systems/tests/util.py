@@ -49,6 +49,8 @@ def test_scoring_system(scoring_system):
         ScoreRequest("fakewiki", [1], ["fake"],
                      injection_caches={1: {wait_time: 0.05}},
                      model_info=['version']))
+    # Print for debugging.
+    print(response.errors)
     assert response.errors == {}
     assert response.scores == {1: {'fake': True}}
     assert response.model_info == {'fake': {'version': 'fake version'}}

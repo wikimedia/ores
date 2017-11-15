@@ -10,7 +10,7 @@ from .util import fakewiki, test_scoring_system, wait_time
 
 
 def test_score():
-    scoring_system = ProcessPool({'fakewiki': fakewiki}, timeout=0.10,
+    scoring_system = ProcessPool({'fakewiki': fakewiki},
                                  workers=8)
 
     test_scoring_system(scoring_system)
@@ -20,7 +20,7 @@ def test_rev_id_scorer():
     revid = RevIdScorer(version='0.0.1')
     fakewiki = ScoringContext(
         'fakewiki', {'revid': revid}, OfflineExtractor())
-    scoring_system = ProcessPool({'fakewiki': fakewiki}, timeout=0.10,
+    scoring_system = ProcessPool({'fakewiki': fakewiki},
                                  workers=8,
                                  score_cache=LRU(size=10))
     response = scoring_system.score(
