@@ -107,8 +107,8 @@ class ScoringSystem(dict):
             self._cache_scores(request, rev_id, score_map)
 
         # 4.5 Record scoring errors
-        for rev_id, error in scoring_errors.items():
-            for model in request.model_names:
+        for rev_id, model_errors in scoring_errors.items():
+            for model, error in model_errors.items():
                 response.add_error(rev_id, model, error)
                 self.metrics_collector.score_errored(request, model)
 
@@ -134,14 +134,15 @@ class ScoringSystem(dict):
 
         return root_caches, errors
 
-    def _process_score_map(self, request, rev_id, model_names, root_cache):
+    def _process_score_map(self, request, rev_id, model_name, root_cache):
         context = self[request.context_name]
 
         start = time.time()
         # Runs a timeout function so that we don't get stuck here
         try:
+            # FIXME: timeout needs to be pushed up
             score_map = timeout(
-                context.process_model_scores, model_names, root_cache,
+                context.process_model_scores, model_name, root_cache,
                 include_features=request.include_features,
                 seconds=self.timeout)
         except revscoring.errors.CaughtDependencyError as e:
@@ -160,7 +161,7 @@ class ScoringSystem(dict):
         duration = time.time() - start
 
         logger.debug("Score generated for {0}:{1} in {2} seconds"
-                     .format(request.context_name, set(request.model_names),
+                     .format(request.context_name, model_name,
                              round(duration, 3)))
         self.metrics_collector.score_processed(request, duration)
 

@@ -13,6 +13,7 @@ configuration "/v2/testwiki/revid/..."
 """
 import json
 import logging
+import re
 
 import docopt
 import requests
@@ -65,15 +66,33 @@ def main(argv=None):
         ores_url,
         "/v3/scores/testwiki/2342342/revid/?features&feature.delay=16",
         is_json=True,
-        equal_to={"testwiki": {
+        re_matches={"testwiki": {
             "models": {"revid": {"version": "0.0.0"}},
             "scores": {"2342342": {
-                "revid": {"error": {'message': 'Timed out after 15 seconds.',
+                "revid": {"error": {'message': 'Timed out after 15(.\d+)? seconds.',
                                     'type': 'TimeoutError'}}
             }}}})
 
 
-def make_request(ores_url, path, is_json=False, equal_to=None):
+def re_struct_match(pattern, content):
+    '''Match structures, but the pattern is interpreted as a regex.'''
+
+    if hasattr(pattern, 'keys') and hasattr(content, 'keys'):
+        if pattern.keys() != content.keys():
+            return False
+        for k, v in content.items():
+            if not re_struct_match(pattern[k], content[k]):
+                return False
+    else:
+        if hasattr(pattern, 'keys') or hasattr(content, 'keys'):
+            return False
+
+        return re.match(pattern, content)
+
+    return True
+
+
+def make_request(ores_url, path, is_json=False, equal_to=None, re_matches=None):
     logger.debug("Requesting {0}".format(path))
     response = requests.get(ores_url + path)
     assert response.status_code == 200, \
@@ -91,5 +110,8 @@ def make_request(ores_url, path, is_json=False, equal_to=None):
 
     if equal_to:
         assert content == equal_to, "{0} != {1}".format(content, equal_to)
+
+    if re_matches:
+        assert re_struct_match(re_matches, content), "{0} !~ {1}".format(content, re_matches)
 
     return response

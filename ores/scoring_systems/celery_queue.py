@@ -61,34 +61,19 @@ class CeleryQueue(ScoringSystem):
 
         @self.application.task(throws=expected_errors,
                                queue=DEFAULT_CELERY_QUEUE)
-        def _process_score_map(request, model_names, rev_id, root_cache):
+        def _process_score_map(request, model_name, rev_id, root_cache):
             logger.info("Generating a score map for {0}"
-                        .format(request.format(rev_id, model_names)))
+                        .format(request.format(rev_id, model_name)))
 
             score_map = ScoringSystem._process_score_map(
-                self, request, rev_id, model_names,
+                self, request, rev_id, model_name,
                 root_cache=root_cache)
 
             logger.info("Completed generating score map for {0}"
-                        .format(request.format(rev_id, model_names)))
+                        .format(request.format(rev_id, model_name)))
             return score_map
 
-        @self.application.task(throws=expected_errors,
-                               queue=DEFAULT_CELERY_QUEUE)
-        def _lookup_score_in_map(result_id, model_name):
-            logger.info("Looking up {0} in {1}".format(model_name, result_id))
-            score_map_result = self._process_score_map.AsyncResult(result_id)
-            try:
-                score_map = score_map_result.get(timeout=self.timeout)
-
-            except celery.exceptions.TimeoutError:
-                raise errors.TimeoutError(
-                    "Timed out after {0} seconds.".format(self.timeout))
-            logger.info("Found {0} in {1}!".format(model_name, result_id))
-            return score_map[model_name]
-
         self._process_score_map = _process_score_map
-        self._lookup_score_in_map = _lookup_score_in_map
 
     def _process_missing_scores(self, request, missing_model_set_revs,
                                 root_caches, inprogress_results=None):
@@ -106,24 +91,26 @@ class CeleryQueue(ScoringSystem):
                 if rev_id not in root_caches:
                     for model_name in missing_models:
                         task_id = context.format_id_string(
-                            model_name, rev_id, injection_cache=injection_cache)
+                            model_name, rev_id, request,
+                            injection_cache=injection_cache)
                         self.application.backend.mark_as_failure(
                             task_id, RuntimeError("Never started"))
                     continue
                 root_cache = {str(k): v for k, v in root_caches[rev_id].items()}
-                result = self._process_score_map.delay(
-                    request, missing_models, rev_id, root_cache)
 
                 for model_name in missing_models:
                     task_id = context.format_id_string(
-                        model_name, rev_id, injection_cache=injection_cache)
-                    score_result = self._lookup_score_in_map.apply_async(
-                        args=(result.id, model_name), task_id=task_id,
-                        expires=self.timeout)
-                    if rev_id in results:
-                        results[rev_id][model_name] = score_result
-                    else:
-                        results[rev_id] = {model_name: score_result}
+                        model_name, rev_id, request,
+                        injection_cache=injection_cache)
+
+                    result = self._process_score_map.apply_async(
+                        args=(request, model_name, rev_id, root_cache),
+                        task_id=task_id)
+
+                    if rev_id not in results:
+                        results[rev_id] = {}
+
+                    results[rev_id][model_name] = result
 
         # Read results
         rev_scores = {}
@@ -134,16 +121,21 @@ class CeleryQueue(ScoringSystem):
                 rev_scores[rev_id] = {}
             for model_name, score_result in model_results.items():
                 try:
+                    # TODO: Can turn to a list and fetch them all as a celery group.
                     rev_scores[rev_id][model_name] = \
                         score_result.get(timeout=self.timeout)
                 except celery.exceptions.TimeoutError:
                     timeout_error = errors.TimeoutError(
                         "Timed out after {0} seconds.".format(self.timeout))
-                    score_errors[rev_id] = timeout_error
+                    if rev_id not in score_errors:
+                        score_errors[rev_id] = {}
+                    score_errors[rev_id][model_name] = timeout_error
                     self.application.backend.mark_as_failure(
                         score_result.id, timeout_error)
                 except Exception as error:
-                    score_errors[rev_id] = error
+                    if rev_id not in score_errors:
+                        score_errors[rev_id] = {}
+                    score_errors[rev_id][model_name] = error
 
         return rev_scores, score_errors
 
@@ -160,18 +152,20 @@ class CeleryQueue(ScoringSystem):
                     continue
 
                 task_id = context.format_id_string(
-                    model_name, rev_id, injection_cache=injection_cache)
+                    model_name, rev_id, request,
+                    injection_cache=injection_cache)
                 score_result = \
-                    self._lookup_score_in_map.AsyncResult(task_id)
+                    self.application.AsyncResult(task_id)
+                # FIXME: I guess we're ignoring "PENDING"?
                 if score_result.state in (REQUESTED, SENT,
                                           celery.states.STARTED,
                                           celery.states.SUCCESS):
                     logger.info("Found in-progress result for {0} -- {1}"
                                 .format(task_id, score_result.state))
-                    if rev_id in inprogress_results:
-                        inprogress_results[rev_id][model_name] = score_result
-                    else:
-                        inprogress_results[rev_id] = {model_name: score_result}
+
+                    if rev_id not in inprogress_results:
+                        inprogress_results[rev_id] = {}
+                    inprogress_results[rev_id][model_name] = score_result
 
         return inprogress_results
 
@@ -183,7 +177,8 @@ class CeleryQueue(ScoringSystem):
                 for model_name in model_set:
                     injection_cache = request.injection_caches.get(rev_id)
                     task_id = context.format_id_string(
-                        model_name, rev_id, injection_cache=injection_cache)
+                        model_name, rev_id, request,
+                        injection_cache=injection_cache)
                     self.application.backend.store_result(
                         task_id, {}, REQUESTED)
 
