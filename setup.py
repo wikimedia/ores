@@ -39,6 +39,7 @@ setup(
             'ores = ores.ores:main',
         ],
     },
+    python_requires=">=3",
     packages=find_packages(),
     include_package_data=True,
     long_description=read('README.md'),
