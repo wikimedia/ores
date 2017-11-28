@@ -106,7 +106,8 @@ class CeleryQueue(ScoringSystem):
                 if rev_id not in root_caches:
                     for model_name in missing_models:
                         task_id = context.format_id_string(
-                            model_name, rev_id, injection_cache=injection_cache)
+                            model_name, rev_id, request,
+                            injection_cache=injection_cache)
                         self.application.backend.mark_as_failure(
                             task_id, RuntimeError("Never started"))
                     continue
@@ -116,7 +117,8 @@ class CeleryQueue(ScoringSystem):
 
                 for model_name in missing_models:
                     task_id = context.format_id_string(
-                        model_name, rev_id, injection_cache=injection_cache)
+                        model_name, rev_id, request,
+                        injection_cache=injection_cache)
                     score_result = self._lookup_score_in_map.apply_async(
                         args=(result.id, model_name), task_id=task_id,
                         expires=self.timeout)
@@ -160,7 +162,8 @@ class CeleryQueue(ScoringSystem):
                     continue
 
                 task_id = context.format_id_string(
-                    model_name, rev_id, injection_cache=injection_cache)
+                    model_name, rev_id, request,
+                    injection_cache=injection_cache)
                 score_result = \
                     self._lookup_score_in_map.AsyncResult(task_id)
                 if score_result.state in (REQUESTED, SENT,
@@ -183,7 +186,8 @@ class CeleryQueue(ScoringSystem):
                 for model_name in model_set:
                     injection_cache = request.injection_caches.get(rev_id)
                     task_id = context.format_id_string(
-                        model_name, rev_id, injection_cache=injection_cache)
+                        model_name, rev_id, request,
+                        injection_cache=injection_cache)
                     self.application.backend.store_result(
                         task_id, {}, REQUESTED)
 
