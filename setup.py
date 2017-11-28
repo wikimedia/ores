@@ -1,5 +1,6 @@
 import os
 import re
+import require_python_3
 
 from setuptools import find_packages, setup
 

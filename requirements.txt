@@ -11,3 +11,4 @@ yamlconf >= 0.2.2, < 0.2.999
 pytest >= 3.2.2, < 3.2.999
 pyyaml == 3.11
 revscoring >= 2.0.2, < 2.0.999
+require-python-3
