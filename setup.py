@@ -11,7 +11,7 @@ if sys.version_info <= (3, 0):
     print("ORES needs Python 3 to run properly. Your version is " + platform.python_version())
     sys.exit(1)
 
-    
+   
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
