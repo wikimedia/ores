@@ -1,16 +1,12 @@
 import os
 import re
-import sys
-import platform
+
 from setuptools import find_packages, setup
 
 about_path = os.path.join(os.path.dirname(__file__), "ores/about.py")
 exec(compile(open(about_path).read(), about_path, "exec"))
 
-if sys.version_info <= (3, 0):
-    print("ORES needs Python 3 to run properly. Your version is " + platform.python_version())
-    sys.exit(1)
-    
+
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
@@ -31,7 +27,6 @@ def requirements(fname):
 
 
 setup(
-    python_requires=">=3"
     name=__name__,  # noqa
     version=__version__,  # noqa
     author=__author__,  # noqa
