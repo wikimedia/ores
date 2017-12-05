@@ -149,7 +149,7 @@ class ScoringSystem(dict):
                 duration = time.time() - start
                 self.metrics_collector.score_timed_out(request, duration)
                 raise TimeoutError("Timed out after {0} seconds."
-                                   .format(duration))
+                                   .format(round(duration)))
             else:
                 raise
         except TimeoutError:

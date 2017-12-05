@@ -32,7 +32,8 @@ def timeout(func, *args, seconds=None, **kwargs):
             return result
         elif to_ctx_mgr.state == to_ctx_mgr.TIMED_OUT:
             # Timeout occurred while executing the block
-            raise TimeoutError("Timed out after {0} seconds.".format(duration))
+            raise TimeoutError("Timed out after {0} seconds."
+                               .format(round(duration)))
         else:
             traceback.print_tb()
             raise RuntimeError("Something weird happened.")

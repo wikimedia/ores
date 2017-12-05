@@ -72,12 +72,73 @@ def main(argv=None):
                                     'type': 'TimeoutError'}}
             }}}})
 
+    other_wiki_event = {
+        "comment": "/* K-O */", "database": "enwiki",
+        "meta": {
+            "domain": "en.wikipedia.org", "dt": "2017-12-05T15:56:51+00:00",
+            "id": "e87a7723-d9d4-11e7-9e8e-141877613bad",
+            "request_id": "3464552a-85d0-404e-aa24-80b74473b15f",
+            "schema_uri": "mediawiki/revision/create/2",
+            "topic": "eqiad.mediawiki.revision-create",
+            "uri": "https://en.wikipedia.org/wiki/List_of_Ateneo_de_Manila_University_people",
+            "partition": 0, "offset": 561544941
+        },
+        "page_id": 4716305, "page_is_redirect": False,
+        "page_namespace": 0,
+        "page_title": "List_of_Ateneo_de_Manila_University_people",
+        "parsedcomment": "<a href=\"/wiki/List_of_Ateneo_de_Manila_University_" +
+                         "people#K-O\" title=\"List of Ateneo de Manila " +
+                         "University people\">→</a>‎<span dir=\"auto\">" +
+                         "<span class=\"autocomment\">K-O</span></span>",
+        "performer": {
+            "user_edit_count": 13845,
+            "user_groups": ["extendedconfirmed", "*", "user", "autoconfirmed"],
+            "user_id": 24365224, "user_is_bot": False,
+            "user_registration_dt": "2015-03-09T02:40:31Z",
+            "user_text": "Khendygirl"
+        },
+        "rev_content_changed": True, "rev_content_format": "wikitext",
+        "rev_content_model": "wikitext", "rev_id": 813852458,
+        "rev_len": 60647, "rev_minor_edit": False,
+        "rev_parent_id": 813852231,
+        "rev_sha1": "0a6fggdfff46x0bptqle6pycuz0paht",
+        "rev_timestamp": "2017-12-05T15:56:51Z"
+    }
+    make_request(
+        ores_url,
+        "/v3/precache",
+        post_json=other_wiki_event,
+        http_code=204)
 
-def make_request(ores_url, path, is_json=False, equal_to=None):
+    own_event = other_wiki_event
+    own_event['database'] = "testwiki"
+    make_request(
+        ores_url,
+        "/v3/precache",
+        is_json=True,
+        post_json=own_event,
+        http_code=200,
+        equal_to={
+            "testwiki": {
+                "models": {"revid": {"version": "0.0.0"}},
+                "scores": {"813852458": {"revid": {"score": {
+                                "prediction": True,
+                                "probability": {
+                                    "false": 0.15000000000000002,
+                                    "true": 0.85
+                                }}}}}
+            }})
+
+
+def make_request(ores_url, path, http_code=200, is_json=False,
+                 equal_to=None, post_json=None):
     logger.debug("Requesting {0}".format(path))
-    response = requests.get(ores_url + path)
-    assert response.status_code == 200, \
-           "Non-OK status code {0} for {1}: {2}".format(
+    if post_json is None:
+        response = requests.get(ores_url + path)
+    else:
+        response = requests.post(ores_url + path, json=post_json)
+    assert response.status_code == http_code, \
+           "Status code mismatch {0} for {1}: {2}".format(
                response.status_code, path, response.content)
 
     content = response.text
