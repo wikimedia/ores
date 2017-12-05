@@ -1,5 +1,6 @@
 import json
 import logging
+import re
 
 from flask.ext.jsonpify import jsonify as flask_jsonify
 
@@ -174,7 +175,8 @@ def build_event_set(event):
     uses internally.
     """
     event_set = set()
-    if event['meta']['topic'] == "mediawiki.revision-create":
+    if re.match(r"([^\.]+.)?mediawiki\.revision-create$",
+                event['meta']['topic']):
         event_set.add('edit')
 
         user_groups = event.get('performer', {}).get('user_groups', [])

@@ -1,7 +1,10 @@
 import traceback
 from collections import defaultdict
 
+from revscoring.errors import ModelInfoLookupError
+
 from ... import responses, util
+from .... import errors
 
 
 def format_v3_score_response(response):
@@ -88,5 +91,26 @@ def build_v3_context_model_map(score_request, scoring_system):
                     model_name, score_request.model_info or ['version'])
                 context_models_doc[context_name]['models'][model_name] = model_doc
         return util.jsonify(context_models_doc)
+    except Exception:
+        return responses.unknown_error(traceback.format_exc())
+
+
+def process_score_request(score_request, scoring_system):
+    score_request.model_info = score_request.model_info or ['version']
+    try:
+        score_response = scoring_system.score(score_request)
+        return format_v3_score_response(score_response)
+    except errors.ScoreProcessorOverloaded:
+        return responses.server_overloaded()
+    except errors.MissingContext as e:
+        return responses.not_found("No scorers available for {0}"
+                                   .format(e))
+    except errors.MissingModels as e:
+        context_name, model_names = e.args
+        return responses.not_found(
+            "Models {0} not available for {1}"
+            .format(tuple(model_names), context_name))
+    except ModelInfoLookupError as e:
+        return responses.model_info_lookup_error(e)
     except Exception:
         return responses.unknown_error(traceback.format_exc())
