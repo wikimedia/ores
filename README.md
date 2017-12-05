@@ -11,9 +11,9 @@ ORES is based on Python 3. Use pip to install ORES:
 
 ``pip install ores`` (or ``pip3 install ores`` if your distribution defaults to Python 2)
 
-If you're running with the default configuration, you'll need to install a few more optional libraries,
+If you're running with the default Redis configuration, you'll need to install a few more optional libraries,
 
-``pip install pylru``
+``pip install ores[redis]``
 
 Then you can easily run a test server by:
 
@@ -53,3 +53,4 @@ Authors
 * [Yuvi Panda](https://github.com/yuvipanda)
 * [Amir Sarabadani](https://github.com/Ladsgroup)
 * [Justin Du](https://github.com/mdew192837)
+* [Adam Wight](https://github.com/adamwight)
