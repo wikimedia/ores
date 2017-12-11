@@ -49,6 +49,14 @@ setup(
     include_package_data=True,
     long_description=read('README.md'),
     install_requires=list(requirements("requirements.txt")),
+    extras_require={
+        # Install ores[redis] if your deployment will use the Redis scoring
+        # cache and Celery backend.
+        "redis": [
+            "pylru",
+            "redis",
+        ],
+    },
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Programming Language :: Python",
