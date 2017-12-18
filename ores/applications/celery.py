@@ -19,7 +19,7 @@ import logging
 import docopt
 
 from ..scoring_systems import CeleryQueue
-from .util import build_config
+from .util import build_config, configure_logging
 
 
 def main(argv=None):
@@ -28,31 +28,16 @@ def main(argv=None):
     debug = args['--debug']
 
     run(verbose, debug,
-        config_dirs=args['--config-dir'],
-        logging_config=args['--logging-config'])
+        logging_config=args['--logging-config'],
+        config_dirs=args['--config-dir'])
 
 
-def run(verbose, debug, **kwargs):
-    logging.basicConfig(
-        level=logging.DEBUG if debug else logging.INFO,
-        format='%(asctime)s %(levelname)s:%(name)s -- %(message)s'
-    )
-    logging.getLogger('requests').setLevel(logging.INFO)
-    if verbose:
-        logging.getLogger('revscoring.dependencies.dependent') \
-               .setLevel(logging.DEBUG)
-    else:
-        logging.getLogger('revscoring.dependencies.dependent') \
-               .setLevel(logging.INFO)
-
-    logging.getLogger("ores.metrics_collectors.logger").setLevel(logging.DEBUG)
-    logging.getLogger("stopit").setLevel(logging.ERROR)
+def run(verbose, debug, logging_config=None, **kwargs):
+    configure_logging(logging_config)
 
     application = build(**kwargs)
-    logging.getLogger('ores').setLevel(logging.DEBUG)
-    celery_log_level = "DEBUG" if debug else "INFO"
     application.worker_main(
-        argv=["celery_worker", "--loglevel=" + celery_log_level])
+        argv=["celery_worker"])
 
 
 def build(*args, **kwargs):
