@@ -19,8 +19,6 @@ Options:
     --debug                  Print debug logging information
     --verbose                Print verbose extraction information
 """
-import logging
-
 import docopt
 from ores.wsgi import server
 from ores import ores

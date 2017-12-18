@@ -14,8 +14,6 @@ Options:
     --debug                  Print debug logging information
     --verbose                Print verbose extraction information
 """
-import logging
-
 import docopt
 
 from ..scoring_systems import CeleryQueue
