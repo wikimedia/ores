@@ -31,7 +31,7 @@ def main(argv=None):
 
 
 def run(verbose, debug, logging_config=None, **kwargs):
-    configure_logging(logging_config)
+    configure_logging(verbose, debug, logging_config)
 
     application = build(**kwargs)
     application.worker_main(
