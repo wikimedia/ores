@@ -19,13 +19,11 @@ Options:
     --debug                  Print debug logging information
     --verbose                Print verbose extraction information
 """
-import logging
-
 import docopt
 from ores.wsgi import server
 from ores import ores
 
-from .util import build_config
+from .util import build_config, configure_logging
 
 # This is a hack to help know when the models must or must not be loaded
 # into memory.  By setting this to True, ClientScoringContext will be used
@@ -42,24 +40,12 @@ def main(argv=None):
     debug = args['--debug']
 
     run(host, port, processes, verbose, debug,
-        config_dirs=args['--config-dir'],
-        logging_config=args['--logging-config'])
+        logging_config=args['--logging-config'],
+        config_dirs=args['--config-dir'])
 
 
-def run(host, port, processes, verbose, debug, **kwargs):
-    logging.basicConfig(
-        level=logging.DEBUG if debug else logging.INFO,
-        format='%(asctime)s %(levelname)s:%(name)s -- %(message)s'
-    )
-    logging.getLogger('requests').setLevel(logging.INFO)
-    if verbose:
-        logging.getLogger('revscoring.dependencies.dependent') \
-               .setLevel(logging.DEBUG)
-    else:
-        logging.getLogger('revscoring.dependencies.dependent') \
-               .setLevel(logging.INFO)
-
-    logging.getLogger("ores.metrics_collectors.logger").setLevel(logging.DEBUG)
+def run(host, port, processes, verbose, debug, logging_config=None, **kwargs):
+    configure_logging(verbose, debug, logging_config)
 
     application = build(**kwargs)
     application.debug = True

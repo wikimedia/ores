@@ -51,6 +51,7 @@ scoring_systems:
     CELERY_TASK_SERIALIZER: 'pickle'
     CELERY_RESULT_SERIALIZER: 'pickle'
     CELERYD_CONCURRENCY: 8
+    CELERYD_HIJACK_ROOT_LOGGER: false
     queue_maxsize: 100 # pending tasks
 
 # Scoring contexts
