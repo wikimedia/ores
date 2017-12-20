@@ -13,7 +13,7 @@ DEFAULT_FORMAT = "%(asctime)s %(levelname)s:%(name)s -- %(message)s"
 logger = logging.getLogger(__name__)
 
 
-def build_config(config_dirs=DEFAULT_DIRS):
+def build_config(config_dirs=DEFAULT_DIRS, **kwargs):
     # Loads files in alphabetical order based on the bare filename
     config_file_paths = []
     for directory in config_dirs:
@@ -33,7 +33,7 @@ def build_config(config_dirs=DEFAULT_DIRS):
     return config
 
 
-def configure_logging(verbose=False, debug=False, logging_config=None):
+def configure_logging(verbose=False, debug=False, logging_config=None, **kwargs):
     # Load logging config if specified.  If no config file is specified, we
     # make a half-hearted attempt to find a distributed logging_config.yaml
     # in the current working directory.
