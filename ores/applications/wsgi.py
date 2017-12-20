@@ -39,19 +39,19 @@ def main(argv=None):
     verbose = args['--verbose']
     debug = args['--debug']
 
-    run(host, port, processes, verbose, debug,
+    run(host, port, processes,
+        verbose=verbose, debug=debug,
         logging_config=args['--logging-config'],
         config_dirs=args['--config-dir'])
 
 
-def run(host, port, processes, verbose, debug, logging_config=None, **kwargs):
-    configure_logging(verbose, debug, logging_config)
-
+def run(host, port, processes, **kwargs):
     application = build(**kwargs)
     application.debug = True
     application.run(host=host, port=port, processes=processes, debug=True)
 
 
-def build(*args, **kwargs):
-    config = build_config(*args, **kwargs)
+def build(**kwargs):
+    configure_logging(**kwargs)
+    config = build_config(**kwargs)
     return server.configure(config)
