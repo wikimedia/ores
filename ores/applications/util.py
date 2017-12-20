@@ -48,7 +48,7 @@ def configure_logging(verbose=False, debug=False, logging_config=None, **kwargs)
 
         # Secret sauce: if running from the console, mirror logs there.
         if sys.stdin.isatty():
-            handler = logging.StreamHandler(stream=sys.stdout)
+            handler = logging.StreamHandler(stream=sys.stderr)
             formatter = logging.Formatter(fmt=DEFAULT_FORMAT)
             handler.setFormatter(formatter)
             logging.getLogger().addHandler(handler)
