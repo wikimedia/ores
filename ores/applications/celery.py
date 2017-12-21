@@ -25,21 +25,21 @@ def main(argv=None):
     verbose = args['--verbose']
     debug = args['--debug']
 
-    run(verbose, debug,
+    run(verbose=verbose, debug=debug,
         logging_config=args['--logging-config'],
         config_dirs=args['--config-dir'])
 
 
-def run(verbose, debug, logging_config=None, **kwargs):
-    configure_logging(verbose, debug, logging_config)
-
+def run(**kwargs):
     application = build(**kwargs)
     application.worker_main(
         argv=["celery_worker"])
 
 
-def build(*args, **kwargs):
-    config = build_config(*args, **kwargs)
+def build(**kwargs):
+    configure_logging(**kwargs)
+
+    config = build_config(**kwargs)
     scoring_system = CeleryQueue.from_config(
         config, config['ores']['scoring_system'])
     return scoring_system.application
