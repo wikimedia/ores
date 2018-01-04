@@ -20,6 +20,7 @@ before_install:
 install:
   - pip install pip --upgrade
   - pip install wheel
+  - pip install nltk
   - travis_wait pip install -r requirements.txt || date
   - travis_wait pip install -r test-requirements.txt || date
   - python -m nltk.downloader stopwords
