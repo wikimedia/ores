@@ -127,7 +127,7 @@ def request_and_stat(ores_url, context, models, rev_ids, stats, verbose):
     try:
         response = requests.get(
             ores_url + path, params=params)
-    except:
+    except Exception:
         stats['responses']['connection error'] += 1
         return
 
