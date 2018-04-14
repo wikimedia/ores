@@ -1,51 +1,63 @@
 <html>
 <head>
-  <title>Objective Revision Evaluation Service</title>
-  <link rel="stylesheet" href="wikimedia-ui-static/MW/mediawiki.min.css">
-  <meta name="description" content="The Objective Revision Evaluation Service (ORES) is a web service that provides machine learning as a service for Wikimedia Projects"/>
-  <meta property="og:image" content="https://ores.wikimedia.org/static/images/ores_logo.svg"/>
+	<title>Objective Revision Evaluation Service</title>
+	<link rel="stylesheet" href="https://design.wikimedia.org/css/build/wmui-style-guide.min.css">
+	<link rel="stylesheet" href="/static/css/ores-site-specific.css">
+	<meta name="description" content="The Objective Revision Evaluation Service (ORES) is a web service that provides machine learning as a service for Wikimedia Projects"/>
+	<meta property="og:image" content="https://ores.wikimedia.org/static/images/ores_logo.svg"/>
+	<style type="text/css">
+		.notice {
+			border: 1px solid #b32424;
+			margin: 4px 2em;
+			background: #fee7e6;
+			padding: 0.25em 0.9em;
+		}
+		.site__logo {
+			-moz-background-size: 100%;
+			-webkit-background-size: 100% 100%;
+			background-image: url(/static/images/ores_logo.svg);
+			background-size: 100%;
+			display: block;
+			height: var(--site__logo-height-large);
+			margin-bottom: 2rem;
+			margin-left: -2rem;
+			margin-right: .8rem;
+			vertical-align: middle;
+			width: var(--site__logo-width-large);
+	}
+	</style>
 </head>
-<body>
-  <style type="text/css">
-    html {
-      background: #eaecf0;
-    }
-    body {
-      max-width: 50em;
-      margin: 0px auto;
-      padding: 1em 2em;
-      background: #fff;
-    }
-    .notice {
-      border: 1px solid #b32424;
-      margin: 4px 2em;
-      background: #fee7e6;
-      padding: 0.25em 0.9em;
-    }
-  </style>
-  <img src="/static/images/ores_logo.svg"
-       style="float: right; padding: 0px 0px 1em 1em; height: 12em;" />
-  <p style="margin-top: 12.5px;">
+<body class="page--home">
+	<header id="header" class="header" role="banner">
+		<div class="content-box">
+			<a href="#content" class="is-aural is-focusable">Jump to content</a>
+			<h1 class="site__title"><a href="./"><span class="site__logo"></span>Objective Revision <br>  Evaluation Service</a></h1>
+		</div>
+	</header>
+	<div class="page">
+		<div class="content-box">
+			<main id="content" class="content" role="main">
+	<p style="margin-top: 12.5px;">
     The Objective Revision Evaluation Service (ORES) is a web service
     that provides machine learning as a service for Wikimedia Projects. The
     system is designed to help automate critical wiki-work -- for example,
     vandalism detection and removal. This service is developed as a project of the
     <a href="https://www.mediawiki.org/wiki/Wikimedia_Scoring_Platform_team">
       Wikimedia Scoring Platform team</a>.
-  </p>
-  <br clear="all" />
+	</p>
+	<br clear="all" />
   {% if notice %}
-  <div class="notice">{{ notice | safe }}</div>
+	<div class="notice">{{ notice | safe }}</div>
   {% endif %}
-  <h2>Scores API</h2>
-  <p>
+	<h2>Scores API</h2>
+	<p>
     ORES is intended to be used as a source of information by tool developers.
     To access ORES, scores, a simple RESTful API is provided.  There are two
     versions of the scoring API that differ slightly in their
     behavior.  Version 2 provides access to model info in a scoring request.
     Version 1 is preserved for backwards compatibility.
-  </p>
-  <dl>
+	</p>
+	<dl>
     <dt>Version 3 (<a href="/v3/">docs</a>)</dt>
     <dd style="padding-left: 1em;">
       The current recommended version of the API.<br/>
@@ -70,40 +82,36 @@
         <a href="/v1/scores/">/v1/scores/</a>.
       </i>
     </dd>
-  </dl>
+	</dl>
 
-  <h2>Reference scoring user interface</h2>
-  <p>
+	<h2>Reference scoring user interface</h2>
+	<p>
     ORES provides a simple user interface for obtaining scores.
     See <a href="/ui/">/ui/</a>.
-  </p>
+	</p>
 
-  <h2>Version information</h2>
-  <p>
-    See <a href="/versions/">/versions/</a>.
-  </p>
+	<h2>Version information</h2>
+	<p>See <a href="/versions/">/versions/</a>.</p>
 
-  <h2>On-wiki documentation</h2>
-  <p>
+	<h2>On-wiki documentation</h2>
+	<p>
     To read more about the service and the models available, see:
     <a href="https://www.mediawiki.org/wiki/ORES">
       https://www.mediawiki.org/wiki/ORES</a>.
-  </p>
+	</p>
 
-  <h2>FAQ</h2>
-  <p>
-    See <a href="https://www.mediawiki.org/wiki/ORES/FAQ">On-wiki FAQ page</a>.
-  </p>
-
-  <h2>Privacy policy</h2>
-  <p>
-    See the Wikimedia policy here: <a href="https://wikimediafoundation.org/wiki/Privacy_policy">https://wikimediafoundation.org/wiki/Privacy_policy</a>.
-  </p>
-
-  <hr style="border: 0.5px solid silver"/>
-
-  <div style="text-align: center;">
-    {{footer|default('Written in <a href="https://python.org">Python 3</a>')|safe}}
-  </div>
+	<h2>FAQ</h2>
+	<p>See <a href="https://www.mediawiki.org/wiki/ORES/FAQ">On-wiki FAQ page</a>.</p>
+	</div></div></main>
+	<footer id="footer" class="footer">
+		<div class="content-box">
+			<ul class="footer__list">
+				<li><a href="https://github.com/wiki-ai/ores">Contribute on GitHub</a></li>
+				<li><a href="https://lists.wikimedia.org/mailman/listinfo/ai" title="Join Wikimedia AI mailing list">Join mailing list</a></li>
+			</ul>
+			<p>For the privacy policy, see the Wikimedia policy here: <a href="https://wikimediafoundation.org/wiki/Privacy_policy">https://wikimediafoundation.org/wiki/Privacy_policy</a>.</p>
+			<p>{{footer|default('Written in <a href="https://python.org">Python 3</a>')|safe}}</p>
+		</div>
+	</footer>
 </body>
 </html>
