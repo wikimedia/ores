@@ -1,0 +1,16 @@
+:root {
+	--width-site: 700px;
+	--width-site-desktop-wide: 700px;
+	--site__logo-width-large: 17.9rem;
+	--site__logo-height-large: 19.7rem;
+	--site__logo-width-small: 15.4rem;
+	--site__logo-height-small: 16.9rem;
+	--project--icon-width: 6rem;
+	--project--icon-height: 5.9rem;
+}
+
+body,
+.site__title {
+	font-family: -apple-system, BlinkMacSystemFont, 'Seogoe UI', 'Roboto', 'Lato', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+}
+
