@@ -81,9 +81,15 @@ function createTable( data ) {
 
 function getResults() {
 	var revs = $( '#revIds' ).val().replace( ',', '|' ), modelsUrl = '', url = '', container = '<div id="tableContainer" class="col-md-6 col-md-offset-3" style="margin-top: 3em; margin-bottom: 3em;">';
-	$( 'input:checked' ).each( function () {
+
+	var selectedModels = $( 'input:checked' );
+	if ( selectedModels.length === 0 ) {
+		selectedModels = $( ':checkbox' );
+	}
+	selectedModels.each( function () {
 		modelsUrl += $( this ).val() + '|';
 	} );
+
 	modelsUrl = modelsUrl.slice( 0, -1 );
 	url = '/scores/' + $( '#wikiDropDownInput' ).attr( 'value' ) + '/?models=' + modelsUrl + '&revids=' + revs;
 	$.get( { url: url, datatype: 'jsonp' } ).always( function ( data ) {
