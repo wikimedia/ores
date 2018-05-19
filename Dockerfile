@@ -1,19 +1,14 @@
 FROM python:3.5-slim
 
 RUN apt-get update && apt-get install -y \
-	g++ \
-	gfortran \
-	libblas-dev \
-	liblapack-dev \
-	libopenblas-dev \
-	python3-dev \
-	enchant \
-	redis-server \
-    build-essential \
-    npm \
-    nodejs
-
-RUN npm install -g eslint
+    g++ \
+    gfortran \
+    libblas-dev \
+    liblapack-dev \
+    libopenblas-dev \
+    python3-dev \
+    enchant \
+    build-essential
 
 COPY . /ores
 WORKDIR /ores

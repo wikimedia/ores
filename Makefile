@@ -1,7 +1,6 @@
-define docker-run =
-	docker run --rm -ti \
-		ores/ores-service
-endef
+.PHONY: build-image shell pytest
+
+docker-run = docker run --rm -ti -p 8080:8080 ores/ores-service
 
 build-image:
 	docker build \
