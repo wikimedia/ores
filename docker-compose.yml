@@ -1,0 +1,29 @@
+version: '2.1'
+services:
+    ores:
+        build: '.'
+        volumes:
+            - .:/ores
+
+    ores-api:
+        extends:
+            service: ores
+        command: ./utility applications.wsgi --config ./config/celery-test-docker/
+        depends_on:
+            - redis
+        ports:
+            - "8080:8080"
+
+    ores-worker:
+        extends:
+            service: ores
+        command: ./utility applications.celery --config ./config/celery-test-docker/
+        depends_on:
+            - redis
+        environment:
+            - C_FORCE_ROOT="true"
+
+    redis:
+        image: redis:alpine
+        ports:
+            - "6379"
