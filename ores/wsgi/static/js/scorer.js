@@ -80,9 +80,14 @@ function createTable( data ) {
 }
 
 function getResults() {
-	var revs = $( '#revIds' ).val().replace( ',', '|' ), modelsUrl = '', url = '', container = '<div id="tableContainer" class="col-md-6 col-md-offset-3" style="margin-top: 3em; margin-bottom: 3em;">';
+	var revs = $( '#revIds' ).val().replace( ',', '|' ),
+		modelsUrl = '',
+		url = '',
+		container = '<div id="tableContainer" class="col-md-6 col-md-offset-3" style="margin-top: 3em; margin-bottom: 3em;">',
+		absoluteUrl,
+		selectedModels;
 
-	var selectedModels = $( 'input:checked' );
+	selectedModels = $( 'input:checked' );
 	if ( selectedModels.length === 0 ) {
 		selectedModels = $( ':checkbox' );
 	}
@@ -94,8 +99,8 @@ function getResults() {
 	url = '/scores/' + $( '#wikiDropDownInput' ).attr( 'value' ) + '/?models=' + modelsUrl + '&revids=' + revs;
 
 	// Display the API we'll be using.
-	var absoluteUrl = window.location.href + url;
-	$( '#api-url' ).html( "Raw: <a href=\"" + url + "\">" + absoluteUrl + "</a>" );
+	absoluteUrl = window.location.href + url;
+	$( '#api-url' ).html( 'Raw: <a href="' + url + '">' + absoluteUrl + '</a>' );
 
 	// Get the results.
 	$.get( { url: url, datatype: 'jsonp' } ).always( function ( data ) {
