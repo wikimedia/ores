@@ -9,12 +9,20 @@ Usage:
                     [--debug]
                     [--verbose]
 
+Examples:
+    echo '{"rev_id": 12345}' | \
+        ores score_revisions https://ores.wikimedia.org srwiki damaging
+
 Options:
     -h --help        Prints this documentation
-    <ores-host>      The host name for an ORES instance to use in scoring
-    <context>        The name of the wiki to execute model(s) for
+    <ores-host>      The base URL to an ORES instance to use in scoring.
+                     [example: https://ores.wikimedia.org]
+    <context>        The name of the wiki to execute model(s) for.
+                     [example: srwiki]
     <model>          The name of a model to use in scoring
-    --input=<path>   A file containing json blobs with "rev_id" fields
+                     [example: damaging]
+    --input=<path>   A file containing json lines each with a "rev_id" field,
+                     for example: {"rev_id": 12345}
                      [default: <stdin>]
     --output=<path>  A file to write json blobs with scores to
                      [default: <stdout>]
