@@ -241,23 +241,15 @@ class ScoringSystem(dict):
             raise
 
     @classmethod
-    def _build_context_map(cls, config, name, section_key="scoring_systems"):
+    def _kwargs_from_config(cls, config, name, section_key="scoring_systems"):
+        from ..metrics_collectors import MetricsCollector
+        from ..score_caches import ScoreCache
         from ..scoring_context import ScoringContext
 
         section = config[section_key][name]
 
-        return {name: ScoringContext.from_config(config, name)
-                for name in section['scoring_contexts']}
-
-    @classmethod
-    def _kwargs_from_config(cls, config, name, section_key="scoring_systems"):
-        from ..metrics_collectors import MetricsCollector
-        from ..score_caches import ScoreCache
-
-        section = config[section_key][name]
-
-        context_map = cls._build_context_map(
-            config, name, section_key=section_key)
+        context_map = ScoringContext.map_from_config(
+            config, section['scoring_contexts'])
 
         if 'score_cache' in section:
             score_cache = ScoreCache.from_config(config, section['score_cache'])
