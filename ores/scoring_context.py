@@ -182,6 +182,39 @@ class ScoringContext(dict):
         return root_caches, errors
 
     @classmethod
+    def map_from_config(cls, config, context_names,
+                        section_key="scoring_contexts"):
+        """
+        Loads a whole set of ScoringContext's from a configuration file
+        while maintaining a cache of model names.  This aids in better memory
+        management and allows model aliases to be implemented at the
+        configuration level.
+
+        :Returns:
+            A map of context_names and ScoringContext's where models are loaded
+            once and reused cross contexts.
+        """
+        model_key_map = {}
+        context_map = {}
+
+        for context_name in context_names:
+            section = config[section_key][context_name]
+            model_map = {}
+            for model_name, key in section['scorer_models'].items():
+                if key in model_key_map:
+                    scorer_model = model_key_map[key]
+                else:
+                    scorer_model = Model.from_config(config, key)
+                    model_key_map[key] = scorer_model
+                model_map[model_name] = scorer_model
+
+            extractor = Extractor.from_config(config, section['extractor'])
+            context_map[context_name] = cls(
+                context_name, model_map=model_map, extractor=extractor)
+
+        return context_map
+
+    @classmethod
     def from_config(cls, config, name, section_key="scoring_contexts"):
         """
         Expects:
