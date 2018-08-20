@@ -1,5 +1,5 @@
-[![Build Status](https://travis-ci.org/wikimedia/ores.svg)](https://travis-ci.org/wiki-ai/ores)
-[![Test coverage](https://codecov.io/gh/wikimedia/ores/branch/master/graph/badge.svg)](https://codecov.io/gh/wiki-ai/ores)
+[![Build Status](https://travis-ci.org/wikimedia/ores.svg)](https://travis-ci.org/wikimedia/ores)
+[![Test coverage](https://codecov.io/gh/wikimedia/ores/branch/master/graph/badge.svg)](https://codecov.io/gh/wikimedia/ores)
 
 Objective Revision Evaluation Service
 =====================================
