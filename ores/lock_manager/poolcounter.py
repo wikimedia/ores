@@ -10,32 +10,30 @@ from .lock_manager import LockManager
 
 
 class PoolCounter(LockManager):
-    def __init__(self, config, logger):
+    def __init__(self, config):
         self.server = config['server']
         self.port = config['port']
         self.stream = None
-        self.logger = logger
 
     def connect(self):
         self.stream = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
         return self.stream.connect((self.server, self.port))
 
-    def acq4me(self, key, workers, maxqueue, timeout):
+    def lock(self, key, workers, maxqueue, timeout):
         if not self.stream:
             self.connect()
         try:
             self.stream.send(bytes('ACQ4ME %s %d %d %d\n' % (key, workers, maxqueue, timeout), 'utf-8'))
             data = self.stream.recv(4096).decode('utf-8')
-            print(data)
         except socket.error as e:
             self.stream = None
             raise e
 
-        return data == 'LOCKED\n'
+        return data.strip() == 'LOCKED'
 
     def release(self, key):
         if not self.stream:
-            self.connect()
+            return False
 
         try:
             self.stream.send(bytes('RELEASE %s\n' % key, 'utf-8'))
@@ -44,7 +42,7 @@ class PoolCounter(LockManager):
             self.stream = None
             raise e
 
-        return data == 'RELEASED\n'
+        return data.strip() == 'RELEASED'
 
     def close(self):
         if self.stream:
@@ -53,6 +51,3 @@ class PoolCounter(LockManager):
             return True
         else:
             return False
-
-    def debug(self, message):
-        self.logger.debug(message)
