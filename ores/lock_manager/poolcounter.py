@@ -26,7 +26,7 @@ class PoolCounter(LockManager):
             self.stream.send(bytes('ACQ4ME %s %d %d %d\n' % (key, workers, maxqueue, timeout), 'utf-8'))
             data = self.stream.recv(4096).decode('utf-8')
         except socket.error as e:
-            self.stream = None
+            self.close()
             raise e
 
         return data.strip() == 'LOCKED'
@@ -39,7 +39,7 @@ class PoolCounter(LockManager):
             self.stream.send(bytes('RELEASE %s\n' % key, 'utf-8'))
             data = self.stream.recv(4096).decode('utf-8')
         except socket.error as e:
-            self.stream = None
+            self.close()
             raise e
 
         return data.strip() == 'RELEASED'
