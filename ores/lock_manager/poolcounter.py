@@ -7,7 +7,7 @@ This is useful to make sure too many connections are not coming from one IP.
 import socket
 
 from .lock_manager import LockManager
-
+from ..errors import TimeoutError
 
 class PoolCounter(LockManager):
     def __init__(self, config):
@@ -28,6 +28,9 @@ class PoolCounter(LockManager):
         except socket.error as e:
             self.close()
             raise e
+
+        if data.strip() in ['TIMEOUT', 'QUEUE_FULL']:
+            raise TimeoutError
 
         return data.strip() == 'LOCKED'
 
@@ -51,3 +54,7 @@ class PoolCounter(LockManager):
             return True
         else:
             return False
+
+    @classmethod
+    def from_config(cls, config, name, section_key="lock_managers"):
+        return cls(config[section_key][name])
