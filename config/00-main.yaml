@@ -26,8 +26,9 @@ score_caches:
 #Lock managers
 lock_managers:
   pool_counter:
-    server: localhost
-    port: 7531
+    primary_node:
+      server: localhost
+      port: 7531
 
 # Metrics collection options
 metrics_collectors:
@@ -43,6 +44,8 @@ scoring_systems:
     scoring_contexts:
       - testwiki
     timeout: 15 # seconds
+    connections_per_ip: 4
+    connections_per_ip_hard: 7
   local_single_thread:
     class: ores.scoring_systems.SingleThread
   local_process_pool:
