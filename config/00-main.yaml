@@ -26,9 +26,7 @@ score_caches:
 #Lock managers
 lock_managers:
   pool_counter:
-    primary_node:
-      server: localhost
-      port: 7531
+    - localhost:7531
 
 # Metrics collection options
 metrics_collectors:
@@ -40,7 +38,6 @@ scoring_systems:
   defaults:
     metrics_collector: local_logging
     score_cache: memory_lru
-    lock_manager: pool_counter
     scoring_contexts:
       - testwiki
     timeout: 15 # seconds

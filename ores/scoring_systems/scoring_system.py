@@ -38,14 +38,13 @@ class ScoringSystem(dict):
         if len(missing_models) > 0:
             raise MissingModels(request.context_name, missing_models)
 
-    def score(self, request, ip=None):
+    def score(self, request):
         self.check_context_models(request)
 
         locked = None
-        if ip and (not request.precache) and self.lock_manager is not None:
-            connected = self._connect_to_lock_manager()
-            if connected:
-                locked = self._lock_ip(ip.strip())
+        if request.ip and (not request.precache) and \
+                self.lock_manager is not None:
+            locked = self._lock_ip(request.ip)
 
         start = time.time()
         logger.debug("Scoring {0}".format(request))
@@ -62,8 +61,8 @@ class ScoringSystem(dict):
         else:
             self.metrics_collector.precache_request(request, duration)
 
-        if ip and connected and locked:
-            self._release_ip(ip.strip())
+        if request.ip and locked:
+            self._release_ip(request.ip)
 
         return response
 
@@ -254,15 +253,6 @@ class ScoringSystem(dict):
         except KeyError:
             self.metrics_collector.score_cache_miss(request, model_name)
             raise
-
-    def _connect_to_lock_manager(self):
-        try:
-            self.lock_manager.connect()
-        # Lock manager is down, let's do nothing
-        except ConnectionRefusedError:
-            logger.warning('Can not connect to lock manager')
-            return False
-        return True
 
     def _lock_ip(self, ip):
         try:

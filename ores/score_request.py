@@ -4,7 +4,7 @@ import json
 class ScoreRequest:
     def __init__(self, context_name, rev_ids, model_names, precache=False,
                  include_features=False, injection_caches=None,
-                 model_info=None):
+                 model_info=None, ip=None):
         """
         Construct a ScoreRequest from parameters.
 
@@ -32,6 +32,7 @@ class ScoreRequest:
         self.include_features = include_features
         self.injection_caches = injection_caches or {}
         self.model_info = model_info
+        self.ip = ip
 
     def __str__(self):
         return self.format()
@@ -54,6 +55,8 @@ class ScoreRequest:
             optional.append("injection_caches={0}".format(self.injection_caches))
         if self.model_info:
             optional.append("model_info=" + json.dumps(self.model_info))
+        if self.ip:
+            optional.append("ip={0}".format(self.ip))
 
         return "{0}({1})".format(":".join(repr(v) for v in common),
                                  ", ".join(optional))
@@ -68,4 +71,5 @@ class ScoreRequest:
                 "precache={0!r}".format(self.precache),
                 "include_features={0!r}".format(self.include_features),
                 "injection_caches={0!r}".format(self.injection_caches),
+                "ip={0!r}".format(self.ip),
                 "model_info={0!r}".format(self.model_info)]))

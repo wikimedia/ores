@@ -99,7 +99,8 @@ def build_score_request(scoring_system, request, context_name=None, rev_id=None,
                         precache=precache,
                         include_features=include_features,
                         injection_caches=injection_caches,
-                        model_info=model_info)
+                        model_info=model_info,
+                        ip=request.remote_addr.strip())
 
 
 def parse_rev_ids(request, rev_id):
