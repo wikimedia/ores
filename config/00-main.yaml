@@ -23,6 +23,11 @@ score_caches:
     prefix: ores
     socket_timeout: 15 # seconds
 
+#Lock managers
+lock_managers:
+  pool_counter:
+    - localhost:7531
+
 # Metrics collection options
 metrics_collectors:
   local_logging:
@@ -36,6 +41,8 @@ scoring_systems:
     scoring_contexts:
       - testwiki
     timeout: 15 # seconds
+    connections_per_ip: 4
+    connections_per_ip_hard: 7
   local_single_thread:
     class: ores.scoring_systems.SingleThread
   local_process_pool:

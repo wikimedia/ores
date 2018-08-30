@@ -8,6 +8,7 @@ from .. import errors
 from ..errors import MissingContext, MissingModels, TimeoutError
 from ..metrics_collectors import Null
 from ..score_caches import Empty
+from ..lock_manager import PoolCounter
 from ..score_response import ScoreResponse
 from ..util import timeout
 
@@ -17,12 +18,16 @@ logger = logging.getLogger(__name__)
 class ScoringSystem(dict):
 
     def __init__(self, context_map, score_cache=None,
-                       metrics_collector=None, timeout=None):
+                       metrics_collector=None, timeout=None, lock_manager=None,
+                       connections_per_ip=4, connections_per_ip_hard=7):
         super().__init__()
         self.update(context_map)
         self.score_cache = score_cache or Empty()
         self.metrics_collector = metrics_collector or Null()
         self.timeout = timeout
+        self.connections_per_ip = connections_per_ip
+        self.connections_per_ip_hard = connections_per_ip_hard
+        self.lock_manager = lock_manager
 
     def check_context_models(self, request):
 
@@ -35,6 +40,12 @@ class ScoringSystem(dict):
 
     def score(self, request):
         self.check_context_models(request)
+
+        locked = None
+        if request.ip and (not request.precache) and \
+                self.lock_manager is not None:
+            locked = self._lock_ip(request.ip)
+
         start = time.time()
         logger.debug("Scoring {0}".format(request))
 
@@ -49,6 +60,9 @@ class ScoringSystem(dict):
             self.metrics_collector.scores_request(request, duration)
         else:
             self.metrics_collector.precache_request(request, duration)
+
+        if request.ip and locked:
+            self._release_ip(request.ip)
 
         return response
 
@@ -240,6 +254,26 @@ class ScoringSystem(dict):
             self.metrics_collector.score_cache_miss(request, model_name)
             raise
 
+    def _lock_ip(self, ip):
+        try:
+            locked = self.lock_manager.lock(
+                ip, self.connections_per_ip, self.connections_per_ip_hard,
+                self.timeout)
+        except TimeoutError:
+            raise
+        # Lock manager can't lock, let's do nothing
+        except:
+            logger.warning('Can not lock in lock manager')
+            return False
+        return locked
+
+    def _release_ip(self, ip):
+        try:
+            self.lock_manager.release(ip)
+        # Lock manager can't release, let's do nothing
+        except:
+            logger.warning('Can not release locks in lock manager')
+
     @classmethod
     def _kwargs_from_config(cls, config, name, section_key="scoring_systems"):
         from ..metrics_collectors import MetricsCollector
@@ -256,6 +290,11 @@ class ScoringSystem(dict):
         else:
             score_cache = None
 
+        if 'lock_manager' in section:
+            pool_counter = PoolCounter.from_config(config, section['lock_manager'])
+        else:
+            pool_counter = None
+
         if 'metrics_collector' in section:
             metrics_collector = MetricsCollector.from_config(
                 config, section['metrics_collector'])
@@ -263,9 +302,14 @@ class ScoringSystem(dict):
             metrics_collector = None
 
         timeout = section.get('timeout')
+        connections_per_ip = section.get('connections_per_ip', 4)
+        connections_per_ip_hard = section.get('connections_per_ip', 7)
 
         return {'context_map': context_map, 'score_cache': score_cache,
-                'metrics_collector': metrics_collector, 'timeout': timeout}
+                'metrics_collector': metrics_collector, 'timeout': timeout,
+                'connections_per_ip': connections_per_ip,
+                'connections_per_ip_hard': connections_per_ip_hard,
+                'lock_manager': pool_counter}
 
     @classmethod
     def from_config(cls, config, name, section_key="scoring_systems"):
