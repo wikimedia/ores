@@ -38,6 +38,9 @@ class Null(MetricsCollector):
     def precache_scoring_error(self, request, status, duration):
         pass
 
+    def lock_acquired(self, lock_type, duration):
+        pass
+
     @classmethod
     def from_config(cls, config, name, section_key="metrics_collectors"):
         """

@@ -72,6 +72,10 @@ class Statsd(MetricsCollector):
         self.send_timing_event('precache_scoring_error', request.context_name,
                                request.model_names, status, duration=duration)
 
+    def lock_acquired(self, lock_type, duration):
+        self.send_timing_event('locking_response_time', lock_type,
+                               duration=duration)
+
     def send_timing_event(self, *message_parts, duration=None):
         with self.statsd_client.pipeline() as pipe:
             for message in self.generate_messages(message_parts):

@@ -40,6 +40,9 @@ class MetricsCollector:
     def precache_scoring_error(self, request, status, duration):
         raise NotImplementedError()
 
+    def lock_acquired(self, lock_type, duration):
+        raise NotImplementedError()
+
     @classmethod
     def from_config(cls, config, name, section_key="metrics_collectors"):
         try:
