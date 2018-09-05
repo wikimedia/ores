@@ -34,6 +34,7 @@ def test_statsd():
     collector.score_cache_miss(ScoreRequest("foo", [1], {"derp"}), "derp")
     collector.score_cache_hit(ScoreRequest("foo", [1], {"bar"}), "bar")
     collector.score_errored(ScoreRequest("foo", [1], {"bar"}), "bar")
+    collector.lock_acquired('pulpcounter', 3)
 
     assert set(fake_client.messages) - \
         {('TIMING', 'precache_request.foo.derp', 100000),
@@ -65,6 +66,8 @@ def test_statsd():
          ('INCR', 'score_cache_hit', 1),
          ('INCR', 'score_errored.foo.bar', 1),
          ('INCR', 'score_errored.foo', 1),
+         ('TIMING', 'locking_response_time.pulpcounter', 3000),
+         ('TIMING', 'locking_response_time', 3000),
          ('INCR', 'score_errored', 1)} == set()
 
 

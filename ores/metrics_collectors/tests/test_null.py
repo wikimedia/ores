@@ -14,6 +14,7 @@ def test_null():
     collector.score_cache_miss(ScoreRequest("foo", [1], {"derp"}), "derp")
     collector.score_cache_hit(ScoreRequest("foo", [1], {"bar"}), "bar")
     collector.score_errored(ScoreRequest("foo", [1], {"bar"}), "bar")
+    collector.lock_acquired('pulpcounter', 3)
 
 
 def test_from_config():
