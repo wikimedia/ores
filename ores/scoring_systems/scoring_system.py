@@ -42,12 +42,19 @@ class ScoringSystem(dict):
         self.check_context_models(request)
 
         locked = None
+        start = time.time()
         if request.ip and (not request.precache) and \
                 self.lock_manager is not None:
             locked = self._lock_ip(request.ip)
+            self.metrics_collector.send_timing_event(
+                'poolcounter',
+                'locking_response_time',
+                duration=time.time() - start)
 
-        start = time.time()
         logger.debug("Scoring {0}".format(request))
+
+        if request.ip and locked:
+            self._release_ip(request.ip)
 
         try:
             response = self._score(request)
@@ -60,9 +67,6 @@ class ScoringSystem(dict):
             self.metrics_collector.scores_request(request, duration)
         else:
             self.metrics_collector.precache_request(request, duration)
-
-        if request.ip and locked:
-            self._release_ip(request.ip)
 
         return response
 
