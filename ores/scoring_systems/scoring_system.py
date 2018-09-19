@@ -46,21 +46,19 @@ class ScoringSystem(dict):
         if request.ip and (not request.precache) and \
                 self.lock_manager is not None:
             locked = self._lock_ip(request.ip)
-            self.metrics_collector.send_timing_event(
+            self.metrics_collector.lock_acquired(
                 'poolcounter',
-                'locking_response_time',
                 duration=time.time() - start)
 
         logger.debug("Scoring {0}".format(request))
-
-        if request.ip and locked:
-            self._release_ip(request.ip)
-
         try:
             response = self._score(request)
         except errors.ScoreProcessorOverloaded:
             self.metrics_collector.score_processor_overloaded(request)
             raise
+
+        if request.ip and locked:
+            self._release_ip(request.ip)
 
         duration = time.time() - start
         if not request.precache:
