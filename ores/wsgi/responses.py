@@ -42,3 +42,15 @@ def server_overloaded(message=None):
 
 def unknown_error(message):
     return error(500, 'internal server error', message)
+
+
+def timeout_error(message=None):
+    return error(408, 'request_timeout',
+                 message or ("Cannot process your request because the " +
+                             "server timed out."))
+
+
+def too_many_requests_error(message=None):
+    return error(429, 'too_many_requests',
+                 message or ("A limited number of parallel connections per " +
+                             "IP is allowed."))
