@@ -9,7 +9,7 @@ import socket
 import hashlib
 
 from .lock_manager import LockManager
-from ..errors import TimeoutError
+from ..errors import TimeoutError, TooManyRequestsError
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +49,10 @@ class PoolCounter(LockManager):
             self.close()
             raise e
 
-        if data.strip() in ['TIMEOUT', 'QUEUE_FULL']:
+        if data.strip() == 'QUEUE_FULL':
+            raise TooManyRequestsError
+
+        if data.strip() == 'TIMEOUT':
             raise TimeoutError
 
         return data.strip() == 'LOCKED'

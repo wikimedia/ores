@@ -13,3 +13,7 @@ class MissingContext(RuntimeError):
 
 class MissingModels(RuntimeError):
     pass
+
+
+class TooManyRequestsError(RuntimeError):
+    pass

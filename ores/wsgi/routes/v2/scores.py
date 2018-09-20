@@ -39,6 +39,10 @@ def configure(config, bp, scoring_system):
                 .format(tuple(model_names), context_name))
         except ModelInfoLookupError as e:
             return responses.model_info_lookup_error(e)
+        except errors.TimeoutError:
+            return responses.timeout_error()
+        except errors.TooManyRequestsError:
+            return responses.too_many_requests_error()
         except Exception:
             return responses.unknown_error(traceback.format_exc())
 

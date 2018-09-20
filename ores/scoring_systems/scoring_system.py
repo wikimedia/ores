@@ -5,7 +5,8 @@ import revscoring.errors
 import stopit
 
 from .. import errors
-from ..errors import MissingContext, MissingModels, TimeoutError
+from ..errors import (MissingContext, MissingModels, TimeoutError,
+                      TooManyRequestsError)
 from ..metrics_collectors import Null
 from ..score_caches import Empty
 from ..lock_manager import PoolCounter
@@ -262,6 +263,8 @@ class ScoringSystem(dict):
                 ip, self.connections_per_ip, self.connections_per_ip_hard,
                 self.timeout)
         except TimeoutError:
+            raise
+        except TooManyRequestsError:
             raise
         # Lock manager can't lock, let's do nothing
         except:
