@@ -45,7 +45,7 @@ def unknown_error(message):
 
 
 def timeout_error(message=None):
-    return error(408, 'request_timeout',
+    return error(504, 'request_timeout',
                  message or ("Cannot process your request because the " +
                              "server timed out."))
 
