@@ -101,11 +101,17 @@ def process_score_request(score_request, scoring_system):
         score_response = scoring_system.score(score_request)
         return format_v3_score_response(score_response)
     except errors.ScoreProcessorOverloaded:
+        scoring_system.metrics_collector.response_made(
+                503, score_request)
         return responses.server_overloaded()
     except errors.MissingContext as e:
+        scoring_system.metrics_collector.response_made(
+                404, score_request)
         return responses.not_found("No scorers available for {0}"
                                    .format(e))
     except errors.MissingModels as e:
+        scoring_system.metrics_collector.response_made(
+                404, score_request)
         context_name, model_names = e.args
         return responses.not_found(
             "Models {0} not available for {1}"
@@ -113,8 +119,12 @@ def process_score_request(score_request, scoring_system):
     except ModelInfoLookupError as e:
         return responses.model_info_lookup_error(e)
     except errors.TimeoutError:
+        scoring_system.metrics_collector.response_made(
+                504, score_request)
         return responses.timeout_error()
     except errors.TooManyRequestsError:
+        scoring_system.metrics_collector.response_made(
+                429, score_request)
         return responses.too_many_requests_error()
     except Exception:
         return responses.unknown_error(traceback.format_exc())

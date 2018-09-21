@@ -76,6 +76,10 @@ class Statsd(MetricsCollector):
         self.send_timing_event('locking_response_time', lock_type,
                                duration=duration)
 
+    def response_made(self, response_code, request):
+        self.send_increment_event('response', response_code,
+                                  request.context_name)
+
     def send_timing_event(self, *message_parts, duration=None):
         with self.statsd_client.pipeline() as pipe:
             for message in self.generate_messages(message_parts):
