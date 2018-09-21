@@ -20,7 +20,8 @@ class ScoringSystem(dict):
 
     def __init__(self, context_map, score_cache=None,
                        metrics_collector=None, timeout=None, lock_manager=None,
-                       connections_per_ip=4, connections_per_ip_hard=7):
+                       connections_per_ip=4, connections_per_ip_hard=7,
+                       whitelisted_ips=[]):
         super().__init__()
         self.update(context_map)
         self.score_cache = score_cache or Empty()
@@ -29,6 +30,7 @@ class ScoringSystem(dict):
         self.connections_per_ip = connections_per_ip
         self.connections_per_ip_hard = connections_per_ip_hard
         self.lock_manager = lock_manager
+        self.whitelisted_ips = whitelisted_ips
 
     def check_context_models(self, request):
 
@@ -45,7 +47,8 @@ class ScoringSystem(dict):
         locked = None
         start = time.time()
         if request.ip and (not request.precache) and \
-                self.lock_manager is not None:
+                self.lock_manager is not None and \
+                request.ip not in self.whitelisted_ips:
             locked = self._lock_ip(request.ip)
             self.metrics_collector.lock_acquired(
                 'poolcounter',
@@ -309,11 +312,13 @@ class ScoringSystem(dict):
         timeout = section.get('timeout')
         connections_per_ip = section.get('connections_per_ip', 4)
         connections_per_ip_hard = section.get('connections_per_ip', 7)
+        whitelisted_ips = section.get('whitelisted_ips', [])
 
         return {'context_map': context_map, 'score_cache': score_cache,
                 'metrics_collector': metrics_collector, 'timeout': timeout,
                 'connections_per_ip': connections_per_ip,
                 'connections_per_ip_hard': connections_per_ip_hard,
+                'whitelisted_ips': whitelisted_ips,
                 'lock_manager': pool_counter}
 
     @classmethod
