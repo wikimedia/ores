@@ -95,12 +95,18 @@ def build_score_request(scoring_system, request, context_name=None, rev_id=None,
     if context_name and context_name in scoring_system and not model_names:
         model_names = scoring_system[context_name].keys()
 
+    # WMF specific solution
+    if request.headers.get('X-Client-IP') is None:
+        ip = request.remote_addr.strip()
+    else:
+        ip = request.headers['X-Client-IP'].strip()
+
     return ScoreRequest(context_name, rev_ids, model_names,
                         precache=precache,
                         include_features=include_features,
                         injection_caches=injection_caches,
                         model_info=model_info,
-                        ip=request.remote_addr.strip())
+                        ip=ip)
 
 
 def parse_rev_ids(request, rev_id):
