@@ -41,6 +41,9 @@ class Null(MetricsCollector):
     def lock_acquired(self, lock_type, duration):
         pass
 
+    def response_made(self, response_code, request):
+        pass
+
     @classmethod
     def from_config(cls, config, name, section_key="metrics_collectors"):
         """

@@ -19,6 +19,7 @@ def test_logger():
     collector.score_cache_hit(ScoreRequest("foo", [1], {"bar"}), "bar")
     collector.score_errored(ScoreRequest("foo", [1], {"bar"}), "bar")
     collector.lock_acquired('pulpcounter', 3)
+    collector.response_made(404, ScoreRequest("foo", [1], {"bar"}))
 
     assert set(messages) == \
         {"precache_request: foo:{'bar', 'derp'} in 100 seconds",
@@ -29,7 +30,8 @@ def test_logger():
          "score_cache_miss: foo:derp",
          "score_cache_hit: foo:bar",
          "score_errored: foo:bar",
-         "locking_response_time: pulpcounter in 3 seconds"}
+         "locking_response_time: pulpcounter in 3 seconds",
+         "Response code 404 in foo context"}
 
 
 def test_from_config():

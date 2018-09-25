@@ -84,6 +84,11 @@ class Logger(MetricsCollector):
             "locking_response_time: {0} in {1} seconds"
             .format(lock_type, round(duration, 3)))
 
+    def response_made(self, response_code, request):
+        self.logger.debug(
+            "Response code {0} in {1} context"
+            .format(response_code, request.context_name))
+
     @classmethod
     def from_config(cls, config, name, section_key="metrics_collectors"):
         """

@@ -1,5 +1,10 @@
 from flask.ext.jsonpify import jsonify
 
+SERVER_OVERLOADED = 503
+NOT_FOUND = 404
+TIMEOUT = 504
+TOO_MANY_REQUESTS = 429
+
 
 def no_content():
     return "", 204
@@ -29,12 +34,12 @@ def forbidden(message=None):
 
 
 def not_found(message=None):
-    return error(404, 'not found',
+    return error(NOT_FOUND, 'not found',
                  message or "Nothing found at this location.")
 
 
 def server_overloaded(message=None):
-    return error(503, 'server overloaded',
+    return error(SERVER_OVERLOADED, 'server overloaded',
                  message or ("Cannot process your request because the " +
                              "server is overloaded.  Try again in a" +
                              "few minutes."))
@@ -45,12 +50,12 @@ def unknown_error(message):
 
 
 def timeout_error(message=None):
-    return error(504, 'request_timeout',
+    return error(TIMEOUT, 'request_timeout',
                  message or ("Cannot process your request because the " +
                              "server timed out."))
 
 
 def too_many_requests_error(message=None):
-    return error(429, 'too_many_requests',
+    return error(TOO_MANY_REQUESTS, 'too_many_requests',
                  message or ("A limited number of parallel connections per " +
                              "IP is allowed."))
