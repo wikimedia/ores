@@ -6,6 +6,14 @@ import json
 
 
 class LogstashFormatter(logging.Formatter):
+    # The list contains all the attributes listed in
+    # http://docs.python.org/library/logging.html#logrecord-attributes
+    skip_list = (
+        'args', 'asctime', 'created', 'exc_info', 'filename', 'funcName',
+        'levelname', 'levelno', 'lineno', 'message', 'module', 'msecs',
+        'msg', 'name', 'pathname', 'process', 'processName',
+        'relativeCreated', 'stack_info', 'thread', 'threadName')
+    easy_types = (str, bool, dict, float, int, list, type(None))
 
     def __init__(self, message_type='Logstash', tags=None, host=None):
         self.message_type = message_type
@@ -38,21 +46,11 @@ class LogstashFormatter(logging.Formatter):
         return self.serialize(message)
 
     def get_extra_fields(self, record):
-        # The list contains all the attributes listed in
-        # http://docs.python.org/library/logging.html#logrecord-attributes
-        skip_list = (
-            'args', 'asctime', 'created', 'exc_info', 'filename', 'funcName',
-            'levelname', 'levelno', 'lineno', 'message', 'module', 'msecs',
-            'msg', 'name', 'pathname', 'process', 'processName',
-            'relativeCreated', 'stack_info', 'thread', 'threadName')
-
-        easy_types = (str, bool, dict, float, int, list, type(None))
-
         fields = {}
 
         for key, value in record.__dict__.items():
-            if key not in skip_list:
-                if isinstance(value, easy_types):
+            if key not in LogstashFormatter.skip_list:
+                if isinstance(value, LogstashFormatter.easy_types):
                     fields[key] = value
                 else:
                     fields[key] = repr(value)
