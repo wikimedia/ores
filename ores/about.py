@@ -1,5 +1,5 @@
 __name__ = "ores"
-__version__ = "1.2.0"
+__version__ = "1.2.1"
 __author__ = "Aaron Halfaker"
 __author_email__ = "ahalfaker@wikimedia.org"
 __description__ = "A webserver for hosting scorer models."
