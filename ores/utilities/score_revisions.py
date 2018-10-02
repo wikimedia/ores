@@ -3,7 +3,10 @@ Scores a set of revisions using an ORES api
 
 Usage:
     score_revisions (-h|--help)
-    score_revisions <ores-host> <context> <model>...
+    score_revisions <ores-host> <user-agent> <context> <model>...
+                    [--batch-size=<revs>]
+                    [--parallel-requests=<reqs>]
+                    [--retries=<num>]
                     [--input=<path>]
                     [--output=<path>]
                     [--debug]
@@ -17,10 +20,21 @@ Options:
     -h --help        Prints this documentation
     <ores-host>      The base URL to an ORES instance to use in scoring.
                      [example: https://ores.wikimedia.org]
+    <user-agent>     The user agent to provide to the ORES service for tracking
+                     purposes.  Good user agents include an email address that
+                     admins can contact.
+                     [example: "<someone@domain.org> Analyzing article hist"]
     <context>        The name of the wiki to execute model(s) for.
                      [example: srwiki]
     <model>          The name of a model to use in scoring
                      [example: damaging]
+    --batch-size=<revs>  The number of scores to batch per request.
+                         [default: 50]
+    --parallel-requests=<reqs>  The size of the requester pool.  This limits
+                                maximum number of concurrent connections.
+                                [default: 2]
+    --retries=<num>  The maximum number of retries for basic HTTP errors
+                     before giving up. [default: 5]
     --input=<path>   A file containing json lines each with a "rev_id" field,
                      for example: {"rev_id": 12345}
                      [default: <stdin>]
@@ -51,8 +65,12 @@ def main(argv=None):
         logging.getLogger("requests.packages.urllib3").setLevel(logging.WARNING)
 
     ores_host = args['<ores-host>']
+    user_agent = args['<user-agent>']
     context = args['<context>']
     model_names = args['<model>']
+    batch_size = int(args['--batch-size'])
+    parallel_requests = int(args['--parallel-requests'])
+    retries = int(args['--retries'])
     if args['--input'] == "<stdin>":
         logger.info("Reading input from <stdin>")
         input = sys.stdin
@@ -68,12 +86,16 @@ def main(argv=None):
 
     verbose = args['--verbose']
 
-    run(ores_host, context, model_names, input, output, verbose)
+    run(ores_host, user_agent, context, model_names, batch_size,
+        parallel_requests, retries, input, output, verbose)
 
 
-def run(ores_host, context, model_names, input, output, verbose):
+def run(ores_host, user_agent, context, model_names, batch_size,
+        parallel_requests, retries, input, output, verbose):
     rev_docs = [json.loads(l) for l in input]
-    session = api.Session(ores_host, user_agent="ahalfaker@wikimedia.org")
+    session = api.Session(
+        ores_host, user_agent=user_agent, batch_size=batch_size,
+        parallel_requests=parallel_requests, retries=retries)
 
     rev_ids = [d['rev_id'] for d in rev_docs]
     scores = session.score(context, model_names, rev_ids)
