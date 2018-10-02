@@ -79,7 +79,10 @@ class Session:
         logging.debug("Starting up thread pool with {0} workers"
                       .format(self.workers))
         with ThreadPoolExecutor(max_workers=self.workers) as executor:
-            futures = []
+            futures = []  # A list of future results
+
+            # This loop loads all rev_id_batch's into the executor for
+            # processing
             for rev_id_batch in chunked(rev_ids, self.batch_size):
                 rev_id_batch = list(rev_id_batch)
                 logging.debug("Starting batch of {0} revids"
@@ -88,6 +91,7 @@ class Session:
                                                context, rev_id_batch,
                                                models))
 
+            # This loop blocks on reading the futures as soon as they are ready
             for future in futures:
                 for score in future.result():
                     yield score
