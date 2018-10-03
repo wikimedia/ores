@@ -1,7 +1,7 @@
 import traceback
 import logging
 import socket
-from datetime import datetime
+from datetime import datetime, timezone
 import json
 
 
@@ -15,8 +15,7 @@ class LogstashFormatter(logging.Formatter):
         'relativeCreated', 'stack_info', 'thread', 'threadName')
     easy_types = (str, bool, dict, float, int, list, type(None))
 
-    def __init__(self, message_type='Logstash', tags=None, host=None):
-        self.message_type = message_type
+    def __init__(self, tags=None, host=None):
         self.tags = tags if tags is not None else []
         self.host = host if host is not None else socket.gethostname()
 
@@ -29,7 +28,6 @@ class LogstashFormatter(logging.Formatter):
             'host': self.host,
             'path': record.pathname,
             'tags': self.tags,
-            'type': self.message_type,
 
             # Extra Fields
             'level': record.levelname,
@@ -73,8 +71,8 @@ class LogstashFormatter(logging.Formatter):
 
     @classmethod
     def format_timestamp(cls, time):
-        tstamp = datetime.utcfromtimestamp(time)
-        return tstamp.strftime("%Y-%m-%dT%H:%M:%S") + ".%03d" % (tstamp.microsecond / 1000) + "Z"
+        tstamp = datetime.fromtimestamp(time, timezone.utc)
+        return tstamp.isoformat()
 
     @classmethod
     def format_exception(cls, exc_info):
