@@ -27,6 +27,11 @@ score_caches:
 lock_managers:
   pool_counter:
     - localhost:7531
+  redis:
+    class: ores.lock_manager.Redis
+    host: localhost
+    prefix: ores_jobs
+    socket_timeout: 15 # seconds
 
 # Metrics collection options
 metrics_collectors:

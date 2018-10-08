@@ -12,6 +12,7 @@ from celery.signals import before_task_publish
 
 from .. import errors
 from .scoring_system import ScoringSystem
+from ..lock_manager import Redis
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +35,8 @@ def update_sent_state(sender=None, body=None, **kwargs):
 
 class CeleryQueue(ScoringSystem):
 
-    def __init__(self, *args, application, queue_maxsize=None, **kwargs):
+    def __init__(self, *args, application, queue_maxsize=None,
+                 jobs_lock_manager=None, **kwargs):
         super().__init__(*args, **kwargs)
         global _applications
         self.application = application
@@ -42,6 +44,8 @@ class CeleryQueue(ScoringSystem):
                              else None
 
         self.redis = redis_from_url(self.application.conf.BROKER_URL)
+
+        self.jobs_lock_manager = jobs_lock_manager
 
         if self.queue_maxsize is not None and self.redis is None:
             logger.warning("No redis connection.  Can't check queue size")
@@ -68,7 +72,6 @@ class CeleryQueue(ScoringSystem):
             score_map = ScoringSystem._process_score_map(
                 self, request, rev_id, model_names,
                 root_cache=root_cache)
-
             logger.info("Completed generating score map for {0}"
                         .format(request.format(rev_id, model_names)))
             return score_map
@@ -76,6 +79,7 @@ class CeleryQueue(ScoringSystem):
         @self.application.task(throws=expected_errors,
                                queue=DEFAULT_CELERY_QUEUE)
         def _lookup_score_in_map(result_id, model_name):
+            # Deprecated task. Will be removed soon.
             logger.info("Looking up {0} in {1}".format(model_name, result_id))
             score_map_result = self._process_score_map.AsyncResult(result_id)
             try:
@@ -114,30 +118,27 @@ class CeleryQueue(ScoringSystem):
                 root_cache = {str(k): v for k, v in root_caches[rev_id].items()}
                 result = self._process_score_map.delay(
                     request, missing_models, rev_id, root_cache)
+                if self.jobs_lock_manager:
+                    self._lock_process(context, missing_models, rev_id, request,
+                                       injection_cache, result.id)
 
                 for model_name in missing_models:
-                    task_id = context.format_id_string(
-                        model_name, rev_id, request,
-                        injection_cache=injection_cache)
-                    score_result = self._lookup_score_in_map.apply_async(
-                        args=(result.id, model_name), task_id=task_id,
-                        expires=self.timeout)
                     if rev_id in results:
-                        results[rev_id][model_name] = score_result
+                        results[rev_id][model_name] = result
                     else:
-                        results[rev_id] = {model_name: score_result}
+                        results[rev_id] = {model_name: result}
 
         # Read results
         rev_scores = {}
         score_errors = {}
         combined_results = chain(inprogress_results.items(), results.items())
         for rev_id, model_results in combined_results:
+            injection_cache = request.injection_caches.get(rev_id)
             if rev_id not in rev_scores:
                 rev_scores[rev_id] = {}
             for model_name, score_result in model_results.items():
                 try:
-                    rev_scores[rev_id][model_name] = \
-                        score_result.get(timeout=self.timeout)
+                    task_result = score_result.get(timeout=self.timeout)
                 except celery.exceptions.TimeoutError:
                     timeout_error = errors.TimeoutError(
                         "Timed out after {0} seconds.".format(self.timeout))
@@ -146,8 +147,28 @@ class CeleryQueue(ScoringSystem):
                         score_result.id, timeout_error)
                 except Exception as error:
                     score_errors[rev_id] = error
+                if model_name in task_result:
+                    rev_scores[rev_id][model_name] = task_result[model_name]
+                else:
+                    # B/C
+                    # TODO: Remove this later
+                    rev_scores[rev_id][model_name] = task_result
+
+                if self.jobs_lock_manager:
+                    key = context.format_id_string(
+                        model_name, rev_id, request,
+                        injection_cache=injection_cache)
+                    self.jobs_lock_manager.release(key)
 
         return rev_scores, score_errors
+
+    def _lock_process(self, context, models, rev_id, request, injection_cache,
+                      task_id):
+        for model in models:
+            key = context.format_id_string(
+                    model, rev_id, request,
+                    injection_cache=injection_cache)
+            self.jobs_lock_manager.lock(key, task_id)
 
     def _lookup_inprogress_results(self, request, response):
         context = self[request.context_name]
@@ -161,14 +182,15 @@ class CeleryQueue(ScoringSystem):
                    model_name in response.scores[rev_id]:
                     continue
 
+                if not self.jobs_lock_manager:
+                    continue
                 task_id = context.format_id_string(
                     model_name, rev_id, request,
                     injection_cache=injection_cache)
-                score_result = \
-                    self._lookup_score_in_map.AsyncResult(task_id)
-                if score_result.state in (REQUESTED, SENT,
-                                          celery.states.STARTED,
-                                          celery.states.SUCCESS):
+                lock_value = self.jobs_lock_manager.is_locked(task_id)
+                if lock_value:
+                    score_result = \
+                        self._process_score_map.AsyncResult(lock_value)
                     logger.info("Found in-progress result for {0} -- {1}"
                                 .format(task_id, score_result.state))
                     if rev_id in inprogress_results:
@@ -231,6 +253,13 @@ class CeleryQueue(ScoringSystem):
         kwargs = cls._kwargs_from_config(
             config, name, section_key=section_key)
         queue_maxsize = section.get('queue_maxsize')
+
+        if 'jobs_lock_manager' in section:
+            jobs_lock_manager = Redis.from_config(
+                config, section['jobs_lock_manager'])
+        else:
+            jobs_lock_manager = None
+
         application = celery.Celery(__name__)
         application.conf.update(**{k: v for k, v in section.items()
                                    if k not in ('class', 'context_map',
@@ -240,7 +269,8 @@ class CeleryQueue(ScoringSystem):
         application.conf.CELERY_CREATE_MISSING_QUEUES = True
 
         return cls(application=application,
-                   queue_maxsize=queue_maxsize, **kwargs)
+                   queue_maxsize=queue_maxsize,
+                   jobs_lock_manager=jobs_lock_manager, **kwargs)
 
 
 PASS_HOST_PORT = re.compile(
