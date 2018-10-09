@@ -147,18 +147,19 @@ class CeleryQueue(ScoringSystem):
                         score_result.id, timeout_error)
                 except Exception as error:
                     score_errors[rev_id] = error
-                if model_name in task_result:
-                    rev_scores[rev_id][model_name] = task_result[model_name]
                 else:
-                    # B/C
-                    # TODO: Remove this later
-                    rev_scores[rev_id][model_name] = task_result
+                    if model_name in task_result:
+                        rev_scores[rev_id][model_name] = task_result[model_name]
+                    else:
+                        # B/C
+                        # TODO: Remove this later
+                        rev_scores[rev_id][model_name] = task_result
 
-                if self.jobs_lock_manager:
-                    key = context.format_id_string(
-                        model_name, rev_id, request,
-                        injection_cache=injection_cache)
-                    self.jobs_lock_manager.release(key)
+                    if self.jobs_lock_manager:
+                        key = context.format_id_string(
+                            model_name, rev_id, request,
+                            injection_cache=injection_cache)
+                        self.jobs_lock_manager.release(key)
 
         return rev_scores, score_errors
 
