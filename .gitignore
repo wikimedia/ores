@@ -63,3 +63,6 @@ docs/_build/
 
 #npm stuff
 node_modules/
+
+# PyCharm
+.idea/
