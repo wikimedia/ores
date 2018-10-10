@@ -16,7 +16,7 @@ def test_score_request():
 def test_score_request_serialization():
     sr = ScoreRequest("foo", [1, 2, 3], ["bar", "baz"], ip='0.0.0.0')
 
-    assert sr.toJSON() == {
+    assert sr.to_json() == {
         'context': 'foo',
         'include_features': False,
         'injection_caches': {},
@@ -29,7 +29,7 @@ def test_score_request_serialization():
 
 def test_score_request_deserialization():
     sr = ScoreRequest("foo", [1, 2, 3], ["bar", "baz"], ip='0.0.0.0')
-    sr_new = ScoreRequest.fromJSON({
+    sr_new = ScoreRequest.from_json({
         'context': 'foo',
         'include_features': False,
         'injection_caches': {},
@@ -39,4 +39,4 @@ def test_score_request_deserialization():
         'precache': False,
         'rev_ids': {1, 2, 3}})
 
-    assert sr.toJSON() == sr_new.toJSON()
+    assert sr.to_json() == sr_new.to_json()

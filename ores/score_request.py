@@ -74,7 +74,7 @@ class ScoreRequest:
                 "ip={0!r}".format(self.ip),
                 "model_info={0!r}".format(self.model_info)]))
 
-    def toJSON(self):
+    def to_json(self):
         return {
             'context': self.context_name,
             'rev_ids': self.rev_ids,
@@ -87,13 +87,13 @@ class ScoreRequest:
         }
 
     @classmethod
-    def fromJSON(cls, kwargs):
+    def from_json(cls, data):
         return cls(
-            kwargs['context'],
-            kwargs['rev_ids'],
-            kwargs['model_names'],
-            precache=kwargs.get('precache', False),
-            include_features=kwargs.get('include_features', False),
-            injection_caches=kwargs.get('injection_caches'),
-            model_info=kwargs.get('model_info'),
-            ip=kwargs.get('ip'))
+            data['context'],
+            data['rev_ids'],
+            data['model_names'],
+            precache=data['precache'],
+            include_features=data['include_features'],
+            injection_caches=data['injection_caches'],
+            model_info=data['model_info'],
+            ip=data['ip'])
