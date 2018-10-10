@@ -1,19 +1,19 @@
 """
-Class to implement Redis lock manager.
+Class to implement Redis task tracker.
 
-This is useful to deduplicate celery jobs
+This is useful to deduplicate celery jobs.
 """
 
 import logging
 
-from .lock_manager import LockManager
+from .task_tracker import TaskTracker
 
 logger = logging.getLogger(__name__)
 TTL = 5 * 60   # 5 minutes
 PREFIX = "ores"
 
 
-class Redis(LockManager):
+class RedisTaskTracker(TaskTracker):
     def __init__(self, redis, ttl=None, prefix=None):
         self.redis = redis
         self.ttl = int(ttl or TTL)
@@ -23,7 +23,7 @@ class Redis(LockManager):
         return self.redis.setex(self.prefix + ':' + key, self.ttl,
                                 bytes(value, 'utf-8'))
 
-    def is_locked(self, key):
+    def get_in_progress_task(self, key):
         value = self.redis.get(self.prefix + ':' + key)
         if value is None:
             return False
@@ -44,10 +44,10 @@ class Redis(LockManager):
         return cls(redis.StrictRedis(*args, **kwargs), ttl=ttl, prefix=prefix)
 
     @classmethod
-    def from_config(cls, config, name, section_key="lock_managers"):
+    def from_config(cls, config, name, section_key="task_trackers"):
         """
         score_caches:
-            lock_managers:
+            task_trackers:
                 class: ores.lock_manager.Redis
                 host: localhost
                 prefix: ores-derp

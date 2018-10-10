@@ -27,11 +27,15 @@ score_caches:
 lock_managers:
   pool_counter:
     - localhost:7531
+
+#Task trackers
+task_trackers:
   redis:
-    class: ores.lock_manager.Redis
+    class: ores.task_tracker.RedisTaskTracker
     host: localhost
-    prefix: ores_jobs
+    prefix: ores_tasks
     socket_timeout: 15 # seconds
+    ttl: 300 # 5 minutes
 
 # Metrics collection options
 metrics_collectors:

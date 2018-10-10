@@ -12,7 +12,7 @@ from celery.signals import before_task_publish
 
 from .. import errors
 from .scoring_system import ScoringSystem
-from ..lock_manager import Redis
+from ..task_tracker import RedisTaskTracker
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +36,7 @@ def update_sent_state(sender=None, body=None, **kwargs):
 class CeleryQueue(ScoringSystem):
 
     def __init__(self, *args, application, queue_maxsize=None,
-                 jobs_lock_manager=None, **kwargs):
+                 task_tracker=None, **kwargs):
         super().__init__(*args, **kwargs)
         global _applications
         self.application = application
@@ -45,7 +45,7 @@ class CeleryQueue(ScoringSystem):
 
         self.redis = redis_from_url(self.application.conf.BROKER_URL)
 
-        self.jobs_lock_manager = jobs_lock_manager
+        self.task_tracker = task_tracker
 
         if self.queue_maxsize is not None and self.redis is None:
             logger.warning("No redis connection.  Can't check queue size")
@@ -118,7 +118,7 @@ class CeleryQueue(ScoringSystem):
                 root_cache = {str(k): v for k, v in root_caches[rev_id].items()}
                 result = self._process_score_map.delay(
                     request, missing_models, rev_id, root_cache)
-                if self.jobs_lock_manager:
+                if self.task_tracker:
                     self._lock_process(context, missing_models, rev_id, request,
                                        injection_cache, result.id)
 
@@ -155,11 +155,11 @@ class CeleryQueue(ScoringSystem):
                         # TODO: Remove this later
                         rev_scores[rev_id][model_name] = task_result
 
-                    if self.jobs_lock_manager:
+                    if self.task_tracker:
                         key = context.format_id_string(
                             model_name, rev_id, request,
                             injection_cache=injection_cache)
-                        self.jobs_lock_manager.release(key)
+                        self.task_tracker.release(key)
 
         return rev_scores, score_errors
 
@@ -169,7 +169,7 @@ class CeleryQueue(ScoringSystem):
             key = context.format_id_string(
                     model, rev_id, request,
                     injection_cache=injection_cache)
-            self.jobs_lock_manager.lock(key, task_id)
+            self.task_tracker.lock(key, task_id)
 
     def _lookup_inprogress_results(self, request, response):
         context = self[request.context_name]
@@ -183,15 +183,15 @@ class CeleryQueue(ScoringSystem):
                    model_name in response.scores[rev_id]:
                     continue
 
-                if not self.jobs_lock_manager:
+                if not self.task_tracker:
                     continue
-                task_id = context.format_id_string(
+                key = context.format_id_string(
                     model_name, rev_id, request,
                     injection_cache=injection_cache)
-                lock_value = self.jobs_lock_manager.is_locked(task_id)
-                if lock_value:
+                task_id = self.task_tracker.get_in_progress_task(key)
+                if task_id:
                     score_result = \
-                        self._process_score_map.AsyncResult(lock_value)
+                        self._process_score_map.AsyncResult(task_id)
                     logger.info("Found in-progress result for {0} -- {1}"
                                 .format(task_id, score_result.state))
                     if rev_id in inprogress_results:
@@ -255,11 +255,11 @@ class CeleryQueue(ScoringSystem):
             config, name, section_key=section_key)
         queue_maxsize = section.get('queue_maxsize')
 
-        if 'jobs_lock_manager' in section:
-            jobs_lock_manager = Redis.from_config(
-                config, section['jobs_lock_manager'])
+        if 'task_tracker' in section:
+            task_tracker = RedisTaskTracker.from_config(
+                config, section['task_tracker'])
         else:
-            jobs_lock_manager = None
+            task_tracker = None
 
         application = celery.Celery(__name__)
         application.conf.update(**{k: v for k, v in section.items()
@@ -271,7 +271,7 @@ class CeleryQueue(ScoringSystem):
 
         return cls(application=application,
                    queue_maxsize=queue_maxsize,
-                   jobs_lock_manager=jobs_lock_manager, **kwargs)
+                   task_tracker=task_tracker, **kwargs)
 
 
 PASS_HOST_PORT = re.compile(
