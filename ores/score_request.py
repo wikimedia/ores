@@ -73,3 +73,27 @@ class ScoreRequest:
                 "injection_caches={0!r}".format(self.injection_caches),
                 "ip={0!r}".format(self.ip),
                 "model_info={0!r}".format(self.model_info)]))
+
+    def to_json(self):
+        return {
+            'context': self.context_name,
+            'rev_ids': self.rev_ids,
+            'model_names': self.model_names,
+            'precache': self.precache,
+            'include_features': self.include_features,
+            'injection_caches': self.injection_caches,
+            'ip': self.ip,
+            'model_info': self.model_info
+        }
+
+    @classmethod
+    def from_json(cls, data):
+        return cls(
+            data['context'],
+            data['rev_ids'],
+            data['model_names'],
+            precache=data['precache'],
+            include_features=data['include_features'],
+            injection_caches=data['injection_caches'],
+            model_info=data['model_info'],
+            ip=data['ip'])
