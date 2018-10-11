@@ -6,7 +6,6 @@ import logging.config
 import sys
 
 DEFAULT_DIRS = ["config/", "/etc/ores/"]
-DEFAULT_LOGGING_CONFIG = "logging_config.yaml"
 DEFAULT_FORMAT = "%(asctime)s %(levelname)s:%(name)s -- %(message)s"
 
 
@@ -33,18 +32,14 @@ def build_config(config_dirs=DEFAULT_DIRS, **kwargs):
     return config
 
 
-def configure_logging(verbose=False, debug=False, logging_config=None, **kwargs):
-    # Load logging config if specified.  If no config file is specified, we
-    # make a half-hearted attempt to find a distributed logging_config.yaml
-    # in the current working directory.
-    if logging_config is None:
-        if os.path.exists(DEFAULT_LOGGING_CONFIG):
-            logging_config = DEFAULT_LOGGING_CONFIG
+def configure_logging(verbose=False, debug=False, config=None, **kwargs):
+    if config is None:
+        logging_config = None
+    else:
+        logging_config = config.get('logging')
 
     if logging_config is not None:
-        with open(logging_config) as f:
-            logging_config = yamlconf.load(f)
-            logging.config.dictConfig(logging_config)
+        logging.config.dictConfig(logging_config)
 
         # Secret sauce: if running from the console, mirror logs there.
         if sys.stdin.isatty():

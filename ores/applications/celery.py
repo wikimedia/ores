@@ -37,9 +37,8 @@ def run(**kwargs):
 
 
 def build(**kwargs):
-    configure_logging(**kwargs)
-
     config = build_config(**kwargs)
+    configure_logging(config=config, **kwargs)
     scoring_system = CeleryQueue.from_config(
         config, config['ores']['scoring_system'])
     return scoring_system.application
