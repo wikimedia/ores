@@ -12,7 +12,7 @@ from celery.signals import before_task_publish
 
 from .. import errors
 from .scoring_system import ScoringSystem
-from ..task_tracker import RedisTaskTracker
+from ..task_tracker import RedisTaskTracker, NullTaskTracker
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +45,7 @@ class CeleryQueue(ScoringSystem):
 
         self.redis = redis_from_url(self.application.conf.BROKER_URL)
 
-        self.task_tracker = task_tracker
+        self.task_tracker = task_tracker or NullTaskTracker()
 
         if self.queue_maxsize is not None and self.redis is None:
             logger.warning("No redis connection.  Can't check queue size")
@@ -118,9 +118,8 @@ class CeleryQueue(ScoringSystem):
                 root_cache = {str(k): v for k, v in root_caches[rev_id].items()}
                 result = self._process_score_map.delay(
                     request, missing_models, rev_id, root_cache)
-                if self.task_tracker:
-                    self._lock_process(context, missing_models, rev_id, request,
-                                       injection_cache, result.id)
+                self._lock_process(missing_models, rev_id, request,
+                                   injection_cache, result.id)
 
                 for model_name in missing_models:
                     if rev_id in results:
@@ -155,16 +154,16 @@ class CeleryQueue(ScoringSystem):
                         # TODO: Remove this later
                         rev_scores[rev_id][model_name] = task_result
 
-                    if self.task_tracker:
-                        key = context.format_id_string(
-                            model_name, rev_id, request,
-                            injection_cache=injection_cache)
-                        self.task_tracker.release(key)
+                    key = context.format_id_string(
+                        model_name, rev_id, request,
+                        injection_cache=injection_cache)
+                    self.task_tracker.release(key)
 
         return rev_scores, score_errors
 
-    def _lock_process(self, context, models, rev_id, request, injection_cache,
+    def _lock_process(self, models, rev_id, request, injection_cache,
                       task_id):
+        context = self[request.context_name]
         for model in models:
             key = context.format_id_string(
                     model, rev_id, request,
@@ -183,8 +182,6 @@ class CeleryQueue(ScoringSystem):
                    model_name in response.scores[rev_id]:
                     continue
 
-                if not self.task_tracker:
-                    continue
                 key = context.format_id_string(
                     model_name, rev_id, request,
                     injection_cache=injection_cache)
