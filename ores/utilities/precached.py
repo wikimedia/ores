@@ -78,12 +78,13 @@ def run(stream_url, ores_url, metrics_collector, config, delay, notify, verbose)
 
     # What to do in case of a change
     def precache_a_change(change):
+        session = requests.Session()
         if delay:
             time.sleep(delay)
         if notify:
             watchdog_ping(*notify)
         start = time.time()
-        response = requests.post(ores_url + "/v3/precache/", json=change)
+        response = session.post(ores_url + "/v3/precache/", json=change, headers={'Content-Type': "Application/JSON"})
         if response.status == 200:
             logger.info("Scored {0} in {1} seconds."
                         .format(json.dumps(change), round(time.time() - start, 3)))
