@@ -13,7 +13,6 @@ Options:
                              [default: 8080]
     --config-dir=<path>      The path to a directory containing configuration
                              [default: config/]
-    --logging-config=<path>  The path to a logging configuration file
     --processes=<num>        The number of parallel processes to handle
                              [default: 16]
     --debug                  Print debug logging information
@@ -41,7 +40,6 @@ def main(argv=None):
 
     run(host, port, processes,
         verbose=verbose, debug=debug,
-        logging_config=args['--logging-config'],
         config_dirs=args['--config-dir'])
 
 
@@ -52,6 +50,6 @@ def run(host, port, processes, **kwargs):
 
 
 def build(**kwargs):
-    configure_logging(**kwargs)
     config = build_config(**kwargs)
+    configure_logging(config=config, **kwargs)
     return server.configure(config)
