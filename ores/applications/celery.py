@@ -10,7 +10,6 @@ Options:
     -h --help                Prints this documentation
     --config-dir=<path>      The path to a directory containing configuration
                              [default: config/]
-    --logging-config=<path>  The path to a logging configuration file
     --debug                  Print debug logging information
     --verbose                Print verbose extraction information
 """
@@ -26,7 +25,6 @@ def main(argv=None):
     debug = args['--debug']
 
     run(verbose=verbose, debug=debug,
-        logging_config=args['--logging-config'],
         config_dirs=args['--config-dir'])
 
 
