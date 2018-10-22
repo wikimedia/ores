@@ -8,7 +8,6 @@ import celery.exceptions
 import celery.states
 import mwapi.errors
 import revscoring.errors
-from celery.signals import before_task_publish
 
 from .. import errors
 from .scoring_system import ScoringSystem
@@ -21,16 +20,6 @@ _applications = []
 DEFAULT_CELERY_QUEUE = "celery"
 SENT = "SENT"
 REQUESTED = "REQUESTED"
-
-
-@before_task_publish.connect
-def update_sent_state(sender=None, body=None, **kwargs):
-    for application in _applications:
-        task = application.tasks.get(sender)
-        backend = task.backend if task else application.backend
-
-        logger.debug("Setting state to {0} for {1}".format(SENT, body['id']))
-        backend.store_result(body['id'], result=None, status=SENT)
 
 
 class CeleryQueue(ScoringSystem):
