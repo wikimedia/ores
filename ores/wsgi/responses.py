@@ -1,4 +1,4 @@
-from flask.ext.jsonpify import jsonify
+from flask_jsonpify import jsonify
 
 SERVER_OVERLOADED = 503
 NOT_FOUND = 404
