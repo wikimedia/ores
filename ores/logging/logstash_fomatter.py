@@ -28,6 +28,7 @@ class LogstashFormatter(logging.Formatter):
             'host': self.host,
             'path': record.pathname,
             'tags': self.tags,
+            'type': 'ores',
 
             # Extra Fields
             'level': record.levelname,
@@ -80,4 +81,4 @@ class LogstashFormatter(logging.Formatter):
 
     @classmethod
     def serialize(cls, message):
-        return bytes(json.dumps(message), 'utf-8')
+        return bytes(json.dumps(message) + '\n', 'utf-8')

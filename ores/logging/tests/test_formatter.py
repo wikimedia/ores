@@ -19,7 +19,8 @@ def test_format():
         'logger_name': 'test_ores',
         'message': 'Log made',
         'path': '/dev/test/ores',
-        'tags': ['ores']}
+        'tags': ['ores'],
+        'type': 'ores'}
 
 
 def test_format_source():
