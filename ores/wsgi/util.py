@@ -2,7 +2,7 @@ import json
 import logging
 import re
 
-from flask.ext.jsonpify import jsonify as flask_jsonify
+from flask_jsonpify import jsonify as flask_jsonify
 
 from ..score_request import ScoreRequest
 
