@@ -65,23 +65,7 @@ class CeleryQueue(ScoringSystem):
                         .format(request.format(rev_id, model_names)))
             return score_map
 
-        @self.application.task(throws=expected_errors,
-                               queue=DEFAULT_CELERY_QUEUE)
-        def _lookup_score_in_map(result_id, model_name):
-            # Deprecated task. Will be removed soon.
-            logger.info("Looking up {0} in {1}".format(model_name, result_id))
-            score_map_result = self._process_score_map.AsyncResult(result_id)
-            try:
-                score_map = score_map_result.get(timeout=self.timeout)
-
-            except celery.exceptions.TimeoutError:
-                raise errors.TimeoutError(
-                    "Timed out after {0} seconds.".format(self.timeout))
-            logger.info("Found {0} in {1}!".format(model_name, result_id))
-            return score_map[model_name]
-
         self._process_score_map = _process_score_map
-        self._lookup_score_in_map = _lookup_score_in_map
 
     def _process_missing_scores(self, request, missing_model_set_revs,
                                 root_caches, inprogress_results=None):
@@ -139,9 +123,7 @@ class CeleryQueue(ScoringSystem):
                     if model_name in task_result:
                         rev_scores[rev_id][model_name] = task_result[model_name]
                     else:
-                        # B/C
-                        # TODO: Remove this later
-                        rev_scores[rev_id][model_name] = task_result
+                        raise RuntimeError('Model is not in the task but the task locked the model')
 
                     key = context.format_id_string(
                         model_name, rev_id, request,
@@ -253,7 +235,7 @@ class CeleryQueue(ScoringSystem):
                                                 'score_cache',
                                                 'metrics_collector', 'timeout',
                                                 'queue_maxsize')})
-        application.conf.CELERY_CREATE_MISSING_QUEUES = True
+        application.conf.task_create_missing_queues = True
 
         return cls(application=application,
                    queue_maxsize=queue_maxsize,

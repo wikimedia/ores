@@ -61,13 +61,13 @@ scoring_systems:
     class: ores.scoring_systems.CeleryQueue
     score_cache: local_redis
     BROKER_URL: redis://localhost
-    BROKER_TRANSPORT_OPTIONS: {'socket_timeout': 15} # seconds
+    broker_transport_options: {'socket_timeout': 15} # seconds
     CELERY_RESULT_BACKEND: redis://localhost
-    CELERY_ACCEPT_CONTENT: ['pickle']
-    CELERY_TASK_SERIALIZER: 'pickle'
-    CELERY_RESULT_SERIALIZER: 'pickle'
+    accept_content: ['pickle']
+    task_serializer: 'pickle'
+    result_serializer: 'pickle'
     CELERYD_CONCURRENCY: 8
-    CELERYD_HIJACK_ROOT_LOGGER: false
+    worker_hijack_root_logger: false
     queue_maxsize: 100 # pending tasks
 
 # Scoring contexts
