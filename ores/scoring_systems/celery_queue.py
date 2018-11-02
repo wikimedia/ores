@@ -9,6 +9,7 @@ import celery.states
 import mwapi.errors
 import revscoring.errors
 
+from ores.score_request import ScoreRequest
 from .. import errors
 from .scoring_system import ScoringSystem
 from ..task_tracker import RedisTaskTracker, NullTaskTracker
@@ -57,6 +58,9 @@ class CeleryQueue(ScoringSystem):
         def _process_score_map(request, model_names, rev_id, root_cache):
             logger.info("Generating a score map for {0}"
                         .format(request.format(rev_id, model_names)))
+
+            if not isinstance(request, ScoreRequest):
+                request = ScoreRequest.from_json(request)
 
             score_map = ScoringSystem._process_score_map(
                 self, request, rev_id, model_names,
