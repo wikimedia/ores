@@ -15,8 +15,9 @@ logger = logging.getLogger(__name__)
 
 
 class PoolCounter(LockManager):
-    def __init__(self, nodes):
+    def __init__(self, nodes, connection_timeout=0.1):
         self.nodes = nodes
+        self.connection_timeout = connection_timeout
         self.stream = None
 
     def connect(self, key):
@@ -28,10 +29,16 @@ class PoolCounter(LockManager):
         node = sorted(hashes, key=lambda i: i[1])[0][0]
         try:
             self.stream = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
+            self.stream.settimeout(self.connection_timeout)
             self.stream.connect(node)
+            self.stream.settimeout(None)
         except ConnectionRefusedError:
             logger.warning(
                 'Can not connect to the PoolCounter node %s' % node[0])
+            return False
+        except TimeoutError:
+            logger.warning(
+                'Timeout error connecting to the PoolCounter node %s' % node[0])
             return False
         return True
 
@@ -81,6 +88,7 @@ class PoolCounter(LockManager):
     @classmethod
     def from_config(cls, config, name, section_key="lock_managers"):
         nodes = []
+        # TODO: Fix config so we can inject connection_timeout
         for node in config[section_key][name]:
             nodes.append((node.split(':')[0],
                           int(node.split(':')[1])))
