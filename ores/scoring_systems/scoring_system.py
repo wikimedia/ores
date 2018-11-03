@@ -60,9 +60,9 @@ class ScoringSystem(dict):
         except errors.ScoreProcessorOverloaded:
             self.metrics_collector.score_processor_overloaded(request)
             raise
-
-        if request.ip and locked:
-            self._release_ip(request.ip)
+        finally:
+            if request.ip and locked:
+                self._release_ip(request.ip)
 
         duration = time.time() - start
         if not request.precache:
