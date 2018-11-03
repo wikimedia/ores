@@ -1,9 +1,12 @@
+import logging
+
 from flask_jsonpify import jsonify
 
 SERVER_OVERLOADED = 503
 NOT_FOUND = 404
 TIMEOUT = 504
 TOO_MANY_REQUESTS = 429
+logger = logging.getLogger(__name__)
 
 
 def no_content():
@@ -46,6 +49,7 @@ def server_overloaded(message=None):
 
 
 def unknown_error(message):
+    logger.error(message)
     return error(500, 'internal server error', message)
 
 
