@@ -1,44 +1,32 @@
-language: python
+
 sudo: true
-python:
-  - "3.5"
-addons:
-  apt:
-    packages:
-    - g++
-    - gfortran
-    - libblas-dev
-    - liblapack-dev
-    - libopenblas-dev
-    - python3-dev
-    - enchant
-    - redis-server
+
+services:
+  - docker
+
+env:
+  COMPOSE_VERSION: 1.23.1
 
 before_install:
-  - npm install -g eslint
-# Install packages
-install:
-  - pip install pip --upgrade
-  - pip install wheel
-  - pip install nltk
-  - travis_wait pip install -r requirements.txt || date
-  - travis_wait pip install -r test-requirements.txt || date
-  - python -m nltk.downloader stopwords
-  - pip install codecov pytest-cov
-  - sudo service redis-server start
+ - curl -L https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
+ - chmod +x docker-compose
+ - sudo mv docker-compose /usr/local/bin
+ - npm install -g eslint
+
 script:
-  - flake8 .
   - eslint .
-  - ./utility applications.wsgi --config ./config/celery-test/ &
-  - ./utility applications.celery --config ./config/celery-test/ &
+  - docker-compose build
+  - docker-compose up -d
+  - docker-compose run ores-api pip install -r test-requirements.txt
+  - docker-compose run ores-api flake8 .
   - sleep 5
-  - ./utility test_api http://localhost:8080 --debug
-  - py.test --cov=ores
+  - docker-compose run ores-api ./utility test_api http://localhost:8080 --debug
+  - docker-compose run ores-api py.test --cov=ores
+
 after_success:
   - codecov
-group: stable
+
 dist: trusty
-os: linux
 notifications:
   irc:
     channels:
