@@ -15,9 +15,6 @@ addons:
     - python3-dev
     - enchant
     - redis-server
-
-before_install:
-  - npm install -g eslint
 # Install packages
 install:
   - pip install pip --upgrade
@@ -29,7 +26,6 @@ install:
   - pip install codecov pytest-cov
 script:
   - flake8 .
-  - eslint .
   - ./utility applications.wsgi --config ./config/celery-test/ &
   - ./utility applications.celery --config ./config/celery-test/ &
   - sleep 5
@@ -38,7 +34,7 @@ script:
 after_success:
   - codecov
 group: stable
-dist: trusty
+dist: bionic
 os: linux
 notifications:
   irc:
