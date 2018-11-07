@@ -1,2 +1,6 @@
 ores:
   scoring_system: local_celery
+
+score_caches:
+  local_redis:
+    host: 127.0.0.1

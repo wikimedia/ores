@@ -2,6 +2,8 @@ language: python
 sudo: true
 python:
   - "3.5"
+services:
+  - redis-server
 addons:
   apt:
     packages:
@@ -25,7 +27,6 @@ install:
   - travis_wait pip install -r test-requirements.txt || date
   - python -m nltk.downloader stopwords
   - pip install codecov pytest-cov
-  - sudo service redis-server start
 script:
   - flake8 .
   - eslint .
