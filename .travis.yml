@@ -16,6 +16,10 @@ addons:
 
 before_install:
   - npm install -g eslint
+  - sudo sed -e 's/^bind.*/bind 127.0.0.1/' /etc/redis/redis.conf > redis.conf
+  - sudo mv redis.conf /etc/redis
+  - sudo service redis-server start
+  - echo PING | nc localhost 6379
 # Install packages
 install:
   - pip install pip --upgrade
