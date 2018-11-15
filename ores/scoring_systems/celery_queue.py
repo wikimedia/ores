@@ -56,11 +56,11 @@ class CeleryQueue(ScoringSystem):
         @self.application.task(throws=expected_errors,
                                queue=DEFAULT_CELERY_QUEUE)
         def _process_score_map(request, model_names, rev_id, root_cache):
-            logger.info("Generating a score map for {0}"
-                        .format(request.format(rev_id, model_names)))
-
             if not isinstance(request, ScoreRequest):
                 request = ScoreRequest.from_json(request)
+
+            logger.info("Generating a score map for {0}"
+                        .format(request.format(rev_id, model_names)))
 
             score_map = ScoringSystem._process_score_map(
                 self, request, rev_id, model_names,
