@@ -61,6 +61,14 @@ scoring_systems:
     class: ores.scoring_systems.CeleryQueue
     score_cache: local_redis
     queue_maxsize: 100 # pending tasks
+    broker_url: redis://localhost
+    broker_transport_options: {'socket_timeout': 15} # seconds
+    accept_content: ['pickle']
+    task_serializer: 'pickle'
+    result_serialize: 'pickle'
+    result_backend: redis://localhost
+    worker_concurrency: 8
+    worker_hijack_root_logger: false
 
 # Scoring contexts
 scoring_contexts:
