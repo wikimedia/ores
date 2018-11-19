@@ -240,7 +240,6 @@ class CeleryQueue(ScoringSystem):
                                                 'score_cache',
                                                 'metrics_collector', 'timeout',
                                                 'queue_maxsize')})
-        application.conf.CELERY_CREATE_MISSING_QUEUES = True
 
         return cls(application=application,
                    queue_maxsize=queue_maxsize,
