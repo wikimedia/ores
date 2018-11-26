@@ -59,6 +59,9 @@ class CeleryQueue(ScoringSystem):
             if not isinstance(request, ScoreRequest):
                 request = ScoreRequest.from_json(request)
 
+            if not isinstance(model_names, frozenset):
+                model_names = frozenset(model_names)
+
             logger.info("Generating a score map for {0}"
                         .format(request.format(rev_id, model_names)))
 
