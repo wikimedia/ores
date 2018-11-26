@@ -77,8 +77,8 @@ class ScoreRequest:
     def to_json(self):
         return {
             'context': self.context_name,
-            'rev_ids': self.rev_ids,
-            'model_names': self.model_names,
+            'rev_ids': list(self.rev_ids),
+            'model_names': list(self.model_names),
             'precache': self.precache,
             'include_features': self.include_features,
             'injection_caches': self.injection_caches,
@@ -90,8 +90,8 @@ class ScoreRequest:
     def from_json(cls, data):
         return cls(
             data['context'],
-            data['rev_ids'],
-            data['model_names'],
+            set(data['rev_ids']),
+            set(data['model_names']),
             precache=data['precache'],
             include_features=data['include_features'],
             injection_caches=data['injection_caches'],

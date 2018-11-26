@@ -15,16 +15,19 @@ def test_score_request():
 
 def test_score_request_serialization():
     sr = ScoreRequest("foo", [1, 2, 3], ["bar", "baz"], ip='0.0.0.0')
+    actual = sr.to_json()
+    actual['model_names'].sort()
+    actual['rev_ids'].sort()
 
-    assert sr.to_json() == {
+    assert actual == {
         'context': 'foo',
         'include_features': False,
         'injection_caches': {},
         'ip': '0.0.0.0',
         'model_info': None,
-        'model_names': {'bar', 'baz'},
+        'model_names': ['bar', 'baz'],
         'precache': False,
-        'rev_ids': {1, 2, 3}}
+        'rev_ids': [1, 2, 3]}
 
 
 def test_score_request_deserialization():
