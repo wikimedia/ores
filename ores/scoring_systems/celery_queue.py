@@ -94,7 +94,7 @@ class CeleryQueue(ScoringSystem):
                     continue
                 root_cache = {str(k): v for k, v in root_caches[rev_id].items()}
                 result = self._process_score_map.delay(
-                    request, missing_models, rev_id, root_cache)
+                    request.to_json(), missing_models, rev_id, root_cache)
                 self._lock_process(missing_models, rev_id, request,
                                    injection_cache, result.id)
 
