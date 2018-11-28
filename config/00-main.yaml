@@ -22,6 +22,15 @@ score_caches:
     host: localhost
     prefix: ores
     socket_timeout: 15 # seconds
+  local_redis_sentinel:
+    class: ores.score_caches.RedisSentinel
+    prefix: ores
+    socket_timeout: 0.1 # seconds
+    cluster: mymaster
+    hosts:
+      - localhost:5000
+      - localhost:5001
+      - localhost:5002
 
 #Lock managers
 lock_managers:
