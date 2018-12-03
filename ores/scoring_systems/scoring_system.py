@@ -9,7 +9,7 @@ from ..errors import (MissingContext, MissingModels, TimeoutError,
                       TooManyRequestsError)
 from ..metrics_collectors import Null
 from ..score_caches import Empty
-from ..lock_manager import PoolCounter
+from ..lock_manager import PoolCounter, IpRangeList
 from ..score_response import ScoreResponse
 from ..util import timeout
 
@@ -30,7 +30,7 @@ class ScoringSystem(dict):
         self.connections_per_ip = connections_per_ip
         self.connections_per_ip_hard = connections_per_ip_hard
         self.lock_manager = lock_manager
-        self.whitelisted_ips = whitelisted_ips
+        self.whitelisted_ranges = IpRangeList(whitelisted_ips)
 
     def check_context_models(self, request):
 
@@ -48,7 +48,7 @@ class ScoringSystem(dict):
         start = time.time()
         if request.ip and (not request.precache) and \
                 self.lock_manager is not None and \
-                request.ip not in self.whitelisted_ips:
+                not self.whitelisted_ranges.matches(request.ip):
             locked = self._lock_ip(request.ip)
             self.metrics_collector.lock_acquired(
                 'poolcounter',

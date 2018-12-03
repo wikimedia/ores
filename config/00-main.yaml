@@ -61,6 +61,9 @@ scoring_systems:
     timeout: 15 # seconds
     connections_per_ip: 4
     connections_per_ip_hard: 7
+    # Avoid the PoolCounter limit for the given IPs.  Accepts an IP address or
+    # range, v4 or v6.
+    # whitelisted_ips: [ '10.0.0.0/8' ]
   local_single_thread:
     class: ores.scoring_systems.SingleThread
   local_process_pool:
