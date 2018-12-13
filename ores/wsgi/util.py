@@ -166,8 +166,8 @@ def build_score_request_from_event(precache_map, event):
     # Start building the response document
     event_set = build_event_set(event)
 
-    model_names = {precache_map[context_name][e] for e in event_set
-                   if e in precache_map[context_name]}
+    model_names = {m for e in event_set if e in precache_map[context_name]
+                   for m in precache_map[context_name][e]}
 
     if len(model_names) == 0:
         return None
@@ -223,7 +223,10 @@ def build_precache_map(config):
                 logger.warning("{0} events are not available"
                                .format(set(events) - AVAILABLE_EVENTS))
             for event in precached_config['on']:
-                precache_map[context][event] = model
+                if event in precache_map[context]:
+                    precache_map[context][event].add(model)
+                else:
+                    precache_map[context][event] = {model}
                 logger.debug("Setting up precaching for {0} in {1} on {2}"
                              .format(model, context, event))
 
