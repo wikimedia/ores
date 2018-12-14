@@ -1,4 +1,52 @@
-from ..util import build_precache_map, build_score_request_from_event
+import pytest
+import flask
+
+from ..util import build_precache_map, build_score_request_from_event, build_score_request
+from ...applications.wsgi import build
+from ...scoring_systems.scoring_system import ScoringSystem
+
+
+@pytest.fixture
+def app():
+    yield build()
+
+
+def test_build_score_request(app):
+    with app.test_request_context('/?models=foo|bar&revids=123|234', environ_base={'REMOTE_ADDR': '127.0.0.1'}):
+        scoring_system = ScoringSystem({})
+        actual = build_score_request(scoring_system, flask.request).to_json()
+        actual['model_names'].sort()
+        actual['rev_ids'].sort()
+
+        expected = {
+             'context': None,
+             'include_features': False,
+             'injection_caches': {},
+             'ip': '127.0.0.1',
+             'model_info': [],
+             'model_names': ['bar', 'foo'],
+             'precache': False,
+             'rev_ids': [123, 234]
+        }
+        assert actual == expected
+
+
+def test_build_score_request_(app):
+    with app.test_request_context('/?models=foo&precache&features', environ_base={'REMOTE_ADDR': '127.0.0.1'}):
+        scoring_system = ScoringSystem({})
+        actual = build_score_request(scoring_system, flask.request, context_name='testwiki', rev_id=7251).to_json()
+
+        expected = {
+            'context': 'testwiki',
+            'include_features': True,
+            'injection_caches': {},
+            'ip': '127.0.0.1',
+            'model_info': [],
+            'model_names': ['foo'],
+            'precache': True,
+            'rev_ids': [7251]
+        }
+        assert actual == expected
 
 
 def test_build_precache_map():
