@@ -192,7 +192,7 @@ def build_event_set(event):
         else:
             event_set.add('nonbot_edit')
 
-        if event['rev_parent_id'] == 0:
+        if not event.get('rev_parent_id'):
             event_set.add('page_creation')
             if 'bot' in user_groups:
                 event_set.add('bot_page_creation')
