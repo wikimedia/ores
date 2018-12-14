@@ -3,8 +3,6 @@ Runs a pre-caching server against an ORES instance by listening to an
 EventStream and submitting requests for scores to the web interface for each
 revision as it happens.
 
-If ran by systemd, it uses watchdog to stay alive.
-
 :Usage:
     precached -h | --help
     precached <stream-url> <ores-url> [--config=<path>] [--delay=<secs>]
@@ -33,7 +31,6 @@ import yamlconf
 from sseclient import SSEClient
 
 from ..metrics_collectors import MetricsCollector, Null
-from .watchdog import notify_socket, watchdog_ping
 
 logger = logging.getLogger(__name__)
 
@@ -60,9 +57,6 @@ def main(argv=None):
                              sorted(glob.glob(config_paths))))
     delay = float(args['--delay'])
     verbose = bool(args['--debug'])
-    notify = notify_socket()
-    if not notify:
-        logger.info('Not being ran as a service, watchdog disabled')
     ss_name = config['ores']['scoring_system']
     if 'metrics_collector' in config['scoring_systems'][ss_name]:
         metrics_collector = MetricsCollector.from_config(
@@ -71,18 +65,16 @@ def main(argv=None):
         metrics_collector = Null()
 
     run(stream_url, ores_url, metrics_collector, config, delay,
-        notify, verbose)
+        verbose)
 
 
-def run(stream_url, ores_url, metrics_collector, config, delay, notify, verbose):
+def run(stream_url, ores_url, metrics_collector, config, delay, verbose):
 
     # What to do in case of a change
     def precache_a_change(change):
         session = requests.Session()
         if delay:
             time.sleep(delay)
-        if notify:
-            watchdog_ping(*notify)
         start = time.time()
         response = session.post(ores_url + "/v3/precache/", json=change, headers={'Content-Type': "Application/JSON"})
         if response.status == 200:
