@@ -37,7 +37,7 @@ script:
   - ./utility applications.celery --config ./config/celery-test/ &
   - sleep 5
   - ./utility test_api http://localhost:8080 --debug
-  - py.test --cov=ores
+  - py.test --cov=ores -vv
 after_success:
   - codecov
 group: stable
