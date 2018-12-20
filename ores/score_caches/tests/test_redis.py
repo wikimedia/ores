@@ -13,6 +13,7 @@ def cache():
                 'ttl': 100}}}, 'redis')
 
 
+@pytest.mark.redis
 def test_lookup(cache):
-    cache.store(0.421, 'teswiki', 'damaging', 124)
-    assert cache.lookup('teswiki', 'damaging', 124) == 0.421
+    cache.store(0.421, 'testwiki', 'damaging', 124)
+    assert cache.lookup('testwiki', 'damaging', 124) == 0.421

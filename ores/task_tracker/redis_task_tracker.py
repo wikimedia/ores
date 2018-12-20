@@ -48,7 +48,7 @@ class RedisTaskTracker(TaskTracker):
         """
         task_trackers:
             redis:
-                class: ores.lock_manager.Redis
+                class: ores.task_tracker.RedisTaskTracker
                 host: localhost
                 prefix: ores-derp
                 ttl: 9001
