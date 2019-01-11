@@ -8,6 +8,7 @@ Usage:
                     [--parallel-requests=<reqs>]
                     [--retries=<num>]
                     [--input=<path>]
+                    [--input-format=<input-format>]
                     [--output=<path>]
                     [--debug]
                     [--verbose]
@@ -19,6 +20,7 @@ Examples:
 Options:
     -h --help        Prints this documentation
     <ores-host>      The base URL to an ORES instance to use in scoring.
+                     TODO: Make optional.
                      [example: https://ores.wikimedia.org]
     <user-agent>     The user agent to provide to the ORES service for tracking
                      purposes.  Good user agents include an email address that
@@ -35,9 +37,15 @@ Options:
                                 [default: 2]
     --retries=<num>  The maximum number of retries for basic HTTP errors
                      before giving up. [default: 5]
-    --input=<path>   A file containing json lines each with a "rev_id" field,
-                     for example: {"rev_id": 12345}
+    --input=<path>   A file listing revision IDs.  See --input-format for the
+                     available formats.
                      [default: <stdin>]
+    --input-format=<format>  Format of the input records.
+                     If the format is "jsonlines", then we parse each line as a
+                     JSON object with a top-level "rev_id" field.
+                     for example: {"rev_id": 12345}
+                     If the format is "plain", each line is a raw revision ID: 12345
+                     [default: jsonlines]
     --output=<path>  A file to write json blobs with scores to
                      [default: <stdout>]
     --debug          Print debug logging
@@ -71,6 +79,7 @@ def main(argv=None):
     batch_size = int(args['--batch-size'])
     parallel_requests = int(args['--parallel-requests'])
     retries = int(args['--retries'])
+    input_format = args['--input-format']
     if args['--input'] == "<stdin>":
         logger.info("Reading input from <stdin>")
         input = sys.stdin
@@ -87,17 +96,21 @@ def main(argv=None):
     verbose = args['--verbose']
 
     run(ores_host, user_agent, context, model_names, batch_size,
-        parallel_requests, retries, input, output, verbose)
+        parallel_requests, retries, input, input_format, output, verbose)
 
 
 def run(ores_host, user_agent, context, model_names, batch_size,
-        parallel_requests, retries, input, output, verbose):
-    rev_docs = [json.loads(l) for l in input]
+        parallel_requests, retries, input, input_format, output, verbose):
     session = api.Session(
         ores_host, user_agent=user_agent, batch_size=batch_size,
         parallel_requests=parallel_requests, retries=retries)
 
-    rev_ids = [d['rev_id'] for d in rev_docs]
+    if input_format == "jsonlines":
+        rev_docs = [json.loads(l) for l in input]
+        rev_ids = [d['rev_id'] for d in rev_docs]
+    elif input_format == "plain":
+        rev_ids = [int(l.strip()) for l in input.readlines()]
+        rev_docs = [{"rev_id": rev_id} for rev_id in rev_ids]
     scores = session.score(context, model_names, rev_ids)
 
     for rev_doc, score_doc in zip(rev_docs, scores):
