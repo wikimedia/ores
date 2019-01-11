@@ -1,6 +1,8 @@
 """
 This module provides a :class:`ores.api.Session` class that can maintain a
-connection to an instance of ORES and efficiently generate scores.
+client connection to an instance of ORES and efficiently generate scores.
+
+Batching and parallelism are set by constructor arguments.
 
 .. autoclass:: ores.api.Session
     :members:
@@ -107,7 +109,8 @@ class Session:
         start = time.time()
         response = requests.get(url, params=params,
                                 headers=self.headers,
-                                verify=True, stream=True)
+                                verify=True)
+
         try:
             doc = response.json()
         except ValueError:
