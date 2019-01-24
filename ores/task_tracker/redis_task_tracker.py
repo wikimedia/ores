@@ -46,9 +46,9 @@ class RedisTaskTracker(TaskTracker):
     @classmethod
     def from_config(cls, config, name, section_key="task_trackers"):
         """
-        score_caches:
-            task_trackers:
-                class: ores.lock_manager.Redis
+        task_trackers:
+            redis:
+                class: ores.task_tracker.RedisTaskTracker
                 host: localhost
                 prefix: ores-derp
                 ttl: 9001

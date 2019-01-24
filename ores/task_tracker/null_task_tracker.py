@@ -2,8 +2,10 @@
 Null implementation of task tracker.
 """
 
+from .task_tracker import TaskTracker
 
-class NullTaskTracker:
+
+class NullTaskTracker(TaskTracker):
     def lock(self, key, task_id):
         return True
 
