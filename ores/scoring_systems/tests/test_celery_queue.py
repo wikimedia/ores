@@ -1,10 +1,10 @@
 import celery
 from revscoring.extractors import OfflineExtractor
 
-from ores.score_request import ScoreRequest
-from ores.scoring.models import RevIdScorer
-from ores.scoring_context import ScoringContext
-from ores.task_tracker import InMemoryTaskTracker
+from ...score_request import ScoreRequest
+from ...scoring.models import RevIdScorer
+from ...scoring_context import ScoringContext
+from ...task_tracker import InMemoryTaskTracker
 from ..celery_queue import CeleryQueue
 from .util import fakewiki
 
