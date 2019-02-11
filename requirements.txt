@@ -1,6 +1,6 @@
 celery >= 4.1.1, < 4.1.999
 docopt >= 0.6.2, < 0.6.999
-flask >= 0.12.3, < 0.12.999
+flask >= 1.0.2, < 1.0.999
 flask-jsonpify >= 1.5.0, < 1.5.999
 flask-swaggerui >= 0.0.1, < 0.0.999
 flask-wikimediaui >= 0.0.1, < 0.0.999
