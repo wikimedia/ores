@@ -1,5 +1,3 @@
-language: python
-sudo: true
 env:
   - DOCKER_COMPOSE_VERSION=1.17.1
 services:
@@ -9,14 +7,14 @@ install:
   - docker-compose build
 script:
   - docker-compose up -d
-  - docker exec ores_ores-worker_1 flake8 /ores
+  - docker-compose exec ores-worker flake8 /ores
 #  - eslint .
-  - docker exec ores_ores-api_1 /ores/utility test_api http://localhost:8080 --debug
-  - docker exec ores_ores-worker_1 py.test /ores --cov=ores -m "not redis" -vv
+  - docker-compose exec ores-api /ores/utility test_api http://localhost:8080 --debug
+  - docker-compose exec ores-worker py.test /ores --cov=ores -m "not redis" -vv
 after_success:
   - codecov
 group: stable
-dist: trusty
+dist: xenial
 os: linux
 notifications:
   irc:
