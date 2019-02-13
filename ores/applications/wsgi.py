@@ -46,7 +46,7 @@ def main(argv=None):
 def run(host, port, processes, **kwargs):
     application = build(**kwargs)
     application.debug = True
-    application.run(host=host, port=port, processes=processes, debug=True)
+    application.run(host=host, port=port, processes=processes, threaded=False, debug=True)
 
 
 def build(**kwargs):
