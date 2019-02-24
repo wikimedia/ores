@@ -18,7 +18,6 @@ RUN pip install wheel
 RUN pip install nltk
 RUN pip install -r /ores/requirements.txt
 RUN pip install -r /ores/test-requirements.txt
-RUN pip install codecov pytest-cov
 RUN python -m nltk.downloader stopwords
 
 EXPOSE 8080
