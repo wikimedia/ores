@@ -154,10 +154,11 @@ class ScoringContext(dict):
         """
         # Make a copy of dependency_caches
         root_caches = {}
+        override_caches = {}
         for rev_id in rev_ids:
             injection_cache = injection_caches.get(rev_id, {}) \
                               if injection_caches is not None else {}
-            root_caches[rev_id] = dict(injection_cache.items())
+            override_caches[rev_id] = dict(injection_cache.items())
 
         # Find our root datasources
         root_datasources = \
@@ -173,9 +174,12 @@ class ScoringContext(dict):
         for rev_id, (error, values) in zip(rev_ids, error_root_vals):
             if error is not None:
                 errors[rev_id] = error
-                del root_caches[rev_id]
+                if rev_id in root_caches:
+                    del root_caches[rev_id]
             else:
                 root_caches[rev_id] = dict(zip(root_datasources, values))
+                # Override injected caches
+                root_caches[rev_id].update(override_caches[rev_id])
         logger.debug("Extracted root datasources for {0}:{1}:{2} in {3} secs"
                      .format(self.name, set(model_names), rev_ids,
                              round(time.time() - start, 3)))
