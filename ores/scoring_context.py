@@ -170,10 +170,12 @@ class ScoringContext(dict):
 
         # Check each extraction for errors
         errors = {}
-        for rev_id, (error, _) in zip(rev_ids, error_root_vals):
+        for rev_id, (error, values) in zip(rev_ids, error_root_vals):
             if error is not None:
                 errors[rev_id] = error
                 del root_caches[rev_id]
+            else:
+                root_caches[rev_id] = dict(zip(root_datasources, values))
         logger.debug("Extracted root datasources for {0}:{1}:{2} in {3} secs"
                      .format(self.name, set(model_names), rev_ids,
                              round(time.time() - start, 3)))
