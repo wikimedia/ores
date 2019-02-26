@@ -2,6 +2,7 @@ import time
 
 from pytest import mark
 from revscoring import Extractor, Model
+from revscoring.dependencies import solve
 from revscoring.features import Feature
 from revscoring.scoring import ModelInfo
 
@@ -34,8 +35,9 @@ class FakeSM(Model):
 
 class FakeExtractor(Extractor):
 
-    def extract(self, rev_ids, features, *args, **kwargs):
-        return [(None, [0 for feature in features]) for rev_id in rev_ids]
+    def extract(self, rev_ids, features, *args, caches={}, **kwargs):
+        return [(None, list(solve(features, cache=caches.get(rev_id, {}))))
+                for rev_id in rev_ids]
 
 
 fakewiki = ScoringContext(
