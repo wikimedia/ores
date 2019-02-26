@@ -1,5 +1,7 @@
 pytest
 pylru
+codecov
+pytest-cov
 statsd
 redis
 flake8

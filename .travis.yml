@@ -1,14 +1,14 @@
-env:
-  - DOCKER_COMPOSE_VERSION=1.17.1
 services:
   - docker
 
 install:
+  - npm install eslint
   - docker-compose build
+
 script:
+  - ./node_modules/.bin/eslint .
   - docker-compose up -d
   - docker-compose exec ores-worker flake8 /ores
-#  - eslint .
   - docker-compose exec ores-api /ores/utility test_api http://localhost:8080 --debug
   - docker-compose exec ores-worker py.test /ores --cov=ores -m "not redis" -vv
 after_success:
