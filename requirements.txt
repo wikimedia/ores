@@ -6,7 +6,7 @@ flask-swaggerui >= 0.0.1, < 0.0.999
 flask-wikimediaui >= 0.0.1, < 0.0.999
 mwapi >= 0.5.0, < 0.5.999
 pyyaml == 4.2b4
-redis >= 2.10.6, < 3.0.0
+redis >= 3.2.1, < 4.0.0
 revscoring >= 2.3.0, < 2.3.999
 sseclient >= 0.0.18
 stopit >= 1.1.1, < 1.1.999
