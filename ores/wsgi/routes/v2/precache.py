@@ -4,8 +4,8 @@ from urllib.parse import unquote
 
 from flask import request
 
-from . import scores
 from ... import preprocessors, responses, util
+from . import scores
 
 logger = logging.getLogger(__name__)
 

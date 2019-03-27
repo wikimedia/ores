@@ -1,7 +1,7 @@
-import pytest
 import json
 
 from ores.applications.wsgi import build
+import pytest
 
 
 @pytest.fixture

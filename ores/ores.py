@@ -20,7 +20,6 @@ import sys
 import traceback
 from importlib import import_module
 
-
 USAGE = """Usage:
     {progname} (-h | --help)
     {progname} <utility> [-h | --help]

@@ -1,5 +1,6 @@
-import sys
 import platform
+import sys
+
 from pkg_resources import VersionConflict
 
 from .about import (__author__, __author_email__, __description__, __name__,

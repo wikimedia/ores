@@ -3,10 +3,10 @@ import traceback
 from flask import request
 from revscoring.errors import ModelInfoLookupError
 
-from . import util
-from ... import preprocessors, responses
 from .... import errors
+from ... import preprocessors, responses
 from ...util import build_score_request, jsonify
+from . import util
 
 
 def configure(config, bp, scoring_system):

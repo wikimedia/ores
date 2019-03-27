@@ -1,12 +1,8 @@
 import os
 
-from flask import render_template, send_file, request
+from flask import render_template, request, send_file
 
-from . import versions
-from . import ui
-from . import v1
-from . import v2
-from . import v3
+from . import ui, v1, v2, v3, versions
 
 PWD = os.path.dirname(os.path.abspath(__file__))
 GEAR_FAVICON = os.path.join(PWD, "../static/favicon/gear/favicon.ico")

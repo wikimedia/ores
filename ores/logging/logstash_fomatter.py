@@ -1,8 +1,8 @@
-import traceback
+import json
 import logging
 import socket
+import traceback
 from datetime import datetime, timezone
-import json
 
 
 class LogstashFormatter(logging.Formatter):

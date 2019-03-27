@@ -15,6 +15,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 import requests
 import requests.adapters
+
 from more_itertools import chunked
 
 logger = logging.getLogger(__name__)
