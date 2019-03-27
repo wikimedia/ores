@@ -28,6 +28,14 @@ Visit these pages to see if your installation works,
 ``http://localhost:8080/``
 ``http://localhost:8080/v2/scores/testwiki/revid/641962088?features=true``
 
+Running ores using docker composer
+==================================
+As an easy way to run ores for development, download and install [docker-compose](https://docs.docker.com/compose/) and then do:
+
+``docker-compose up``
+
+ores will be accessible through localhost:8080
+
 Running a development server
 ============================
 We recommend that you set up a python "virtual environment".  We put together
