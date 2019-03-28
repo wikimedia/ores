@@ -1,7 +1,7 @@
 from collections import namedtuple
 
-from ores.score_request import ScoreRequest
 from ores.metrics_collectors.logger import Logger
+from ores.score_request import ScoreRequest
 
 
 def test_logger():

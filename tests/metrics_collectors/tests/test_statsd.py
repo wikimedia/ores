@@ -3,8 +3,8 @@ from contextlib import contextmanager
 
 from pytest import raises
 
-from ores.score_request import ScoreRequest
 from ores.metrics_collectors.statsd import Statsd
+from ores.score_request import ScoreRequest
 
 
 def test_statsd():

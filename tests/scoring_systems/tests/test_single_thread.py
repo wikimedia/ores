@@ -1,6 +1,7 @@
 from ores import errors
 from ores.score_request import ScoreRequest
 from ores.scoring_systems.single_thread import SingleThread
+
 from .util import fakewiki, test_scoring_system, wait_time
 
 
