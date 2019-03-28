@@ -3,7 +3,6 @@ import time
 from hashlib import sha1
 
 from revscoring import Model, dependencies
-from revscoring.datasources import Datasource
 from revscoring.extractors import Extractor
 from revscoring.features import trim
 
@@ -135,8 +134,7 @@ class ScoringContext(dict):
     def _generate_root_datasources(self, model_names):
         for model_name in model_names:
             for dependency in dependencies.dig(self.model_features(model_name)):
-                if isinstance(dependency, Datasource):
-                    yield dependency
+                yield dependency
 
     def extract_root_dependency_caches(
             self, model_names, rev_ids, injection_caches=None):
@@ -152,28 +150,31 @@ class ScoringContext(dict):
                 The names of a :class:`revscoring.ScorerModel` to
                 extract the roots dependencies for
         """
-        # Make a copy of dependency_caches
-        root_caches = {}
+        # Make a copy of injection_caches
+        _injection_caches = {}
         for rev_id in rev_ids:
             injection_cache = injection_caches.get(rev_id, {}) \
                               if injection_caches is not None else {}
-            root_caches[rev_id] = dict(injection_cache.items())
+            _injection_caches[rev_id] = dict(injection_cache.items())
 
         # Find our root datasources
         root_datasources = \
             list(set(self._generate_root_datasources(model_names)))
 
-        # Extract the root datasource and update the root_caches in-place
         start = time.time()
         error_root_vals = self.extractor.extract(
-            rev_ids, root_datasources, caches=root_caches)
+            rev_ids, root_datasources, caches=_injection_caches)
 
         # Check each extraction for errors
+        root_caches = {}
         errors = {}
-        for rev_id, (error, _) in zip(rev_ids, error_root_vals):
+        for rev_id, (error, values) in zip(rev_ids, error_root_vals):
             if error is not None:
                 errors[rev_id] = error
-                del root_caches[rev_id]
+                if rev_id in root_caches:
+                    del root_caches[rev_id]
+            else:
+                root_caches[rev_id] = dict(zip(root_datasources, values))
         logger.debug("Extracted root datasources for {0}:{1}:{2} in {3} secs"
                      .format(self.name, set(model_names), rev_ids,
                              round(time.time() - start, 3)))

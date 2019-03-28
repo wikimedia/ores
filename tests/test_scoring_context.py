@@ -53,8 +53,11 @@ def test_scoring_context():
                                      extractor)
 
     rev_ids = [1, 2, 3, 4, 5]
+    cache = {len_func: len,
+             literal_fake: "fake"}
     root_ds_caches, errors = scoring_context.extract_root_dependency_caches(
-        ["fake"], rev_ids)
+        ["fake"], rev_ids,
+        injection_caches={rev_id: cache for rev_id in rev_ids})
     print(root_ds_caches)
     print(errors)
     assert len(root_ds_caches) == 4
