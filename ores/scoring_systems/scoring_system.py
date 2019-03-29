@@ -7,9 +7,9 @@ import stopit
 from .. import errors
 from ..errors import (MissingContext, MissingModels, TimeoutError,
                       TooManyRequestsError)
+from ..lock_manager import IpRangeList, PoolCounter
 from ..metrics_collectors import Null
 from ..score_caches import Empty
-from ..lock_manager import PoolCounter, IpRangeList
 from ..score_response import ScoreResponse
 from ..util import timeout
 

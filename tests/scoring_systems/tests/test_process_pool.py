@@ -6,6 +6,7 @@ from ores.score_request import ScoreRequest
 from ores.scoring.models import RevIdScorer
 from ores.scoring_context import ScoringContext
 from ores.scoring_systems.process_pool import ProcessPool
+
 from .util import fakewiki, test_scoring_system, wait_time
 
 

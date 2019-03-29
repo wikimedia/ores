@@ -2,9 +2,9 @@ import logging
 
 from flask import request
 
-from . import util
 from ... import preprocessors, responses
 from ...util import build_precache_map, build_score_request_from_event
+from . import util
 
 logger = logging.getLogger(__name__)
 

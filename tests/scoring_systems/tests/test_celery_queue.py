@@ -4,8 +4,9 @@ from revscoring.extractors import OfflineExtractor
 from ores.score_request import ScoreRequest
 from ores.scoring.models import RevIdScorer
 from ores.scoring_context import ScoringContext
-from ores.task_tracker import InMemoryTaskTracker
 from ores.scoring_systems.celery_queue import CeleryQueue
+from ores.task_tracker import InMemoryTaskTracker
+
 from .util import fakewiki
 
 

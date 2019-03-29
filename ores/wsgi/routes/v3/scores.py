@@ -1,8 +1,8 @@
 from flask import request
 
-from . import util
 from ... import preprocessors, responses
 from ...util import build_score_request
+from . import util
 
 
 def configure(config, bp, scoring_system):

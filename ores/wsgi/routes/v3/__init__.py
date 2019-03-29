@@ -1,9 +1,7 @@
 from flask import request
 from flask_swaggerui import render_swaggerui
 
-from . import precache
-from . import scores
-from . import spec
+from . import precache, scores, spec
 
 
 def configure(config, bp, score_processor):

@@ -1,9 +1,10 @@
-import pytest
 import flask
+import pytest
 
-from ores.wsgi.util import build_precache_map, build_score_request_from_event, build_score_request
 from ores.applications.wsgi import build
 from ores.scoring_systems.scoring_system import ScoringSystem
+from ores.wsgi.util import (build_precache_map, build_score_request,
+                            build_score_request_from_event)
 
 
 @pytest.fixture

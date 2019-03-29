@@ -4,12 +4,12 @@ Class to implement PoolCounter lock manager.
 This is useful to make sure too many connections are not coming from one IP.
 """
 
+import hashlib
 import logging
 import socket
-import hashlib
 
-from .lock_manager import LockManager
 from ..errors import TimeoutError, TooManyRequestsError
+from .lock_manager import LockManager
 
 logger = logging.getLogger(__name__)
 

@@ -1,9 +1,10 @@
 import glob
-import os.path
-import yamlconf
 import logging
 import logging.config
+import os.path
 import sys
+
+import yamlconf
 
 DEFAULT_DIRS = ["config/", "/etc/ores/"]
 DEFAULT_FORMAT = "%(asctime)s %(levelname)s:%(name)s -- %(message)s"

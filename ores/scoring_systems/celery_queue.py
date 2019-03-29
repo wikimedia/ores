@@ -10,9 +10,10 @@ import mwapi.errors
 import revscoring.errors
 
 from ores.score_request import ScoreRequest
+
 from .. import errors
+from ..task_tracker import NullTaskTracker, RedisTaskTracker
 from .scoring_system import ScoringSystem
-from ..task_tracker import RedisTaskTracker, NullTaskTracker
 
 logger = logging.getLogger(__name__)
 

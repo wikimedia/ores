@@ -3,8 +3,8 @@ from collections import defaultdict
 
 from revscoring.errors import ModelInfoLookupError
 
-from ... import responses, util
 from .... import errors
+from ... import responses, util
 
 
 def format_v3_score_response(response):

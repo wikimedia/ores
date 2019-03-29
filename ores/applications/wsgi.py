@@ -19,8 +19,9 @@ Options:
     --verbose                Print verbose extraction information
 """
 import docopt
-from ores.wsgi import server
+
 from ores import ores
+from ores.wsgi import server
 
 from .util import build_config, configure_logging
 

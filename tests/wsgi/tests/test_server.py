@@ -1,5 +1,6 @@
-import pytest
 import json
+
+import pytest
 
 from ores.applications.wsgi import build
 

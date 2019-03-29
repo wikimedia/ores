@@ -1,6 +1,7 @@
-from logging import LogRecord
-from ores.logging.logstash_fomatter import LogstashFormatter
 import json
+from logging import LogRecord
+
+from ores.logging.logstash_fomatter import LogstashFormatter
 
 
 def test_format():

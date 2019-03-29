@@ -1,5 +1,5 @@
-from ores.score_request import ScoreRequest
 from ores.metrics_collectors.null import Null
+from ores.score_request import ScoreRequest
 
 
 def test_null():
