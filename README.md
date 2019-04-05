@@ -1,8 +1,8 @@
 [![Build Status](https://travis-ci.org/wikimedia/ores.svg)](https://travis-ci.org/wikimedia/ores)
 [![Test coverage](https://codecov.io/gh/wikimedia/ores/branch/master/graph/badge.svg)](https://codecov.io/gh/wikimedia/ores)
 
-Objective Revision Evaluation Service
-=====================================
+ORES
+====
 A webserver for hosting scoring services. For more information, see [the ORES documentation on MediaWiki](https://mediawiki.org/wiki/ORES).
 
 Installation
@@ -36,24 +36,35 @@ As an easy way to run ores for development, download and install [docker-compose
 
 ores will be accessible through localhost:8080
 
-Running a development server
-============================
-We recommend that you set up a python "virtual environment".  We put together
-[this guide](https://gist.github.com/halfak/9f4830895496af9e9731) to help you
-get everything set up.  
+Running tests
+=============
+For a native installation, make sure you installed dependencies for testing:
 
-Install requirements AND the test-requirements in order to run the default
-test server and experiment with different scoring strategies.
+``pip install -r test-requirements.txt``
 
-* `$ pip install -r requirements.txt`
-* `$ pip install -r test-requirements.txt`
+then run:
 
-Run a test server as ORES using the `./utility`, so local changes are
-reflected: Use `-h` to view its usage
+``py.test .``
 
-* `$ ./utility applications.wsgi`
+For docker installation, run:
 
-Check if everything is running on `http://localhost:8080`.
+``docker-compose exec ores-worker py.test /ores``
+
+Utilities
+=========
+ORES provies several utilities:
+* `precached`: Starts a daemon that requests scores for revisions as they happen
+* `score_revisions`: Scores a set of revisions using an ORES API
+* `stress_test`: Scores a large set of revisions at a configurable rate
+* `test_api`: Runs a series of tests against a live ORES API
+
+In order to run any of them, run it through `./utility` wrapper:
+
+``./utility test_api -h``
+
+For docker installations run it through one of containers:
+
+``docker-compose exec ores-worker /ores/utility test_api -h``
 
 Authors
 =======
