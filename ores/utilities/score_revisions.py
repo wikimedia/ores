@@ -102,8 +102,8 @@ def run(ores_host, user_agent, context, model_names, batch_size,
 
     for rev_doc, score_doc in zip(rev_docs, scores):
         rev_doc['score'] = score_doc
-        json.dump(rev_doc, sys.stdout)
-        sys.stdout.write("\n")
+        json.dump(rev_doc, output)
+        output.write("\n")
         if verbose:
             sys.stderr.write(".")
             sys.stderr.flush()
