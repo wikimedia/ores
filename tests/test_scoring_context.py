@@ -1,8 +1,7 @@
 from collections import namedtuple
 
-from revscoring import dependencies
-
 from ores.scoring_context import ScoringContext
+from revscoring import dependencies
 
 
 def test_scoring_context():
@@ -54,7 +53,7 @@ def test_scoring_context():
 
     rev_ids = [1, 2, 3, 4, 5]
     cache = {len_func: len,
-             literal_fake: "fake"}
+             literal_fake: "foo"}
     root_ds_caches, errors = scoring_context.extract_root_dependency_caches(
         ["fake"], rev_ids,
         injection_caches={rev_id: cache for rev_id in rev_ids})
@@ -63,6 +62,7 @@ def test_scoring_context():
     assert len(root_ds_caches) == 4
     assert len(errors) == 1
     assert root_ds_caches[1][fake_data] == "fake"
+    assert root_ds_caches[1][literal_fake] == "foo"
     assert 5 in errors
 
     score = scoring_context.process_model_scores(

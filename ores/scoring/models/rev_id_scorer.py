@@ -1,25 +1,35 @@
 import time
 
-from revscoring import Model
+from revscoring import Datasource, Feature, Model
 from revscoring.datasources.revision_oriented import revision
-from revscoring.features import Feature
 from revscoring.scoring import ModelInfo
 from revscoring.scoring.statistics import Classification
 
 
-def process_reversed_last_two_in_rev_id(rev_id):
+def process_last_two_in_rev_id(rev_id):
     last_two = str(rev_id)[-2:]
     if len(last_two) == 1:
-        return int(last_two + "0")
+        return "0" + last_two
     else:
-        return int("".join(reversed(last_two)))
+        return last_two
+
+
+last_two_in_rev_id = Datasource(
+    "revision.last_two_in_rev_id",
+    process_last_two_in_rev_id,
+    depends_on=[revision.id]
+)
+
+
+def process_reversed_last_two_in_rev_id(last_two):
+    return int("".join(reversed(last_two)))
 
 
 reversed_last_two_in_rev_id = Feature(
     "revision.reversed_last_two_in_rev_id",
     process_reversed_last_two_in_rev_id,
     returns=int,
-    depends_on=[revision.id]
+    depends_on=[last_two_in_rev_id]
 )
 
 

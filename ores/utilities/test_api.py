@@ -58,6 +58,19 @@ def main(argv=None):
                                     "probability": {"false": 0.76,
                                                     "true": 0.24}}}
             }}}})
+    make_request(
+        ores_url,
+        ("/v3/scores/testwiki/2342342/revid/?" +
+         "feature.revision.reversed_last_two_in_rev_id=50"),
+        is_json=True,
+        equal_to={'testwiki': {
+            'models': {'revid': {'version': '0.0.0'}},
+            'scores': {'2342342': {
+                'revid': {'score': {'prediction': False,
+                                    'probability': {'true': 0.50,
+                                                    'false': 0.50}}}
+            }}}})
+
     response = requests.get(ores_url + "/404/")
     assert response.status_code == 404, "/404/ didn't get a 404!"
 

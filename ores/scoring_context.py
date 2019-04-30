@@ -175,6 +175,7 @@ class ScoringContext(dict):
                     del root_caches[rev_id]
             else:
                 root_caches[rev_id] = dict(zip(root_datasources, values))
+                root_caches[rev_id].update(_injection_caches[rev_id])
         logger.debug("Extracted root datasources for {0}:{1}:{2} in {3} secs"
                      .format(self.name, set(model_names), rev_ids,
                              round(time.time() - start, 3)))
