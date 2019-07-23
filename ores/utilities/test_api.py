@@ -92,7 +92,7 @@ def main(argv=None):
             "id": "e87a7723-d9d4-11e7-9e8e-141877613bad",
             "request_id": "3464552a-85d0-404e-aa24-80b74473b15f",
             "schema_uri": "mediawiki/revision/create/2",
-            "topic": "eqiad.mediawiki.revision-create",
+            "stream": "mediawiki.revision-create",
             "uri": "https://en.wikipedia.org/wiki/List_of_Ateneo_de_Manila_University_people",
             "partition": 0, "offset": 561544941
         },
