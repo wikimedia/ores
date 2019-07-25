@@ -1,6 +1,5 @@
 import flask
 import pytest
-
 from ores.applications.wsgi import build
 from ores.scoring_systems.scoring_system import ScoringSystem
 from ores.wsgi.util import (build_precache_map, build_score_request,
@@ -72,7 +71,9 @@ def test_build_precache_map():
 def test_event():
     event = {
         "database": "enwiki",
-        "meta": {"topic": "mediawiki.revision-create"},
+        "meta": {
+            "stream": "mediawiki.revision-create"
+        },
         "page_id": 193804,
         "page_is_redirect": False,
         "page_namespace": 0,
