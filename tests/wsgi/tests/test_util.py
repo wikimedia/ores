@@ -48,6 +48,23 @@ def test_build_score_request_(app):
         }
         assert actual == expected
 
+def test_build_score_request_(app):
+    with app.test_request_context('/?models=foo&revids=123|234&feature.foo.bar=1', environ_base={'REMOTE_ADDR': '127.0.0.1'}):
+        scoring_system = ScoringSystem({})
+        actual = build_score_request(scoring_system, flask.request, context_name='testwiki', rev_id=None).to_json()
+
+        expected = {
+            'context': 'testwiki',
+            'include_features': False,
+            'injection_caches': {123: {"feature.foo.bar": 1}, 234: {"feature.foo.bar": 1}},
+            'ip': '127.0.0.1',
+            'model_info': [],
+            'model_names': ['foo'],
+            'precache': False,
+            'rev_ids': [234, 123]
+        }
+        assert actual == expected
+
 
 def test_build_precache_map():
     precache_config = {
