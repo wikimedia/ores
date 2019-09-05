@@ -37,19 +37,17 @@ def test_statsd():
     collector.lock_acquired('pulpcounter', 3)
     collector.response_made(404, ScoreRequest("foo", [1], {"bar"}))
 
-    assert set(fake_client.messages) - \
+    assert set(fake_client.messages) == \
         {('TIMING', 'precache_request.foo.derp', 100000),
          ('TIMING', 'precache_request.foo.bar', 100000),
          ('TIMING', 'precache_request.foo', 100000),
          ('TIMING', 'precache_request', 100000),
-         ('TIMING', 'scores_request.foo.bar.50', 150000),
          ('TIMING', 'scores_request.foo.bar', 150000),
          ('TIMING', 'scores_request.foo', 150000),
          ('TIMING', 'scores_request', 150000),
          ('INCR', 'revision_scored.foo.bar', 50),
          ('INCR', 'revision_scored.foo', 50),
          ('INCR', 'revision_scored', 50),
-         ('TIMING', 'datasources_extracted.foo.bar.10', 25000),
          ('TIMING', 'datasources_extracted.foo.bar', 25000),
          ('TIMING', 'datasources_extracted.foo', 25000),
          ('TIMING', 'datasources_extracted', 25000),
@@ -72,7 +70,7 @@ def test_statsd():
          ('INCR', 'response.404', 1),
          ('INCR', 'response', 1),
          ('INCR', 'response.404.foo', 1),
-         ('INCR', 'score_errored', 1)} == set()
+         ('INCR', 'score_errored', 1)}
 
 
 def test_from_config():
