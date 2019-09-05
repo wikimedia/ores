@@ -21,16 +21,14 @@ class Statsd(MetricsCollector):
 
     def scores_request(self, request, duration):
         self.send_timing_event('scores_request', request.context_name,
-                               request.model_names, len(request.rev_ids),
-                               duration=duration)
+                               request.model_names, duration=duration)
         self.send_increment_event('revision_scored', request.context_name,
                                   request.model_names,
                                   count=len(request.rev_ids))
 
     def datasources_extracted(self, request, rev_id_count, duration):
         self.send_timing_event('datasources_extracted', request.context_name,
-                               request.model_names, rev_id_count,
-                               duration=duration)
+                               request.model_names, duration=duration)
 
     def score_processed(self, request, duration):
         self.send_timing_event('score_processed', request.context_name,
