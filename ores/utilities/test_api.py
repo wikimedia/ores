@@ -87,28 +87,28 @@ def main(argv=None):
 
     make_request(
         ores_url,
-        "/v3/scores/testwiki/?revids=1234|2345&feature.delay=2&features",
+        "/v3/scores/testwiki/?revids=1205|2309&feature.delay=2&features",
         is_json=True,
         equal_to={"testwiki": {
             "models": {"revid": {"version": "0.0.0"}},
             "scores": {
-                "1234": {"revid": {
+                "1205": {"revid": {
                     "score": {
                         "prediction": False,
-                        "probability": {"false": 0.57, "true": 0.43}},
+                        "probability": {"false": 0.50, "true": 0.50}},
                     "features": {
                         "feature.delay": 2,
-                        "feature.revision.reversed_last_two_in_rev_id": 43}
+                        "feature.revision.reversed_last_two_in_rev_id": 50}
                 }},
-                "2345": {"revid": {
+                "2309": {"revid": {
                     "score": {
                         "prediction": True,
-                        "probability": {"false": 0.46, "true": 0.54}},
+                        "probability": {"false": 0.09999999999999998, "true": 0.90}},
                     "features": {
                         "feature.delay": 2,
-                        "feature.revision.reversed_last_two_in_rev_id": 54}}
+                        "feature.revision.reversed_last_two_in_rev_id": 90}}
                 }}
-            }})
+        }})
 
     other_wiki_event = {
         "comment": "/* K-O */", "database": "enwiki",

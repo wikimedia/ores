@@ -1,5 +1,6 @@
 import flask
 import pytest
+
 from ores.applications.wsgi import build
 from ores.scoring_systems.scoring_system import ScoringSystem
 from ores.wsgi.util import (build_precache_map, build_score_request,
@@ -48,8 +49,11 @@ def test_build_score_request_(app):
         }
         assert actual == expected
 
-def test_build_score_request_(app):
-    with app.test_request_context('/?models=foo&revids=123|234&feature.foo.bar=1', environ_base={'REMOTE_ADDR': '127.0.0.1'}):
+
+def test_build_score_request_injection(app):
+    with app.test_request_context(
+            '/?models=foo&revids=123|234&feature.foo.bar=1',
+            environ_base={'REMOTE_ADDR': '127.0.0.1'}):
         scoring_system = ScoringSystem({})
         actual = build_score_request(scoring_system, flask.request, context_name='testwiki', rev_id=None).to_json()
 

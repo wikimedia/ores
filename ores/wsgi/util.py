@@ -143,9 +143,9 @@ def parse_injection(request, rev_ids):
 
     if len(rev_cache) > 0:
         for rev_id in rev_ids:
-          c = cache.get(rev_id) or {}
-          c.update(rev_cache)
-          cache[rev_id] = c
+            c = cache.get(rev_id) or {}
+            c.update(rev_cache)
+            cache[rev_id] = c
 
     return cache or None
 
