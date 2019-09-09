@@ -88,7 +88,7 @@ def build_score_request(scoring_system, request, context_name=None, rev_id=None,
     model_names = parse_model_names(request, model_name)
     precache = 'precache' in request.args
     include_features = 'features' in request.args
-    injection_caches = parse_injection(request, rev_id)
+    injection_caches = parse_injection(request, rev_ids)
     model_info = parse_model_info(request)
 
     if context_name and context_name in scoring_system and not model_names:
@@ -122,30 +122,30 @@ def parse_model_names(request, model_name):
         return read_bar_split_param(request, "models", type=str)
 
 
-def parse_injection(request, rev_id):
+def parse_injection(request, rev_ids):
     """Parse values for features / datasources of interest."""
     cache = {}
 
     if 'inject' in request.values:
         try:
-            cache = json.loads(request.values['inject'])
+            cache = {int(rev_id): injection
+                     for rev_id, injection in json.loads(request.values['inject']).items()}
         except json.JSONDecodeError as e:
             raise CacheParsingError(e)
 
-    if rev_id is not None:
-        rev_cache = cache
+    rev_cache = {}
+    try:
+        for k, v in request.values.items():
+            if k.startswith(("feature.", "datasource.")):
+                rev_cache[k] = json.loads(v)
+    except json.JSONDecodeError as e:
+        raise CacheParsingError(e)
 
-        try:
-            for k, v in request.values.items():
-                if k.startswith(("feature.", "datasource.")):
-                    rev_cache[k] = json.loads(v)
-        except json.JSONDecodeError as e:
-            raise CacheParsingError(e)
-
-        if len(rev_cache) > 0:
-            cache = {rev_id: rev_cache}
-    else:
-        cache = {int(rev_id): c for rev_id, c in cache.items()}
+    if len(rev_cache) > 0:
+        for rev_id in rev_ids:
+            c = cache.get(rev_id) or {}
+            c.update(rev_cache)
+            cache[rev_id] = c
 
     return cache or None
 
