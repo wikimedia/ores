@@ -1,8 +1,8 @@
 from flask import request
 
+from . import util
 from ... import preprocessors, responses
 from ...util import build_score_request
-from . import util
 
 
 def configure(config, bp, scoring_system):
@@ -20,7 +20,7 @@ def configure(config, bp, scoring_system):
         return util.build_v3_context_model_map(score_request, scoring_system)
 
     # /v3/scores/enwiki/?models=reverted&revids=456789|4567890
-    @bp.route("/v3/scores/<context>/", methods=["GET"])
+    @bp.route("/v3/scores/<context>/", methods=["GET", "POST"])
     @preprocessors.nocache
     @preprocessors.minifiable
     def score_model_revisions_v3(context):
@@ -33,7 +33,7 @@ def configure(config, bp, scoring_system):
         return util.process_score_request(score_request, scoring_system)
 
     # /v3/scores/enwiki/reverted/?revids=456789|4567890
-    @bp.route("/v3/scores/<context>/<int:revid>/", methods=["GET"])
+    @bp.route("/v3/scores/<context>/<int:revid>/", methods=["GET", "POST"])
     @preprocessors.nocache
     @preprocessors.minifiable
     def score_revisions_v3(context, revid):
