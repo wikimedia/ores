@@ -98,8 +98,12 @@ def build_v3_context_model_map(score_request, scoring_system):
 def process_score_request(score_request, scoring_system):
     score_request.model_info = score_request.model_info or ['version']
     try:
-        score_response = scoring_system.score(score_request)
-        return format_v3_score_response(score_response)
+        if len(score_request.rev_ids) > 50:
+            return responses.bad_request(
+                "Too many values for 'revids' parameter.  Max of 50.")
+        else:
+            score_response = scoring_system.score(score_request)
+            return format_v3_score_response(score_response)
     except errors.ScoreProcessorOverloaded:
         scoring_system.metrics_collector.response_made(
                 responses.SERVER_OVERLOADED, score_request)

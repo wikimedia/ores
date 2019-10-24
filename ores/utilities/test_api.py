@@ -167,6 +167,17 @@ def main(argv=None):
                                 }}}}}
             }})
 
+    revids_param = "|".join(str(v) for v in range(100, 200))
+    make_request(
+        ores_url,
+        "/v3/scores/testwiki/?revids={0}".format(revids_param),
+        is_json=True,
+        http_code=400,
+        equal_to={"error": {
+            "code": "bad request",
+            "message": "Too many values for 'revids' parameter.  Max of 50."
+        }})
+
 
 def make_request(ores_url, path, http_code=200, is_json=False,
                  equal_to=None, post_json=None):
