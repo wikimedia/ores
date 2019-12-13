@@ -117,7 +117,7 @@ def test_event():
         "rev_sha1": "1820ao45y9o91b8m5tojay0yrsn15kh",
         "rev_timestamp": "2018-12-13T16:53:16Z"}
 
-    precache_map = {'enwiki': {'edit': {'revid', 'goodfaith'}, 'bot_edit': {'damaging'}}}
+    precache_map = {'enwiki': {'main_edit': {'revid', 'goodfaith'}, 'bot_edit': {'damaging'}}}
     expected = {
         'context': 'enwiki',
         'include_features': False,

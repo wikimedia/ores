@@ -183,6 +183,8 @@ def build_event_set(event):
     event_set = set()
     if event['meta']['stream'] == "mediawiki.revision-create":
         event_set.add('edit')
+        if event.get('page_namespace') == 0:
+            event_set.add('main_edit')
 
         user_groups = event.get('performer', {}).get('user_groups', [])
         if 'bot' in user_groups:
@@ -192,6 +194,9 @@ def build_event_set(event):
 
         if not event.get('rev_parent_id'):
             event_set.add('page_creation')
+            if event.get('page_namespace') == 0:
+                event_set.add('main_creation')
+
             if 'bot' in user_groups:
                 event_set.add('bot_page_creation')
             else:
@@ -200,7 +205,8 @@ def build_event_set(event):
     return event_set
 
 
-AVAILABLE_EVENTS = {'edit', 'bot_edit', 'nonbot_edit', 'page_creation',
+AVAILABLE_EVENTS = {'edit', 'main_edit', 'bot_edit', 'nonbot_edit',
+                    'main_creation', 'page_creation',
                     'bot_page_creation', 'nonbot_page_creation'}
 
 
