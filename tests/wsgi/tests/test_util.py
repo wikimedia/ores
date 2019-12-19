@@ -1,9 +1,9 @@
 import flask
 import pytest
-
 from ores.applications.wsgi import build
 from ores.scoring_systems.scoring_system import ScoringSystem
-from ores.wsgi.util import (build_precache_map, build_score_request,
+from ores.wsgi.util import (build_event_set, build_precache_map,
+                            build_score_request,
                             build_score_request_from_event)
 
 
@@ -87,6 +87,43 @@ def test_build_precache_map():
     }
     precache_map = build_precache_map(config)
     assert precache_map == {'enwiki': {'edit': {'revid', 'goodfaith'}}}
+
+
+def test_build_event_set():
+    event = {
+        'rev_content_model': 'wikitext',
+        'page_is_redirect': False,
+        'rev_content_format': 'text/x-wiki',
+        'rev_sha1': '3vv5u9bvaeycx0t0w6n7jjwdpyzc951',
+        'rev_parent_id': 931601209,
+        'page_id': 57951304,
+        'page_namespace': 0,
+        '$schema': '/mediawiki/revision/create/1.0.0',
+        'rev_timestamp': '2019-12-19T22:55:34Z',
+        'meta': {
+            'request_id': 'Xfv-5gpAIDEAAEU91qkAAABY',
+            'partition': 0,
+            'domain': 'en.wikipedia.org',
+            'dt': '2019-12-19T22:55:34Z',
+            'stream': 'mediawiki.revision-create',
+            'uri': 'https://en.wikipedia.org/wiki/Sidhu_Moose_Wala',
+            'topic': 'eqiad.mediawiki.revision-create',
+            'offset': 1542189973,
+            'id': '5a048c0d-5401-45f1-8559-ff08d0f241b0'
+        },
+        'performer': {
+            'user_text': '184.68.29.42',
+            'user_groups': ['*'],
+            'user_is_bot': False
+        },
+        'rev_minor_edit': False,
+        'page_title': 'Sidhu_Moose_Wala',
+        'rev_len': 13771,
+        'rev_id': 931601462,
+        'rev_content_changed': True,
+        'chronology_id': '2f8df00917ebf7ffd684492af76d6724',
+        'database': 'enwiki'}
+    assert build_event_set(event) == {"edit", "main_edit", "nonbot_edit"}
 
 
 def test_event():
