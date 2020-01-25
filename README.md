@@ -32,7 +32,7 @@ Running ores using docker composer
 ==================================
 As an easy way to run ores for development, download and install [docker-compose](https://docs.docker.com/compose/) and then do:
 
-``docker-compose up``
+``docker-compose build && docker-compose up``
 
 ores will be accessible through localhost:8080
 
