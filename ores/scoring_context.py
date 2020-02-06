@@ -1,8 +1,10 @@
 import logging
+import multiprocessing
 import time
 from hashlib import sha1
 
 from revscoring import Model, dependencies
+from revscoring.dependencies import dig
 from revscoring.extractors import Extractor
 from revscoring.features import trim
 
@@ -25,6 +27,10 @@ class ScoringContext(dict):
         extractor : :class:`revscoring.Extractor`
            An extractor to use for gathering feature values
     """
+
+    class ModelLoader:
+        def load(self, config, key):
+            return Model.from_config(config, key)
 
     def __init__(self, name, model_map, extractor):
         super().__init__()
@@ -198,6 +204,7 @@ class ScoringContext(dict):
         """
         model_key_map = {}
         context_map = {}
+        model_loader = cls.ModelLoader()
 
         for context_name in context_names:
             section = config[section_key][context_name]
@@ -206,7 +213,7 @@ class ScoringContext(dict):
                 if key in model_key_map:
                     scorer_model = model_key_map[key]
                 else:
-                    scorer_model = Model.from_config(config, key)
+                    scorer_model = model_loader.load(config, key)
                     model_key_map[key] = scorer_model
                 model_map[model_name] = scorer_model
 
@@ -241,17 +248,51 @@ class ScoringContext(dict):
                 enwiki_damaging_2014: ...
                 enwiki_good-faith_2014: ...
         """
-        logger.info("Loading {0} '{1}' from config.".format(cls.__name__, name))
+        logger.info("Loading {0} '{1}' from config."
+                    .format(cls.__name__, name))
         section = config[section_key][name]
+        model_loader = cls.ModelLoader()
 
         model_map = {}
         for model_name, key in section['scorer_models'].items():
-            scorer_model = Model.from_config(config, key)
+            scorer_model = model_loader.load(config, key)
             model_map[model_name] = scorer_model
 
         extractor = Extractor.from_config(config, section['extractor'])
 
         return cls(name, model_map=model_map, extractor=extractor)
+
+
+class ServerScoringContext(ScoringContext):
+    """
+    A scoring context that is only capable of scoring.  This ScoringContext is
+    intended to be used in clients where a web service (client) implements all
+    of the model_info actions (e.g. :class:`ores.scoring_systems.CeleryQueue`).
+
+    This ScoringContext saves on unnecessary memory usage, but still provides
+    access to basic scoring functionality.
+    """
+
+    class ModelLoader:
+        def load_model_and_queue(self, q, config, key):
+            model = Model.from_config(config, key)
+            model.info = None  # We don't need info on the server-side
+            q.put(model)
+
+        def load(self, config, key):
+            logger.warning("Loading model {0} with sub-process".format(key))
+            q = multiprocessing.Queue()
+            p = multiprocessing.Process(
+                target=self.load_model_and_queue, args=(q, config, key),
+                daemon=True)
+            p.start()
+            model = q.get()
+            p.join()
+            return model
+
+    def __init__(self, name, *args, **kwargs):
+        logger.info("Loading {0} as a ServerScoringContext".format(name))
+        super().__init__(name, *args, **kwargs)
 
 
 class ClientScoringContext(ScoringContext):
@@ -264,17 +305,35 @@ class ClientScoringContext(ScoringContext):
     informational functionality.
     """
 
+    class ModelLoader:
+        def load_model_and_queue(self, q, config, key):
+            model = Model.from_config(config, key)
+            # Just return the model info and the root of the features
+            q.put((model.info, list(dig(model.features))))
+
+        def load(self, config, key):
+            logger.warning("Loading model {0} with sub-process".format(key))
+            q = multiprocessing.Queue()
+            p = multiprocessing.Process(
+                target=self.load_model_and_queue, args=(q, config, key),
+                daemon=True)
+            p.start()
+            model_info, root_features = q.get()
+            p.join()
+            return model_info, root_features
+
     def __init__(self, name, model_map, *args, **kwargs):
+        logger.info("Loading {0} as a ClientScoringContext".format(name))
         # Load an empty model map
         bare_model_map = {model_name: NotImplemented
-                          for model_name, model in model_map.items()}
+                          for model_name, _ in model_map.items()}
         super().__init__(name, bare_model_map, *args, **kwargs)
 
         # Create an info map for use when formatting information
-        self.info_map = {model_name: model.info
-                         for model_name, model in model_map.items()}
-        self.features_map = {model_name: model.features
-                             for model_name, model in model_map.items()}
+        self.info_map = {model_name: info
+                         for model_name, (info, _) in model_map.items()}
+        self.features_map = {model_name: root_features
+                             for model_name, (_, root_features) in model_map.items()}
 
     def _get_model_info_for(self, model_name):
         return self.info_map[model_name]

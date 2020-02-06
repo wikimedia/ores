@@ -11,6 +11,7 @@ from ..lock_manager import IpRangeList, PoolCounter
 from ..metrics_collectors import Null
 from ..score_caches import Empty
 from ..score_response import ScoreResponse
+from ..scoring_context import ScoringContext
 from ..util import timeout
 
 logger = logging.getLogger(__name__)
@@ -283,14 +284,13 @@ class ScoringSystem(dict):
             logger.warning('Can not release locks in lock manager')
 
     @classmethod
-    def _kwargs_from_config(cls, config, name, section_key="scoring_systems"):
+    def _kwargs_from_config(cls, config, name, section_key="scoring_systems", ScoringContextClass=ScoringContext):
         from ..metrics_collectors import MetricsCollector
         from ..score_caches import ScoreCache
-        from ..scoring_context import ScoringContext
 
         section = config[section_key][name]
 
-        context_map = ScoringContext.map_from_config(
+        context_map = ScoringContextClass.map_from_config(
             config, section['scoring_contexts'])
 
         if 'score_cache' in section:

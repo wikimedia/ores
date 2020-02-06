@@ -8,7 +8,6 @@ import celery.exceptions
 import celery.states
 import mwapi.errors
 import revscoring.errors
-
 from ores.score_request import ScoreRequest
 
 from .. import errors
@@ -209,27 +208,20 @@ class CeleryQueue(ScoringSystem):
                 raise errors.ScoreProcessorOverloaded(message)
 
     @classmethod
-    def _build_context_map(cls, config, name, section_key="scoring_systems"):
-        from .. import ores
-        from ..scoring_context import ScoringContext, ClientScoringContext
+    def from_config(cls, config, name, section_key="scoring_systems"):
+        from ores import ores
+        from ..scoring_context import ServerScoringContext, ClientScoringContext
 
+        logger.info("Loading CeleryQueue '{0}' from config.".format(name))
         section = config[section_key][name]
 
         if hasattr(ores, "_is_wsgi_client") and ores._is_wsgi_client:
             ScoringContextClass = ClientScoringContext
         else:
-            ScoringContextClass = ScoringContext
-
-        return {name: ScoringContextClass.from_config(config, name)
-                for name in section['scoring_contexts']}
-
-    @classmethod
-    def from_config(cls, config, name, section_key="scoring_systems"):
-        logger.info("Loading CeleryQueue '{0}' from config.".format(name))
-        section = config[section_key][name]
+            ScoringContextClass = ServerScoringContext
 
         kwargs = cls._kwargs_from_config(
-            config, name, section_key=section_key)
+            config, name, section_key=section_key, ScoringContextClass=ScoringContextClass)
         queue_maxsize = section.get('queue_maxsize')
 
         if 'task_tracker' in section:
