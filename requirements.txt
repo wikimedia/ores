@@ -10,4 +10,5 @@ redis >= 3.2.1, < 4.0.0
 revscoring >= 2.3.0, < 2.6.999
 sseclient >= 0.0.18
 stopit >= 1.1.1, < 1.1.999
+werkzeug == 0.16.1
 yamlconf >= 0.2.4, < 0.2.999
