@@ -22,6 +22,8 @@ services:
             - redis
         environment:
             - C_FORCE_ROOT="true"
+            - PYPI_USER
+            - PYPI_PASS
 
     redis:
         image: redis:alpine

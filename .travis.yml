@@ -1,8 +1,13 @@
 services:
   - docker
+group: stable
+dist: xenial
+os: linux
+
+before_install:
+  - npm install eslint
 
 install:
-  - npm install eslint
   - docker-compose build
 
 script:
@@ -13,9 +18,6 @@ script:
   - docker-compose exec ores-worker py.test /ores --cov=ores -m "not redis" -vv
 after_success:
   - codecov
-group: stable
-dist: xenial
-os: linux
 notifications:
   irc:
     channels:
@@ -26,7 +28,8 @@ notifications:
       - "%{repository_slug}#%{build_number} (%{branch} - %{commit} : %{author}): %{message} %{build_url}"
 
 deploy:
+  skip_cleanup: true
   provider: script
-  script: bash scripts/deploy.sh
+  script: docker-compose exec ores-worker bash scripts/deploy.sh
   on:
     branch: master
