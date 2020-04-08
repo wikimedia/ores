@@ -1,5 +1,7 @@
 [![Build Status](https://travis-ci.org/wikimedia/ores.svg)](https://travis-ci.org/wikimedia/ores)
 [![Test coverage](https://codecov.io/gh/wikimedia/ores/branch/master/graph/badge.svg)](https://codecov.io/gh/wikimedia/ores)
+[![GitHub license](https://img.shields.io/github/license/wikimedia/ores.svg)](./LICENSE)
+[![PyPI version](https://badge.fury.io/py/ores.svg)](https://badge.fury.io/py/ores)
 
 ORES
 ====
