@@ -8,3 +8,7 @@ class Empty(ScoreCache):
 
     def store(self, *args, **kwargs):
         return None
+
+    @classmethod
+    def from_config(cls, config, name, section_key="score_caches"):
+        return cls()
