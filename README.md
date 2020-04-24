@@ -54,7 +54,7 @@ For docker installation, run:
 
 Utilities
 =========
-ORES provies several utilities:
+ORES provides several utilities:
 * `precached`: Starts a daemon that requests scores for revisions as they happen
 * `score_revisions`: Scores a set of revisions using an ORES API
 * `stress_test`: Scores a large set of revisions at a configurable rate
