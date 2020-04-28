@@ -14,6 +14,8 @@ ores:
 
 # Caching options
 score_caches:
+  no_cache:
+    class: ores.score_caches.Empty
   memory_lru:
     class: ores.score_caches.LRU
     size: 1024
@@ -55,7 +57,7 @@ metrics_collectors:
 scoring_systems:
   defaults:
     metrics_collector: local_logging
-    score_cache: memory_lru
+    score_cache: no_cache
     scoring_contexts:
       - testwiki
     timeout: 15 # seconds
