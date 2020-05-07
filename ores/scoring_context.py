@@ -233,11 +233,14 @@ class ScoringContext(dict):
                     scorer_models:
                         damaging: enwiki_damaging_2014
                         good-faith: enwiki_good-faith_2014
+
                     extractor: enwiki
+
                 ptwiki:
                     scorer_models:
                         damaging: ptwiki_damaging_2014
                         good-faith: ptwiki_good-faith_2014
+
                     extractor: ptwiki
 
             extractors:
@@ -247,6 +250,7 @@ class ScoringContext(dict):
             scorer_models:
                 enwiki_damaging_2014: ...
                 enwiki_good-faith_2014: ...
+
         """
         logger.info("Loading {0} '{1}' from config."
                     .format(cls.__name__, name))
