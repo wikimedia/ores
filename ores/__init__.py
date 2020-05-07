@@ -1,3 +1,9 @@
+"""
+This package contains a webserver for hosting scoring services, along with a
+set of utilities and assets for scoring revisions on Wikipedia.
+
+See the :ref:`API Reference <api_reference>` for low level details.
+"""
 import platform
 import sys
 
