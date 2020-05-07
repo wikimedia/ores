@@ -1,0 +1,4 @@
+sphinx==2.4.4
+sphinx-py3doc-enhanced-theme
+m2r
+-e .

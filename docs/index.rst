@@ -1,18 +1,18 @@
-.. Objective-Revision-Evaluation-Service documentation master file, created by
+.. ORES documentation master file, created by
    sphinx-quickstart on Mon Mar 23 09:13:08 2015.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Objective-Revision-Evaluation-Service's documentation!
+ORES: Objective Revision Evaluation Service
 =================================================================
+.. automodule:: ores
 
-Contents:
+Project info:
 
 .. toctree::
-   :maxdepth: 2
+  :maxdepth: 1
 
-   ores
-
+  changelog
 
 
 Indices and tables
