@@ -5,7 +5,7 @@ dist: xenial
 os: linux
 
 before_install:
-  - npm install eslint
+  - npm install eslint@6.6.0
 
 install:
   - docker-compose build
