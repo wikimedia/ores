@@ -16,6 +16,8 @@ script:
   - docker-compose exec ores-worker flake8 /ores
   - docker-compose exec ores-api /ores/utility test_api http://localhost:8080 --debug
   - docker-compose exec ores-worker py.test /ores --cov=ores -m "not redis" -vv
+  - docker-compose exec ores-worker sphinx-build -anW -b html docs dist/docs
+  - docker-compose exec ores-worker sphinx-build -b linkcheck docs dist/docs
 after_success:
   - codecov
 notifications:

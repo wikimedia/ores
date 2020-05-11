@@ -4,5 +4,8 @@ codecov
 pytest-cov>=2.6
 statsd
 redis
+sphinx==2.4.4
+sphinx-py3doc-enhanced-theme
+m2r
 flake8
 threadpool
