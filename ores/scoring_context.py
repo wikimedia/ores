@@ -22,7 +22,7 @@ class ScoringContext(dict):
            usually a wiki's database name.
         model_map : dict
            A mapping between names and
-           :class:`revscoring.ScorerModel`
+           :class:`revscoring.Model`
            instances
         extractor : :class:`revscoring.Extractor`
            An extractor to use for gathering feature values
@@ -153,7 +153,7 @@ class ScoringContext(dict):
 
         :Parameters:
             model_names : `list` ( `str` )
-                The names of a :class:`revscoring.ScorerModel` to
+                The names of a :class:`revscoring.Model` to
                 extract the roots dependencies for
         """
         # Make a copy of injection_caches

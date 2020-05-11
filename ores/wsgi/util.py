@@ -67,11 +67,11 @@ def format_error(error):
 def build_score_request(scoring_system, request, context_name=None, rev_id=None,
                         model_name=None):
     """
-    Build an :class:`ores.ScoreRequest` from information contained in a
+    Build an :class:`ores.score_request.ScoreRequest` from information contained in a
     request.
 
     :Parameters:
-        scoring_system : :class:`ores.ScoringSystem`
+        scoring_system : :class:`ores.scoring_systems.scoring_system.ScoringSystem`
             A scoring system to build request with
         request : :class:`flask.Request`
             A web request to extract information from
