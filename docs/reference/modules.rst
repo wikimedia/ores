@@ -11,6 +11,7 @@ Subpackages
 .. toctree::
     :maxdepth: 1
 
+    ores.scoring_systems
     ores.wsgi
 
 Submodules
