@@ -105,6 +105,10 @@ language = None
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 exclude_patterns = ['_build']
+nitpick_ignore = [
+    ('py:class', 'ores.scoring_systems.CeleryQueue'),
+
+    ]
 
 # The reST default role (used for this markup: `text`) to use for all
 # documents.
@@ -316,3 +320,7 @@ texinfo_documents = [
 
 # If true, do not generate a @detailmenu in the "Top" node's menu.
 #texinfo_no_detailmenu = False
+
+intersphinx_mapping = {'https://docs.python.org/3/': None,
+	'https://revscoring.readthedocs.io/en/latest/': None,
+        'https://flask.palletsprojects.com/en/1.1.x/': None}
