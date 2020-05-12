@@ -28,7 +28,7 @@ class Session:
 
     :Parameters:
         host : str
-            The host of ORES to connect to (preceed with http:// or https://)
+            The host of ORES to connect to (preceed with "http" or "https")
         user_agent : str
             A User-Agent header to send with every request
         batch_size : int
