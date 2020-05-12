@@ -18,6 +18,7 @@ script:
   - docker-compose exec ores-worker py.test /ores --cov=ores -m "not redis" -vv
   - docker-compose exec ores-worker sphinx-build -anW -b html docs dist/docs
   - docker-compose exec ores-worker sphinx-build -b linkcheck docs dist/docs
+  - docker-compose exec ores-worker rm -r dist/docs
 after_success:
   - codecov
 notifications:
