@@ -71,7 +71,7 @@ def build_score_request(scoring_system, request, context_name=None, rev_id=None,
     request.
 
     :Parameters:
-        scoring_system : :class:`ores.scoring_systems.scoring_system.ScoringSystem`
+        scoring_system : :class:`ores.scoring_systems.ScoringSystem`
             A scoring system to build request with
         request : :class:`flask.Request`
             A web request to extract information from
