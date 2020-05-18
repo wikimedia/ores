@@ -1,0 +1,41 @@
+version: v4
+base: python:3.7-slim
+apt: {packages: [g++, enchant, build-essential]}
+python:
+  version: python3.7
+lives:
+  in: /opt/lib
+runs:
+  environment:
+    PYTHONUTF8: '1'
+    PYTHONIOENCODING: utf-8
+variants:
+  build:
+    copies: [local]
+    python:
+      requirements: [requirements.txt]
+
+  development:
+    runs:
+      insecurely: true
+    includes: [build]
+    python:
+      requirements: [requirements.txt, test-requirements.txt]
+    entrypoint: [./utility, applications.wsgi]
+
+  test:
+    includes: [build]
+    python:
+      requirements: [requirements.txt, test-requirements.txt]
+    runs:
+      insecurely: true
+    entrypoint: ["pytest", "-vvv", "--cov=ores", "-m 'not redis'"]
+
+  prep:
+    includes: [build]
+
+  production:
+    runs:
+      insecurely: false
+    copies: [prep]
+    entrypoint: [./utility, applications.wsgi]
