@@ -62,7 +62,7 @@ def format_v2_model(request, response, model_name):
 
     for rev_id, rev_features in response.features.items():
         if model_name in rev_features:
-                model_doc['features'][rev_id] = rev_features[model_name]
+            model_doc['features'][rev_id] = rev_features[model_name]
 
     return model_doc
 
