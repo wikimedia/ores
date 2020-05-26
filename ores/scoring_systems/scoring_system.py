@@ -271,7 +271,7 @@ class ScoringSystem(dict):
         except TooManyRequestsError:
             raise
         # Lock manager can't lock, let's do nothing
-        except:
+        except Exception:
             logger.warning('Can not lock in lock manager')
             return False
         return locked
@@ -280,7 +280,7 @@ class ScoringSystem(dict):
         try:
             self.lock_manager.release(ip)
         # Lock manager can't release, let's do nothing
-        except:
+        except Exception:
             logger.warning('Can not release locks in lock manager')
 
     @classmethod
