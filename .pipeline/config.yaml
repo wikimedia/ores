@@ -1,0 +1,17 @@
+pipelines:
+  test:
+    blubberfile: blubber.yaml
+    stages:
+      - name: build
+        build: build
+      - name: unit-test
+        run:
+          image: '${build.imageID}'
+          arguments: ['py.test', '/ores', '--cov=ores', '-m', '"not redis"', '-vv']
+      - name: lint
+        run:
+          image: '${build.imageID}'
+          arguments: ['flake8', '/ores'] 
+    execution:
+      - [build, unit-test]
+      - [build, lint]
