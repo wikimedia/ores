@@ -14,6 +14,13 @@ logger = logging.getLogger(__name__)
 
 
 def build_config(config_dirs=DEFAULT_DIRS, **kwargs):
+    """
+    Build a dictionary.
+
+    Args:
+        config_dirs: (str): write your description
+        DEFAULT_DIRS: (str): write your description
+    """
     # Loads files in alphabetical order based on the bare filename
     config_file_paths = []
     for directory in config_dirs:
@@ -34,6 +41,14 @@ def build_config(config_dirs=DEFAULT_DIRS, **kwargs):
 
 
 def configure_logging(verbose=False, debug=False, config=None, **kwargs):
+    """
+    Configures logging.
+
+    Args:
+        verbose: (bool): write your description
+        debug: (bool): write your description
+        config: (todo): write your description
+    """
     if config is None:
         logging_config = None
     else:

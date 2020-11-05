@@ -16,12 +16,32 @@ SOCKET_TIMEOUT = 0.1
 class Redis(ScoreCache):
 
     def __init__(self, redis, ttl=None, prefix=None):
+        """
+        Initialize redis instance.
+
+        Args:
+            self: (todo): write your description
+            redis: (todo): write your description
+            ttl: (int): write your description
+            prefix: (str): write your description
+        """
         self.redis = redis
         self.ttl = int(ttl or TTL)
         self.prefix = str(prefix or PREFIX)
 
     def lookup(self, context_name, model_name, rev_id, version=None,
                injection_cache=None):
+        """
+        Retrieves a model object.
+
+        Args:
+            self: (todo): write your description
+            context_name: (str): write your description
+            model_name: (str): write your description
+            rev_id: (int): write your description
+            version: (str): write your description
+            injection_cache: (todo): write your description
+        """
         key = self._generate_key(
             context_name, model_name, rev_id, version=version,
             injection_cache=injection_cache)
@@ -35,6 +55,18 @@ class Redis(ScoreCache):
 
     def store(self, score, context_name, model_name, rev_id, version=None,
               injection_cache=None):
+        """
+        Store a credential in the cache.
+
+        Args:
+            self: (todo): write your description
+            score: (todo): write your description
+            context_name: (str): write your description
+            model_name: (str): write your description
+            rev_id: (str): write your description
+            version: (str): write your description
+            injection_cache: (todo): write your description
+        """
         key = self._generate_key(
             context_name, model_name, rev_id, version=version,
             injection_cache=injection_cache)
@@ -44,6 +76,17 @@ class Redis(ScoreCache):
 
     def _generate_key(self, wiki, model, rev_id, version=None,
                       injection_cache=None):
+        """
+        Generate a cache key.
+
+        Args:
+            self: (todo): write your description
+            wiki: (int): write your description
+            model: (todo): write your description
+            rev_id: (str): write your description
+            version: (str): write your description
+            injection_cache: (int): write your description
+        """
         if injection_cache is None or len(injection_cache) == 0:
             key_values = [self.prefix, wiki, model, rev_id, version]
         else:
@@ -55,6 +98,14 @@ class Redis(ScoreCache):
 
     @classmethod
     def from_parameters(cls, *args, ttl=None, prefix=None, **kwargs):
+        """
+        Creates a new instance from a redis instance.
+
+        Args:
+            cls: (todo): write your description
+            ttl: (todo): write your description
+            prefix: (str): write your description
+        """
         try:
             import redis
         except ImportError:
@@ -82,6 +133,13 @@ class Redis(ScoreCache):
 
     @classmethod
     def hash_cache(cls, cache):
+        """
+        Return a hash of the cache.
+
+        Args:
+            cls: (todo): write your description
+            cache: (dict): write your description
+        """
         sorted_tuple = tuple(sorted(cache.items()))
         return sha1(bytes(str(sorted_tuple), 'utf8')).hexdigest()
 
@@ -89,6 +147,17 @@ class Redis(ScoreCache):
 class RedisSentinel(ScoreCache):
 
     def __init__(self, sentinel, ttl=None, prefix=None, cluster=None, socket_timeout=None):
+        """
+        Initialize the socket.
+
+        Args:
+            self: (todo): write your description
+            sentinel: (todo): write your description
+            ttl: (int): write your description
+            prefix: (str): write your description
+            cluster: (str): write your description
+            socket_timeout: (float): write your description
+        """
         self.sentinel = sentinel
         self.ttl = int(ttl or TTL)
         self.prefix = str(prefix or PREFIX)
@@ -97,6 +166,17 @@ class RedisSentinel(ScoreCache):
 
     def lookup(self, context_name, model_name, rev_id, version=None,
                injection_cache=None):
+        """
+        Execute a lookup.
+
+        Args:
+            self: (todo): write your description
+            context_name: (str): write your description
+            model_name: (str): write your description
+            rev_id: (int): write your description
+            version: (str): write your description
+            injection_cache: (todo): write your description
+        """
         key = self._generate_key(
             context_name, model_name, rev_id, version=version,
             injection_cache=injection_cache)
@@ -111,6 +191,18 @@ class RedisSentinel(ScoreCache):
 
     def store(self, score, context_name, model_name, rev_id, version=None,
               injection_cache=None):
+        """
+        Store a master in - value pair.
+
+        Args:
+            self: (todo): write your description
+            score: (todo): write your description
+            context_name: (str): write your description
+            model_name: (str): write your description
+            rev_id: (str): write your description
+            version: (str): write your description
+            injection_cache: (todo): write your description
+        """
         key = self._generate_key(
             context_name, model_name, rev_id, version=version,
             injection_cache=injection_cache)
@@ -121,6 +213,17 @@ class RedisSentinel(ScoreCache):
 
     def _generate_key(self, wiki, model, rev_id, version=None,
                       injection_cache=None):
+        """
+        Generate a cache key for a given wiki.
+
+        Args:
+            self: (todo): write your description
+            wiki: (int): write your description
+            model: (todo): write your description
+            rev_id: (str): write your description
+            version: (str): write your description
+            injection_cache: (int): write your description
+        """
         if injection_cache is None or len(injection_cache) == 0:
             key_values = [self.prefix, wiki, model, rev_id, version]
         else:
@@ -133,6 +236,17 @@ class RedisSentinel(ScoreCache):
     @classmethod
     def from_parameters(cls, hosts, ttl=None, prefix=None, cluster=None,
                         socket_timeout=None):
+        """
+        Create a new : class from a redis instance.
+
+        Args:
+            cls: (todo): write your description
+            hosts: (list): write your description
+            ttl: (todo): write your description
+            prefix: (str): write your description
+            cluster: (todo): write your description
+            socket_timeout: (todo): write your description
+        """
         try:
             from redis.sentinel import Sentinel
         except ImportError:

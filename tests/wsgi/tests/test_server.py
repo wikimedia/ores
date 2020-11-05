@@ -7,20 +7,43 @@ from ores.applications.wsgi import build
 
 @pytest.fixture
 def client():
+    """
+    Create a context manager.
+
+    Args:
+    """
     yield build().test_client()
 
 
 def test_home(client):
+    """
+    Return the home of the home user.
+
+    Args:
+        client: (todo): write your description
+    """
     res = client.get('/', follow_redirects=True)
     assert res.status_code == 200
 
 
 def test_404(client):
+    """
+    Handles a deferred was successful.
+
+    Args:
+        client: (todo): write your description
+    """
     res = client.get('/404', follow_redirects=True)
     assert res.status_code == 404
 
 
 def test_scores(client):
+    """
+    Get status of scores
+
+    Args:
+        client: (todo): write your description
+    """
     res = client.get('/scores', follow_redirects=True)
     assert res.status_code == 200
     assert json.loads(res.get_data().decode('utf-8')) == \
@@ -28,6 +51,12 @@ def test_scores(client):
 
 
 def test_scores_v1_context(client):
+    """
+    Display v1 context.
+
+    Args:
+        client: (todo): write your description
+    """
     res = client.get('/v1/scores/testwiki/', follow_redirects=True)
     data = json.loads(res.get_data().decode('utf-8'))
     del data['models']['revid']['statistics']
@@ -40,6 +69,12 @@ def test_scores_v1_context(client):
 
 
 def test_scores_v1_404_context(client):
+    """
+    Gets the number of v1 test issues context
+
+    Args:
+        client: (todo): write your description
+    """
     res = client.get('/v1/scores/noowiki/', follow_redirects=True)
     data = json.loads(res.get_data().decode('utf-8'))
     assert res.status_code == 404
@@ -47,6 +82,12 @@ def test_scores_v1_404_context(client):
 
 
 def test_scores_v1_context_model(client):
+    """
+    Display v1 account s scores.
+
+    Args:
+        client: (todo): write your description
+    """
     res = client.get('/v1/scores/testwiki/revid', follow_redirects=True)
     data = json.loads(res.get_data().decode('utf-8'))
     del data['statistics']
@@ -57,6 +98,12 @@ def test_scores_v1_context_model(client):
 
 
 def test_scores_v1_404_context_model(client):
+    """
+    Test if v1 context as json.
+
+    Args:
+        client: (todo): write your description
+    """
     res = client.get('/v1/scores/testwiki/norevic', follow_redirects=True)
     data = json.loads(res.get_data().decode('utf-8'))
     assert res.status_code == 404
@@ -64,6 +111,12 @@ def test_scores_v1_404_context_model(client):
 
 
 def test_scores_v1_context_rev(client):
+    """
+    Gets the number of v1 context.
+
+    Args:
+        client: (todo): write your description
+    """
     res = client.get('/v1/scores/testwiki/revid/123', follow_redirects=True)
     data = json.loads(res.get_data().decode('utf-8'))
     assert res.status_code == 200
@@ -72,6 +125,12 @@ def test_scores_v1_context_rev(client):
 
 
 def test_scores_v2(client):
+    """
+    Gets v2 accounts
+
+    Args:
+        client: (todo): write your description
+    """
     res = client.get('/v2/scores', follow_redirects=True)
     assert res.status_code == 200
     assert json.loads(res.get_data().decode('utf-8')) == \
@@ -79,6 +138,12 @@ def test_scores_v2(client):
 
 
 def test_scores_v2_context(client):
+    """
+    Display v2 context variables.
+
+    Args:
+        client: (todo): write your description
+    """
     res = client.get('/v2/scores/testwiki/', follow_redirects=True)
     assert res.status_code == 200
     assert json.loads(res.get_data().decode('utf-8')) == \
@@ -86,6 +151,12 @@ def test_scores_v2_context(client):
 
 
 def test_scores_v2_404_context(client):
+    """
+    Display v2 context variables.
+
+    Args:
+        client: (todo): write your description
+    """
     res = client.get('/v2/scores/noowiki/', follow_redirects=True)
     assert res.status_code == 404
     assert json.loads(res.get_data().decode('utf-8')) == \
@@ -93,6 +164,12 @@ def test_scores_v2_404_context(client):
 
 
 def test_scores_v2_context_model(client):
+    """
+    Display v2 context.
+
+    Args:
+        client: (todo): write your description
+    """
     res = client.get('/v2/scores/testwiki/revid', follow_redirects=True)
     assert res.status_code == 200
     assert json.loads(res.get_data().decode('utf-8')) == \
@@ -100,6 +177,12 @@ def test_scores_v2_context_model(client):
 
 
 def test_scores_v2_context_404_model(client):
+    """
+    Display v2 context. 0.
+
+    Args:
+        client: (todo): write your description
+    """
     res = client.get('/v2/scores/testwiki/revidd', follow_redirects=True)
     assert res.status_code == 404
     assert json.loads(res.get_data().decode('utf-8')) == \
@@ -108,6 +191,12 @@ def test_scores_v2_context_404_model(client):
 
 
 def test_scores_v2_context_rev(client):
+    """
+    Display v2 context variables for v2 context.
+
+    Args:
+        client: (todo): write your description
+    """
     res = client.get('/v2/scores/testwiki/revid/123', follow_redirects=True)
     assert res.status_code == 200
     assert json.loads(res.get_data().decode('utf-8')) == \
@@ -118,6 +207,12 @@ def test_scores_v2_context_rev(client):
 
 
 def test_scores_v3(client):
+    """
+    Gets v3 scores
+
+    Args:
+        client: (todo): write your description
+    """
     res = client.get('/v3/scores', follow_redirects=True)
     assert res.status_code == 200
     assert json.loads(res.get_data().decode('utf-8')) == \
@@ -125,6 +220,12 @@ def test_scores_v3(client):
 
 
 def test_scores_v3_context(client):
+    """
+    Display v3 context variables.
+
+    Args:
+        client: (todo): write your description
+    """
     res = client.get('/v3/scores/testwiki/', follow_redirects=True)
     assert res.status_code == 200
     assert json.loads(res.get_data().decode('utf-8')) == \
@@ -132,6 +233,12 @@ def test_scores_v3_context(client):
 
 
 def test_scores_v3_404_context(client):
+    """
+    Gets v3 context.
+
+    Args:
+        client: (todo): write your description
+    """
     res = client.get('/v3/scores/noowiki/', follow_redirects=True)
     assert res.status_code == 404
     assert json.loads(res.get_data().decode('utf-8')) == \
@@ -139,6 +246,12 @@ def test_scores_v3_404_context(client):
 
 
 def test_scores_v3_rev(client):
+    """
+    Retrieve v3 scores for v3.
+
+    Args:
+        client: (todo): write your description
+    """
     res = client.get('/v3/scores/testwiki/123', follow_redirects=True)
     assert res.status_code == 200
     assert json.loads(res.get_data().decode('utf-8')) == \
@@ -149,11 +262,23 @@ def test_scores_v3_rev(client):
 
 
 def test_scores_v3_precache_get(client):
+    """
+    Gets a list of v3 v3 is enabled.
+
+    Args:
+        client: (dict): write your description
+    """
     res = client.get('/v3/precache', follow_redirects=True)
     assert res.status_code == 405
 
 
 def test_scores_v3_precache_bad_data(client):
+    """
+    Test whether v3 pe pe pe pe pe pe pe pe cache.
+
+    Args:
+        client: (todo): write your description
+    """
     res = client.post('/v3/precache', follow_redirects=True)
     assert res.status_code == 400
     assert json.loads(res.get_data().decode('utf-8')) == \

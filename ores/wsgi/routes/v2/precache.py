@@ -11,6 +11,14 @@ logger = logging.getLogger(__name__)
 
 
 def configure(config, bp, scoring_system):
+    """
+    Configure a score.
+
+    Args:
+        config: (dict): write your description
+        bp: (todo): write your description
+        scoring_system: (todo): write your description
+    """
 
     precache_map = util.build_precache_map(config)
 
@@ -18,6 +26,11 @@ def configure(config, bp, scoring_system):
     @preprocessors.nocache
     @preprocessors.minifiable
     def precache_v2():
+        """
+        Precache the current page.
+
+        Args:
+        """
         if 'event' not in request.args:
             return responses.bad_request(
                 "Must provide an 'event' parameter")

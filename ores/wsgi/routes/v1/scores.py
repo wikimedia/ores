@@ -10,6 +10,14 @@ from . import util
 
 
 def configure(config, bp, scoring_system):
+    """
+    Configure a route.
+
+    Args:
+        config: (dict): write your description
+        bp: (todo): write your description
+        scoring_system: (todo): write your description
+    """
 
     # /scores/
     @bp.route("/scores/", methods=["GET"])
@@ -17,6 +25,11 @@ def configure(config, bp, scoring_system):
     @preprocessors.nocache
     @preprocessors.minifiable
     def scores():
+        """
+        Return a list of dictionaries.
+
+        Args:
+        """
         contexts = [context for context in scoring_system]
 
         contexts.sort()
@@ -24,6 +37,14 @@ def configure(config, bp, scoring_system):
         return jsonify({'contexts': contexts})
 
     def process_score_request(score_request, context=None, model=None):
+        """
+        Displays a single score request.
+
+        Args:
+            score_request: (bool): write your description
+            context: (todo): write your description
+            model: (todo): write your description
+        """
         try:
             if len(score_request.rev_ids) == 0:
                 return util.format_some_model_info(
@@ -66,6 +87,12 @@ def configure(config, bp, scoring_system):
     @preprocessors.nocache
     @preprocessors.minifiable
     def score_model_revisions(context):
+        """
+        Displays the score of the current request.
+
+        Args:
+            context: (todo): write your description
+        """
         try:
             score_request = build_score_request(
                 scoring_system, request, context)
@@ -79,6 +106,13 @@ def configure(config, bp, scoring_system):
     @preprocessors.nocache
     @preprocessors.minifiable
     def score_revisions(context, model):
+        """
+        Displays the score of the given model.
+
+        Args:
+            context: (todo): write your description
+            model: (todo): write your description
+        """
         try:
             score_request = build_score_request(
                 scoring_system, request, context, model_name=model)
@@ -93,6 +127,14 @@ def configure(config, bp, scoring_system):
     @preprocessors.nocache
     @preprocessors.minifiable
     def score_revision(context, model, rev_id):
+        """
+        Displays the current revision.
+
+        Args:
+            context: (todo): write your description
+            model: (todo): write your description
+            rev_id: (int): write your description
+        """
         try:
             score_request = build_score_request(
                 scoring_system, request, context, rev_id=rev_id,

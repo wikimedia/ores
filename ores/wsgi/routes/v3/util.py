@@ -96,6 +96,13 @@ def build_v3_context_model_map(score_request, scoring_system):
 
 
 def process_score_request(score_request, scoring_system):
+    """
+    Process a single score request.
+
+    Args:
+        score_request: (bool): write your description
+        scoring_system: (todo): write your description
+    """
     score_request.model_info = score_request.model_info or ['version']
     try:
         if len(score_request.rev_ids) > 50:

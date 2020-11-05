@@ -21,6 +21,12 @@ logger = logging.getLogger(__name__)
 
 
 def main(argv=None):
+    """
+    Main function.
+
+    Args:
+        argv: (str): write your description
+    """
     args = docopt.docopt(__doc__, argv=argv)
 
     logging.basicConfig(
@@ -181,6 +187,17 @@ def main(argv=None):
 
 def make_request(ores_url, path, http_code=200, is_json=False,
                  equal_to=None, post_json=None):
+    """
+    Make a http post request.
+
+    Args:
+        ores_url: (str): write your description
+        path: (str): write your description
+        http_code: (str): write your description
+        is_json: (bool): write your description
+        equal_to: (str): write your description
+        post_json: (str): write your description
+    """
     logger.debug("Requesting {0}".format(path))
     if post_json is None:
         response = requests.get(ores_url + path)

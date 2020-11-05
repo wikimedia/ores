@@ -3,6 +3,11 @@ from ores.score_request import ScoreRequest
 
 
 def test_null():
+    """
+    Test the best null.
+
+    Args:
+    """
     # Make sure we throw no errors.
 
     collector = Null()
@@ -19,6 +24,11 @@ def test_null():
 
 
 def test_from_config():
+    """
+    Create a test test from a test.
+
+    Args:
+    """
     # Should throw a socket connection error and no others
     config = {
         'metrics_collectors': {

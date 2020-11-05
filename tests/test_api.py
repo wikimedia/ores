@@ -4,9 +4,27 @@ from ores import api
 class FakeSession:
 
     def __init__(self, error_out=False):
+        """
+        Initialize the error
+
+        Args:
+            self: (todo): write your description
+            error_out: (str): write your description
+        """
         self.error_out = error_out
 
     def get(self, url, params, headers, verify=False, stream=False):
+        """
+        Make a get request.
+
+        Args:
+            self: (todo): write your description
+            url: (todo): write your description
+            params: (dict): write your description
+            headers: (dict): write your description
+            verify: (todo): write your description
+            stream: (str): write your description
+        """
         if self.error_out:
             return FakeResponse(
                 {"error": {"code": "an error", "message": "a message"}})
@@ -25,13 +43,31 @@ class FakeSession:
 class FakeResponse:
 
     def __init__(self, doc):
+        """
+        Initialize a docdef
+
+        Args:
+            self: (todo): write your description
+            doc: (todo): write your description
+        """
         self.doc = doc
 
     def json(self):
+        """
+        Returns the json document.
+
+        Args:
+            self: (todo): write your description
+        """
         return self.doc
 
 
 def test_fake_session():
+    """
+    Create a session for the session.
+
+    Args:
+    """
     session = FakeSession(error_out=True)
     response = session.get(None, None, None)
     doc = response.json()
@@ -39,6 +75,11 @@ def test_fake_session():
 
 
 def test_session():
+    """
+    Create a session.
+
+    Args:
+    """
     session1 = api.Session("myhost", session=FakeSession())
     scores = list(session1.score("context", ["foo", "bar"], range(0, 100)))
     assert len(scores) == 100
@@ -47,6 +88,11 @@ def test_session():
 
 
 def test_base_error():
+    """
+    Get base base base base base base base base base base error.
+
+    Args:
+    """
     session2 = api.Session("myhost", session=FakeSession(error_out=True))
     scores = list(session2.score("context", ["foo", "bar"], range(0, 100)))
     assert len(scores) == 100

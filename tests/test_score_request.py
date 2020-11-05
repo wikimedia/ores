@@ -2,6 +2,11 @@ from ores.score_request import ScoreRequest
 
 
 def test_score_request():
+    """
+    Displays the test score.
+
+    Args:
+    """
     sr = ScoreRequest("foo", [1, 2, 3], ["bar", "baz"], ip='0.0.0.0')
 
     assert sr.context_name == "foo"
@@ -14,6 +19,11 @@ def test_score_request():
 
 
 def test_score_request_serialization():
+    """
+    Test to test test test test test test.
+
+    Args:
+    """
     sr = ScoreRequest("foo", [1, 2, 3], ["bar", "baz"], ip='0.0.0.0')
     actual = sr.to_json()
     actual['model_names'].sort()
@@ -31,6 +41,11 @@ def test_score_request_serialization():
 
 
 def test_score_request_deserialization():
+    """
+    Deserializes a json request to the test.
+
+    Args:
+    """
     sr = ScoreRequest("foo", [1, 2, 3], ["bar", "baz"], ip='0.0.0.0')
     sr_new = ScoreRequest.from_json({
         'context': 'foo',

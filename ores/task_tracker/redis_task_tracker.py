@@ -15,15 +15,39 @@ PREFIX = "ores"
 
 class RedisTaskTracker(TaskTracker):
     def __init__(self, redis, ttl=None, prefix=None):
+        """
+        Initialize redis instance.
+
+        Args:
+            self: (todo): write your description
+            redis: (todo): write your description
+            ttl: (int): write your description
+            prefix: (str): write your description
+        """
         self.redis = redis
         self.ttl = int(ttl or TTL)
         self.prefix = str(prefix or PREFIX)
 
     def lock(self, key, value):
+        """
+        Emulate lock.
+
+        Args:
+            self: (todo): write your description
+            key: (str): write your description
+            value: (todo): write your description
+        """
         return self.redis.setex(self.prefix + ':' + key, self.ttl,
                                 bytes(value, 'utf-8'))
 
     def get_in_progress_task(self, key):
+        """
+        Get the progress of a task.
+
+        Args:
+            self: (todo): write your description
+            key: (str): write your description
+        """
         value = self.redis.get(self.prefix + ':' + key)
         if value is None:
             return False
@@ -31,10 +55,25 @@ class RedisTaskTracker(TaskTracker):
             return str(value, 'utf-8')
 
     def release(self, key):
+        """
+        Emulate lock.
+
+        Args:
+            self: (todo): write your description
+            key: (str): write your description
+        """
         return self.redis.delete(self.prefix + ':' + key)
 
     @classmethod
     def from_parameters(cls, *args, ttl=None, prefix=None, **kwargs):
+        """
+        Creates a new instance from a redis instance.
+
+        Args:
+            cls: (todo): write your description
+            ttl: (todo): write your description
+            prefix: (str): write your description
+        """
         try:
             import redis
         except ImportError:

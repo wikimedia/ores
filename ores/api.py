@@ -43,6 +43,18 @@ class Session:
 
     def __init__(self, host, user_agent=None, session=None,
                  retries=5, batch_size=50, parallel_requests=4):
+        """
+        Initialize the session.
+
+        Args:
+            self: (todo): write your description
+            host: (str): write your description
+            user_agent: (str): write your description
+            session: (todo): write your description
+            retries: (todo): write your description
+            batch_size: (int): write your description
+            parallel_requests: (todo): write your description
+        """
         self.host = str(host)
         if session is not None:
             self._session = session
@@ -85,6 +97,15 @@ class Session:
         return self._score(context, models, rev_ids)
 
     def _score(self, context, models, rev_ids):
+        """
+        Generate a list of revisions.
+
+        Args:
+            self: (todo): write your description
+            context: (todo): write your description
+            models: (todo): write your description
+            rev_ids: (str): write your description
+        """
         logging.debug("Starting up thread pool with {0} workers"
                       .format(self.workers))
         with ThreadPoolExecutor(max_workers=self.workers) as executor:
@@ -115,6 +136,15 @@ class Session:
                                for m in models}
 
     def _score_request(self, context, rev_ids, models):
+        """
+        Returns a list of the revisions.
+
+        Args:
+            self: (todo): write your description
+            context: (todo): write your description
+            rev_ids: (str): write your description
+            models: (todo): write your description
+        """
         url = self.host + "/v3/scores/{0}/".format(urllib.parse.quote(context))
 
         params = {'revids': "|".join(str(rid) for rid in rev_ids),

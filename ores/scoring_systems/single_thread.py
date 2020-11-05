@@ -9,6 +9,16 @@ class SingleThread(ScoringSystem):
 
     def _process_missing_scores(self, request, missing_model_set_revs,
                                 root_caches, inprogress_results=None):
+        """
+        Process a list of missing scores.
+
+        Args:
+            self: (todo): write your description
+            request: (todo): write your description
+            missing_model_set_revs: (dict): write your description
+            root_caches: (todo): write your description
+            inprogress_results: (todo): write your description
+        """
         rev_scores = {}
         errors = {}
 
@@ -28,6 +38,15 @@ class SingleThread(ScoringSystem):
 
     @classmethod
     def from_config(cls, config, name, section_key="scoring_systems"):
+        """
+        Initialize an instance from a configuration file.
+
+        Args:
+            cls: (todo): write your description
+            config: (todo): write your description
+            name: (str): write your description
+            section_key: (str): write your description
+        """
         logger.info("Loading SingleThread '{0}' from config.".format(name))
         kwargs = cls._kwargs_from_config(
             config, name, section_key=section_key)

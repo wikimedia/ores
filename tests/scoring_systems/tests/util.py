@@ -13,6 +13,12 @@ wait_time = Feature("wait_time", returns=float)
 
 
 def process_wait(wait_time):
+    """
+    Process a request and wait for the given timeout.
+
+    Args:
+        wait_time: (int): write your description
+    """
     time.sleep(wait_time)
     return wait_time
 
@@ -24,18 +30,40 @@ wait = Feature("wait", process=process_wait, returns=float,
 class FakeSM(Model):
 
     def __init__(self):
+        """
+        Initialize the info.
+
+        Args:
+            self: (todo): write your description
+        """
         self.features = [wait]
         self.version = "fake version"
         self.info = ModelInfo()
         self.info['version'] = self.version
 
     def score(self, feature_values):
+        """
+        Return the score of the given feature.
+
+        Args:
+            self: (todo): write your description
+            feature_values: (bool): write your description
+        """
         return True
 
 
 class FakeExtractor(Extractor):
 
     def extract(self, rev_ids, features, *args, caches={}, **kwargs):
+        """
+        Extract features from the features.
+
+        Args:
+            self: (todo): write your description
+            rev_ids: (int): write your description
+            features: (todo): write your description
+            caches: (dict): write your description
+        """
         return [(None, list(solve(features, cache=caches.get(rev_id, {}))))
                 for rev_id in rev_ids]
 
@@ -46,6 +74,12 @@ fakewiki = ScoringContext(
 
 @mark.skip('Not test')
 def test_scoring_system(scoring_system):
+    """
+    Perform a system system.
+
+    Args:
+        scoring_system: (todo): write your description
+    """
 
     response = scoring_system.score(
         ScoreRequest("fakewiki", [1], ["fake"],

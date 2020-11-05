@@ -38,6 +38,12 @@ MAX_WORKERS = 50
 
 
 def main(argv=None):
+    """
+    Main function.
+
+    Args:
+        argv: (str): write your description
+    """
     args = docopt.docopt(__doc__, argv=argv)
 
     logging.basicConfig(
@@ -69,9 +75,26 @@ def main(argv=None):
 
 
 def run(stream_url, ores_url, metrics_collector, config, delay, verbose):
+    """
+    Run a single stream of a given stream
+
+    Args:
+        stream_url: (str): write your description
+        ores_url: (str): write your description
+        metrics_collector: (str): write your description
+        config: (todo): write your description
+        delay: (int): write your description
+        verbose: (bool): write your description
+    """
 
     # What to do in case of a change
     def precache_a_change(change):
+        """
+        Precache data change of a post request.
+
+        Args:
+            change: (todo): write your description
+        """
         session = requests.Session()
         if delay:
             time.sleep(delay)

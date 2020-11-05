@@ -23,6 +23,20 @@ class ScoringSystem(dict):
                        metrics_collector=None, timeout=None, lock_manager=None,
                        connections_per_ip=4, connections_per_ip_hard=7,
                        whitelisted_ips=[]):
+        """
+        Initialize metrics.
+
+        Args:
+            self: (todo): write your description
+            context_map: (str): write your description
+            score_cache: (todo): write your description
+            metrics_collector: (todo): write your description
+            timeout: (int): write your description
+            lock_manager: (todo): write your description
+            connections_per_ip: (todo): write your description
+            connections_per_ip_hard: (todo): write your description
+            whitelisted_ips: (str): write your description
+        """
         super().__init__()
         self.update(context_map)
         self.score_cache = score_cache or Empty()
@@ -34,6 +48,13 @@ class ScoringSystem(dict):
         self.whitelisted_ranges = IpRangeList(whitelisted_ips)
 
     def check_context_models(self, request):
+        """
+        Checks if the request is missing.
+
+        Args:
+            self: (todo): write your description
+            request: (todo): write your description
+        """
 
         if request.context_name not in self:
             raise MissingContext(request.context_name)
@@ -43,6 +64,13 @@ class ScoringSystem(dict):
             raise MissingModels(request.context_name, missing_models)
 
     def score(self, request):
+        """
+        Displays the score.
+
+        Args:
+            self: (todo): write your description
+            request: (todo): write your description
+        """
         self.check_context_models(request)
 
         locked = None
@@ -74,6 +102,13 @@ class ScoringSystem(dict):
         return response
 
     def _score(self, request):
+        """
+        Displays a score of a set of features.
+
+        Args:
+            self: (todo): write your description
+            request: (todo): write your description
+        """
         context = self[request.context_name]
         response = ScoreResponse(context, request)
 
@@ -136,6 +171,14 @@ class ScoringSystem(dict):
         return response
 
     def _build_model_info(self, request, response):
+        """
+        Build the info about the request.
+
+        Args:
+            self: (todo): write your description
+            request: (todo): write your description
+            response: (todo): write your description
+        """
         context = self[request.context_name]
         for model_name in request.model_names:
             response.add_model_info(
@@ -143,6 +186,14 @@ class ScoringSystem(dict):
                 context.format_model_info(model_name, request.model_info))
 
     def _extract_root_caches(self, request, missing_model_set_revs):
+        """
+        Extract missing references dicts.
+
+        Args:
+            self: (todo): write your description
+            request: (todo): write your description
+            missing_model_set_revs: (dict): write your description
+        """
         context = self[request.context_name]
 
         root_caches = {}
@@ -156,6 +207,16 @@ class ScoringSystem(dict):
         return root_caches, errors
 
     def _process_score_map(self, request, rev_id, model_names, root_cache):
+        """
+        Process a score request.
+
+        Args:
+            self: (todo): write your description
+            request: (todo): write your description
+            rev_id: (int): write your description
+            model_names: (str): write your description
+            root_cache: (todo): write your description
+        """
         context = self[request.context_name]
 
         start = time.time()
@@ -189,10 +250,28 @@ class ScoringSystem(dict):
 
     def _process_missing_scores(self, request, missing_model_set_revs,
                                 root_caches):
+        """
+        Process missing missing missing missing missing missing scores.
+
+        Args:
+            self: (todo): write your description
+            request: (todo): write your description
+            missing_model_set_revs: (todo): write your description
+            root_caches: (todo): write your description
+        """
         raise NotImplementedError()
 
     def _filter_missing_model_set_revs(self, request, response,
                                        inprogress_results=None):
+        """
+        Filters out missing missing reactions.
+
+        Args:
+            self: (todo): write your description
+            request: (todo): write your description
+            response: (todo): write your description
+            inprogress_results: (todo): write your description
+        """
         missing_model_set_rev_pairs = self._filter_missing_model_pairs(
             request, response, inprogress_results)
         missing_model_set_revs = {}
@@ -208,6 +287,15 @@ class ScoringSystem(dict):
 
     def _filter_missing_model_pairs(self, request, response,
                                     inprogress_results):
+        """
+        Returns a list of missing keys.
+
+        Args:
+            self: (todo): write your description
+            request: (todo): write your description
+            response: (todo): write your description
+            inprogress_results: (dict): write your description
+        """
         for rev_id in request.rev_ids:
             missing_models = request.model_names - (
                 set(response.scores.get(rev_id, {}).keys()) |
@@ -217,13 +305,40 @@ class ScoringSystem(dict):
 
     def _register_model_set_revs_to_process(self, request,
                                             missing_model_set_revs):
+        """
+        Sets the model process.
+
+        Args:
+            self: (todo): write your description
+            request: (todo): write your description
+            missing_model_set_revs: (todo): write your description
+        """
         return None
 
     def _cache_scores(self, request, rev_id, score_map):
+        """
+        Parameters ---------- request : class : score.
+
+        Args:
+            self: (todo): write your description
+            request: (todo): write your description
+            rev_id: (int): write your description
+            score_map: (dict): write your description
+        """
         for model_name, score_doc in score_map.items():
             self._cache_score(request, rev_id, model_name, score_doc)
 
     def _cache_score(self, request, rev_id, model_name, score_doc):
+        """
+        Cache the cache score.
+
+        Args:
+            self: (todo): write your description
+            request: (todo): write your description
+            rev_id: (str): write your description
+            model_name: (str): write your description
+            score_doc: (bool): write your description
+        """
         version = self[request.context_name].model_version(model_name)
         injection_cache = request.injection_caches.get(rev_id)
         self.score_cache.store(
@@ -231,9 +346,25 @@ class ScoringSystem(dict):
             rev_id, version=version, injection_cache=injection_cache)
 
     def _lookup_inprogress_results(self, request, response):
+        """
+        Look up the results of a request.
+
+        Args:
+            self: (todo): write your description
+            request: (todo): write your description
+            response: (todo): write your description
+        """
         return {}
 
     def _lookup_cached_scores(self, request, response):
+        """
+        Lookup a list of a list of revisions.
+
+        Args:
+            self: (todo): write your description
+            request: (todo): write your description
+            response: (todo): write your description
+        """
 
         for rev_id in request.rev_ids:
             for model_name in request.model_names:
@@ -245,6 +376,15 @@ class ScoringSystem(dict):
                     pass
 
     def _lookup_cached_score(self, request, rev_id, model_name):
+        """
+        Returns the best score for a given request.
+
+        Args:
+            self: (todo): write your description
+            request: (todo): write your description
+            rev_id: (int): write your description
+            model_name: (str): write your description
+        """
         version = self[request.context_name].model_version(model_name)
         injection_cache = request.injection_caches.get(rev_id)
         try:
@@ -262,6 +402,13 @@ class ScoringSystem(dict):
             raise
 
     def _lock_ip(self, ip):
+        """
+        Lock the given ip to the ip.
+
+        Args:
+            self: (todo): write your description
+            ip: (array): write your description
+        """
         try:
             locked = self.lock_manager.lock(
                 ip, self.connections_per_ip, self.connections_per_ip_hard,
@@ -277,6 +424,13 @@ class ScoringSystem(dict):
         return locked
 
     def _release_ip(self, ip):
+        """
+        Release ip address from the ip address.
+
+        Args:
+            self: (todo): write your description
+            ip: (todo): write your description
+        """
         try:
             self.lock_manager.release(ip)
         # Lock manager can't release, let's do nothing
@@ -285,6 +439,17 @@ class ScoringSystem(dict):
 
     @classmethod
     def _kwargs_from_config(cls, config, name, section_key="scoring_systems", ScoringContextClass=ScoringContext):
+        """
+        Build keyword arguments for the keyword arguments.
+
+        Args:
+            cls: (todo): write your description
+            config: (todo): write your description
+            name: (str): write your description
+            section_key: (str): write your description
+            ScoringContextClass: (todo): write your description
+            ScoringContext: (str): write your description
+        """
         from ..metrics_collectors import MetricsCollector
         from ..score_caches import ScoreCache
 
@@ -323,6 +488,15 @@ class ScoringSystem(dict):
 
     @classmethod
     def from_config(cls, config, name, section_key="scoring_systems"):
+        """
+        Load a configuration object from a configuration.
+
+        Args:
+            cls: (todo): write your description
+            config: (todo): write your description
+            name: (str): write your description
+            section_key: (str): write your description
+        """
         try:
             import yamlconf
         except ImportError:

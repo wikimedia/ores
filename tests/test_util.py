@@ -8,15 +8,30 @@ from ores.util import timeout
 
 
 def test_timeout():
+    """
+    Test for a request timeout.
+
+    Args:
+    """
     timeout(int, 5, seconds=0.5)
 
 
 def test_timeout_error():
+    """
+    Waits the given error to be raised.
+
+    Args:
+    """
     with raises(TimeoutError):
         timeout(time.sleep, 2, seconds=1)
 
 
 def test_timeout_error_badfunc():
+    """
+    Test for bad error.
+
+    Args:
+    """
     # This regex causes a near-infinite loop, should timeout
     # See https://wikitech.wikimedia.org/wiki/Incident_documentation/20170623-ORES
     with raises(TimeoutError):

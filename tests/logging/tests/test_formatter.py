@@ -5,6 +5,11 @@ from ores.logging.logstash_fomatter import LogstashFormatter
 
 
 def test_format():
+    """
+    Format logstash.
+
+    Args:
+    """
     formatter = LogstashFormatter(tags=['ores'], host='ores.test.wmnet')
     log_record = LogRecord('test_ores', 2, '/dev/test/ores', 55, 'Log made',
                            [], None)
@@ -25,6 +30,11 @@ def test_format():
 
 
 def test_format_source():
+    """
+    Formats the test source.
+
+    Args:
+    """
     formatted = LogstashFormatter.format_source('ores', 'ores.test.wmnet', 'scores/')
 
     assert formatted == 'ores://ores.test.wmnet/scores/'

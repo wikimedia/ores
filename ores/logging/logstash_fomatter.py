@@ -16,10 +16,25 @@ class LogstashFormatter(logging.Formatter):
     easy_types = (str, bool, dict, float, int, list, type(None))
 
     def __init__(self, tags=None, host=None):
+        """
+        Initialize the connection.
+
+        Args:
+            self: (todo): write your description
+            tags: (str): write your description
+            host: (str): write your description
+        """
         self.tags = tags if tags is not None else []
         self.host = host if host is not None else socket.gethostname()
 
     def format(self, record):
+        """
+        Format log record.
+
+        Args:
+            self: (todo): write your description
+            record: (todo): write your description
+        """
         # Create message dict
         message = {
             '@timestamp': self.format_timestamp(record.created),
@@ -45,6 +60,13 @@ class LogstashFormatter(logging.Formatter):
         return self.serialize(message)
 
     def get_extra_fields(self, record):
+        """
+        Get extra extra fields.
+
+        Args:
+            self: (todo): write your description
+            record: (str): write your description
+        """
         fields = {}
 
         for key, value in record.__dict__.items():
@@ -57,6 +79,13 @@ class LogstashFormatter(logging.Formatter):
         return fields
 
     def get_debug_fields(self, record):
+        """
+        Return a dict of the exception.
+
+        Args:
+            self: (todo): write your description
+            record: (todo): write your description
+        """
         return {
             'stack_trace': self.format_exception(record.exc_info),
             'lineno': record.lineno,
@@ -68,17 +97,47 @@ class LogstashFormatter(logging.Formatter):
 
     @classmethod
     def format_source(cls, message_type, host, path):
+        """
+        Format a formatted message source.
+
+        Args:
+            cls: (callable): write your description
+            message_type: (str): write your description
+            host: (str): write your description
+            path: (str): write your description
+        """
         return "%s://%s/%s" % (message_type, host, path)
 
     @classmethod
     def format_timestamp(cls, time):
+        """
+        Format a datetime object.
+
+        Args:
+            cls: (todo): write your description
+            time: (float): write your description
+        """
         tstamp = datetime.fromtimestamp(time, timezone.utc)
         return tstamp.isoformat()
 
     @classmethod
     def format_exception(cls, exc_info):
+        """
+        Formats the exception as a string.
+
+        Args:
+            cls: (callable): write your description
+            exc_info: (todo): write your description
+        """
         return ''.join(traceback.format_exception(*exc_info)) if exc_info else ''
 
     @classmethod
     def serialize(cls, message):
+        """
+        Serialize a message. message : type message.
+
+        Args:
+            cls: (todo): write your description
+            message: (str): write your description
+        """
         return bytes(json.dumps(message) + '\n', 'utf-8')

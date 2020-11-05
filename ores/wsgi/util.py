@@ -17,10 +17,22 @@ class ParamError(Exception):
 
 
 def jsonify(doc):
+    """
+    Convert a json document into a json.
+
+    Args:
+        doc: (str): write your description
+    """
     return flask_jsonify(normalize_json(doc))
 
 
 def normalize_json(doc):
+    """
+    Normalize a dictionary into a dict.
+
+    Args:
+        doc: (dict): write your description
+    """
     if isinstance(doc, dict):
         return {_ensure_str_key(k): normalize_json(v) for k, v in doc.items()}
     else:
@@ -28,6 +40,12 @@ def normalize_json(doc):
 
 
 def _ensure_str_key(key):
+    """
+    Convert a string to a key.
+
+    Args:
+        key: (str): write your description
+    """
     if isinstance(key, bool):
         return "true" if key else "false"
     else:
@@ -35,6 +53,16 @@ def _ensure_str_key(key):
 
 
 def read_param(request, param, default=None, type=str):
+    """
+    Read the value from the request.
+
+    Args:
+        request: (todo): write your description
+        param: (todo): write your description
+        default: (str): write your description
+        type: (todo): write your description
+        str: (todo): write your description
+    """
     try:
         value = request.args.get(param, request.form.get(param))
         if value is None:
@@ -46,6 +74,16 @@ def read_param(request, param, default=None, type=str):
 
 
 def read_bar_split_param(request, param, default=None, type=str):
+    """
+    Read the split parameter.
+
+    Args:
+        request: (todo): write your description
+        param: (todo): write your description
+        default: (todo): write your description
+        type: (str): write your description
+        str: (todo): write your description
+    """
     values = read_param(request, param, default=default)
     if values is None:
         return []
@@ -58,6 +96,12 @@ def read_bar_split_param(request, param, default=None, type=str):
 
 
 def format_error(error):
+    """
+    Format an error message.
+
+    Args:
+        error: (todo): write your description
+    """
     error_type = error.__class__.__name__
     message = str(error)
 
@@ -109,6 +153,13 @@ def build_score_request(scoring_system, request, context_name=None, rev_id=None,
 
 
 def parse_rev_ids(request, rev_id):
+    """
+    Parse a request ids.
+
+    Args:
+        request: (todo): write your description
+        rev_id: (str): write your description
+    """
     if rev_id is not None:
         return [int(rev_id)]
     else:
@@ -116,6 +167,13 @@ def parse_rev_ids(request, rev_id):
 
 
 def parse_model_names(request, model_name):
+    """
+    Parses model names.
+
+    Args:
+        request: (todo): write your description
+        model_name: (str): write your description
+    """
     if model_name is not None:
         return [model_name]
     else:
@@ -151,10 +209,23 @@ def parse_injection(request, rev_ids):
 
 
 def parse_model_info(request):
+    """
+    Parses request parameters.
+
+    Args:
+        request: (todo): write your description
+    """
     return read_bar_split_param(request, "model_info", type=str)
 
 
 def build_score_request_from_event(precache_map, event):
+    """
+    Builds a dictionary with the best score.
+
+    Args:
+        precache_map: (todo): write your description
+        event: (todo): write your description
+    """
     context_name = event['database']
     rev_id = event['rev_id']
 

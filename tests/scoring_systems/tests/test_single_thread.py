@@ -6,12 +6,22 @@ from .util import fakewiki, test_scoring_system, wait_time
 
 
 def test_score():
+    """
+    Test the test test test.
+
+    Args:
+    """
     scoring_system = SingleThread({'fakewiki': fakewiki}, timeout=0.10)
 
     test_scoring_system(scoring_system)
 
 
 def test_single_thread():
+    """
+    Test for a single thread.
+
+    Args:
+    """
     scoring_system = SingleThread({'fakewiki': fakewiki}, timeout=1.0)
 
     response = scoring_system.score(

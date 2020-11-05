@@ -10,6 +10,14 @@ logger = logging.getLogger(__name__)
 
 
 def configure(config, bp, scoring_system):
+    """
+    Configure a score.
+
+    Args:
+        config: (dict): write your description
+        bp: (todo): write your description
+        scoring_system: (todo): write your description
+    """
 
     precache_map = build_precache_map(config)
 
@@ -17,6 +25,11 @@ def configure(config, bp, scoring_system):
     @preprocessors.nocache
     @preprocessors.minifiable
     def precache_v3():
+        """
+        Precache the json request.
+
+        Args:
+        """
         event = request.get_json()
         if event is None:
             return responses.bad_request(

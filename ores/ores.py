@@ -27,6 +27,11 @@ USAGE = """Usage:
 
 
 def main():
+    """
+    Main entry point.
+
+    Args:
+    """
 
     if len(sys.argv) < 2:
         sys.stderr.write(USAGE)

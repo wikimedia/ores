@@ -11,6 +11,11 @@ from .util import fakewiki, test_scoring_system, wait_time
 
 
 def test_score():
+    """
+    Test if the workers.
+
+    Args:
+    """
     scoring_system = ProcessPool({'fakewiki': fakewiki},
                                  workers=8)
 
@@ -18,6 +23,11 @@ def test_score():
 
 
 def test_rev_id_scorer():
+    """
+    Test to find_revorer of a model.
+
+    Args:
+    """
     revid = RevIdScorer(version='0.0.1')
     fakewiki = ScoringContext(
         'fakewiki', {'revid': revid}, OfflineExtractor())
@@ -33,6 +43,11 @@ def test_rev_id_scorer():
 
 
 def test_timeout():
+    """
+    Waits for a response to complete.
+
+    Args:
+    """
     scoring_system = ProcessPool({'fakewiki': fakewiki}, timeout=0.05)
 
     response = scoring_system.score(
