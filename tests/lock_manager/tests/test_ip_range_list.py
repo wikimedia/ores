@@ -2,6 +2,11 @@ from ores.lock_manager.ip_range_list import IpRangeList
 
 
 def test_matches_address():
+    """
+    Return a list of ip addresses.
+
+    Args:
+    """
     whitelist = [
         '127.0.0.1',
         '10.0.0.0/8',
@@ -12,6 +17,11 @@ def test_matches_address():
 
 
 def test_matches_range():
+    """
+    Return a list of whitelist.
+
+    Args:
+    """
     whitelist = [
         '127.0.0.1',
         '10.0.0.0/8',
@@ -22,6 +32,11 @@ def test_matches_range():
 
 
 def test_matches_ipv6():
+    """
+    Check if ipv6.
+
+    Args:
+    """
     whitelist = [
         '2001:db8::ff00:42:8329',
         '10.0.0.0/8',
@@ -32,6 +47,11 @@ def test_matches_ipv6():
 
 
 def test_matches_nonmatch():
+    """
+    Returns a list of ip addresses.
+
+    Args:
+    """
     whitelist = [
         '127.0.0.1',
         '10.0.0.0/8',
@@ -42,6 +62,11 @@ def test_matches_nonmatch():
 
 
 def test_matches_mixed_type_safe():
+    """
+    Check if the whitelist matches the whitelelist.
+
+    Args:
+    """
     whitelist = [
         '2001:db8::ff00:42:8329',
         '10.0.0.0/8',

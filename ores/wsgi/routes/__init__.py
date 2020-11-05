@@ -9,19 +9,43 @@ GEAR_FAVICON = os.path.join(PWD, "../static/favicon/gear/favicon.ico")
 
 
 def configure(config, bp, score_processor):
+    """
+    Configure a bokeh application.
+
+    Args:
+        config: (dict): write your description
+        bp: (todo): write your description
+        score_processor: (bool): write your description
+    """
 
     @bp.route("/", methods=["GET"])
     def index():
+        """
+        Render the template.
+
+        Args:
+        """
         return render_template(
             "home.html", **config['ores'].get('home', {}))
 
     @bp.route("/favicon.ico", methods=["GET"])
     def favicon():
+        """
+        Return favicon icon
+
+        Args:
+        """
         # Tries to read from config or just loads the gear..
         return send_file(config['ores'].get('favicon', GEAR_FAVICON))
 
     @bp.app_errorhandler(404)
     def page_not_found(e):
+        """
+        Render the user page.
+
+        Args:
+            e: (todo): write your description
+        """
         return render_template(
             '404.html',
             title=request.path,

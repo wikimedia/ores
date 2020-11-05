@@ -10,11 +10,28 @@ logger = logging.getLogger(__name__)
 class ProcessPool(ScoringSystem):
 
     def __init__(self, *args, workers=None, **kwargs):
+        """
+        Initialize workers.
+
+        Args:
+            self: (todo): write your description
+            workers: (int): write your description
+        """
         super().__init__(*args, **kwargs)
         self.workers = int(workers) if workers is not None else None
 
     def _process_missing_scores(self, request, missing_model_set_revs,
                                 root_caches, inprogress_results=None):
+        """
+        Given a list of missing scores.
+
+        Args:
+            self: (todo): write your description
+            request: (todo): write your description
+            missing_model_set_revs: (dict): write your description
+            root_caches: (todo): write your description
+            inprogress_results: (todo): write your description
+        """
         rev_scores = {}
         errors = {}
 
@@ -45,6 +62,15 @@ class ProcessPool(ScoringSystem):
 
     @classmethod
     def from_config(cls, config, name, section_key="scoring_systems"):
+        """
+        Create a configuration object from a configuration file.
+
+        Args:
+            cls: (todo): write your description
+            config: (todo): write your description
+            name: (str): write your description
+            section_key: (str): write your description
+        """
         logger.info("Loading ProcessPool '{0}' from config.".format(name))
         section = config[section_key][name]
 

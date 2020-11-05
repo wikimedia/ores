@@ -30,19 +30,54 @@ class ScoringContext(dict):
 
     class ModelLoader:
         def load(self, config, key):
+            """
+            Load a configuration from a configuration file.
+
+            Args:
+                self: (todo): write your description
+                config: (dict): write your description
+                key: (str): write your description
+            """
             return Model.from_config(config, key)
 
     def __init__(self, name, model_map, extractor):
+        """
+        Initialize a model.
+
+        Args:
+            self: (todo): write your description
+            name: (str): write your description
+            model_map: (str): write your description
+            extractor: (str): write your description
+        """
         super().__init__()
         self.name = str(name)
         self.update(model_map)
         self.extractor = extractor
 
     def format_model_info(self, model_name, paths=None):
+        """
+        Return information about a model.
+
+        Args:
+            self: (todo): write your description
+            model_name: (str): write your description
+            paths: (str): write your description
+        """
         model_info = self._get_model_info_for(model_name)
         return model_info.format(paths, formatting="json")
 
     def format_id_string(self, model_name, rev_id, request, injection_cache=None):
+        """
+        Format a score string for a given model.
+
+        Args:
+            self: (todo): write your description
+            model_name: (str): write your description
+            rev_id: (str): write your description
+            request: (todo): write your description
+            injection_cache: (dict): write your description
+        """
         version = self.model_version(model_name)
         score_id = ":".join(
             str(v) for v in [self.name, model_name, version, rev_id])
@@ -56,12 +91,33 @@ class ScoringContext(dict):
             return score_id + ":" + cache_hash
 
     def _get_model_info_for(self, model_name):
+        """
+        Returns the info about a specific model_name
+
+        Args:
+            self: (todo): write your description
+            model_name: (str): write your description
+        """
         return self[model_name].info
 
     def model_version(self, model_name):
+        """
+        Return the version of a model.
+
+        Args:
+            self: (todo): write your description
+            model_name: (str): write your description
+        """
         return self[model_name].version
 
     def model_features(self, model_name):
+        """
+        Returns a list of a model_features.
+
+        Args:
+            self: (todo): write your description
+            model_name: (str): write your description
+        """
         return self[model_name].features
 
     def process_model_scores(self, model_names, root_cache,
@@ -138,6 +194,13 @@ class ScoringContext(dict):
         return score
 
     def _generate_root_datasources(self, model_names):
+        """
+        Generate sources for each of the sources.
+
+        Args:
+            self: (todo): write your description
+            model_names: (str): write your description
+        """
         for model_name in model_names:
             for dependency in dependencies.dig(self.model_features(model_name)):
                 yield dependency
@@ -279,11 +342,28 @@ class ServerScoringContext(ScoringContext):
 
     class ModelLoader:
         def load_model_and_queue(self, q, config, key):
+            """
+            Load a queue from a queue.
+
+            Args:
+                self: (todo): write your description
+                q: (str): write your description
+                config: (todo): write your description
+                key: (str): write your description
+            """
             model = Model.from_config(config, key)
             model.info = None  # We don't need info on the server-side
             q.put(model)
 
         def load(self, config, key):
+            """
+            Load a key from the queue.
+
+            Args:
+                self: (todo): write your description
+                config: (dict): write your description
+                key: (str): write your description
+            """
             logger.warning("Loading model {0} with sub-process".format(key))
             q = multiprocessing.Queue()
             p = multiprocessing.Process(
@@ -295,6 +375,13 @@ class ServerScoringContext(ScoringContext):
             return model
 
     def __init__(self, name, *args, **kwargs):
+        """
+        Initialize a new instance.
+
+        Args:
+            self: (todo): write your description
+            name: (str): write your description
+        """
         logger.info("Loading {0} as a ServerScoringContext".format(name))
         super().__init__(name, *args, **kwargs)
 
@@ -311,11 +398,28 @@ class ClientScoringContext(ScoringContext):
 
     class ModelLoader:
         def load_model_and_queue(self, q, config, key):
+            """
+            Load a queue from a queue.
+
+            Args:
+                self: (todo): write your description
+                q: (str): write your description
+                config: (todo): write your description
+                key: (str): write your description
+            """
             model = Model.from_config(config, key)
             # Just return the model info and the root of the features
             q.put((model.info, list(dig(model.features))))
 
         def load(self, config, key):
+            """
+            Load a configuration key.
+
+            Args:
+                self: (todo): write your description
+                config: (dict): write your description
+                key: (str): write your description
+            """
             logger.warning("Loading model {0} with sub-process".format(key))
             q = multiprocessing.Queue()
             p = multiprocessing.Process(
@@ -327,6 +431,14 @@ class ClientScoringContext(ScoringContext):
             return model_info, root_features
 
     def __init__(self, name, model_map, *args, **kwargs):
+        """
+        Initialize the map.
+
+        Args:
+            self: (todo): write your description
+            name: (str): write your description
+            model_map: (dict): write your description
+        """
         logger.info("Loading {0} as a ClientScoringContext".format(name))
         # Load an empty model map
         bare_model_map = {model_name: NotImplemented
@@ -340,13 +452,40 @@ class ClientScoringContext(ScoringContext):
                              for model_name, (_, root_features) in model_map.items()}
 
     def _get_model_info_for(self, model_name):
+        """
+        Returns info_model info_model
+
+        Args:
+            self: (todo): write your description
+            model_name: (str): write your description
+        """
         return self.info_map[model_name]
 
     def model_version(self, model_name):
+        """
+        Return the version of the model.
+
+        Args:
+            self: (todo): write your description
+            model_name: (str): write your description
+        """
         return self.info_map[model_name].get("version")
 
     def model_features(self, model_name):
+        """
+        Returns a list of the features.
+
+        Args:
+            self: (todo): write your description
+            model_name: (str): write your description
+        """
         return self.features_map[model_name]
 
     def process_score(self, *args, **kwargs):
+        """
+        Process the score.
+
+        Args:
+            self: (todo): write your description
+        """
         raise NotImplementedError()

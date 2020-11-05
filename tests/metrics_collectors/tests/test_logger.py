@@ -5,6 +5,11 @@ from ores.score_request import ScoreRequest
 
 
 def test_logger():
+    """
+    Collect test logs.
+
+    Args:
+    """
     messages = []
     FakeLogger = namedtuple("Logger", ["debug"])
     logging_logger = FakeLogger(lambda m: messages.append(m))
@@ -35,6 +40,11 @@ def test_logger():
 
 
 def test_from_config():
+    """
+    : param config : return :
+
+    Args:
+    """
     # Should throw a socket connection error and no others
     config = {
         'metrics_collectors': {

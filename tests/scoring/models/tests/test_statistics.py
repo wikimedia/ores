@@ -2,6 +2,11 @@ from ores.scoring.models.rev_id_scorer import RevIdScorer
 
 
 def test_statistics():
+    """
+    Print statistics about all statistics.
+
+    Args:
+    """
     scorer = RevIdScorer()
     stats = scorer.info['statistics']
 

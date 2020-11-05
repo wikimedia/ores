@@ -13,8 +13,24 @@ class LogstashHandler(DatagramHandler):
     """
 
     def __init__(self, host, port=12201, tags=None):
+        """
+        Initialize the logger.
+
+        Args:
+            self: (todo): write your description
+            host: (str): write your description
+            port: (int): write your description
+            tags: (str): write your description
+        """
         super(LogstashHandler, self).__init__(host, port)
         self.formatter = LogstashFormatter(tags=tags)
 
     def makePickle(self, record):
+        """
+        Create a new record.
+
+        Args:
+            self: (todo): write your description
+            record: (todo): write your description
+        """
         return self.formatter.format(record)

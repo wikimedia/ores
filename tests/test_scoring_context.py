@@ -5,6 +5,11 @@ from revscoring import dependencies
 
 
 def test_scoring_context():
+    """
+    A context that returns a single feature.
+
+    Args:
+    """
     from revscoring.datasources import Datasource
     from revscoring.dependencies import Dependent
     from revscoring.features import Feature
@@ -22,6 +27,14 @@ def test_scoring_context():
     FakeExtractor = namedtuple("Extractor", ['extract', 'solve', 'language'])
 
     def fake_extract(rev_ids, dependents, caches=None):
+        """
+        Extracts a set of revocation_ids.
+
+        Args:
+            rev_ids: (int): write your description
+            dependents: (todo): write your description
+            caches: (dict): write your description
+        """
         caches = caches if caches is not None else {}
         for rev_id in rev_ids:
             if rev_id % 5 != 0:
@@ -36,6 +49,13 @@ def test_scoring_context():
                 yield RuntimeError("extract"), None
 
     def fake_solve(dependents, cache=None):
+        """
+        Solve the given function.
+
+        Args:
+            dependents: (int): write your description
+            cache: (dict): write your description
+        """
         cache = cache if cache is not None else {}
         cache.update({len_func: len,
                       literal_fake: "fake"})

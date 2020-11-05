@@ -5,9 +5,22 @@ from . import precache, scores, spec
 
 
 def configure(config, bp, score_processor):
+    """
+    Configure a swagger route.
+
+    Args:
+        config: (dict): write your description
+        bp: (todo): write your description
+        score_processor: (bool): write your description
+    """
 
     @bp.route("/v2/", methods=["GET"])
     def v2_index():
+        """
+        Render swagger index
+
+        Args:
+        """
         if "spec" in request.args:
             return spec.generate_spec(config)
         else:

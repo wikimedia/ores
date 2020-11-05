@@ -27,6 +27,15 @@ class CeleryQueue(ScoringSystem):
 
     def __init__(self, *args, application, queue_maxsize=None,
                  task_tracker=None, **kwargs):
+        """
+        Initialize the queue.
+
+        Args:
+            self: (todo): write your description
+            application: (todo): write your description
+            queue_maxsize: (int): write your description
+            task_tracker: (todo): write your description
+        """
         super().__init__(*args, **kwargs)
         global _applications
         self.application = application
@@ -45,6 +54,12 @@ class CeleryQueue(ScoringSystem):
         _applications.append(application)
 
     def _initialize_tasks(self):
+        """
+        Initializes the tasks.
+
+        Args:
+            self: (todo): write your description
+        """
         expected_errors = (revscoring.errors.RevisionNotFound,
                            revscoring.errors.PageNotFound,
                            revscoring.errors.UserNotFound,
@@ -56,6 +71,15 @@ class CeleryQueue(ScoringSystem):
         @self.application.task(throws=expected_errors,
                                queue=DEFAULT_CELERY_QUEUE)
         def _process_score_map(request, model_names, rev_id, root_cache):
+            """
+            Process a score request.
+
+            Args:
+                request: (todo): write your description
+                model_names: (str): write your description
+                rev_id: (int): write your description
+                root_cache: (todo): write your description
+            """
             if not isinstance(request, ScoreRequest):
                 request = ScoreRequest.from_json(request)
 
@@ -76,6 +100,16 @@ class CeleryQueue(ScoringSystem):
 
     def _process_missing_scores(self, request, missing_model_set_revs,
                                 root_caches, inprogress_results=None):
+        """
+        Given a list of missing missing scores of the missing scores.
+
+        Args:
+            self: (todo): write your description
+            request: (todo): write your description
+            missing_model_set_revs: (dict): write your description
+            root_caches: (todo): write your description
+            inprogress_results: (dict): write your description
+        """
         logger.debug("Processing missing scores {0}:{1}."
                      .format(request.context_name, missing_model_set_revs))
         context = self[request.context_name]
@@ -142,6 +176,17 @@ class CeleryQueue(ScoringSystem):
 
     def _lock_process(self, models, rev_id, request, injection_cache,
                       task_id):
+        """
+        Lock a list of models.
+
+        Args:
+            self: (todo): write your description
+            models: (todo): write your description
+            rev_id: (int): write your description
+            request: (todo): write your description
+            injection_cache: (todo): write your description
+            task_id: (int): write your description
+        """
         context = self[request.context_name]
         for model in models:
             key = context.format_id_string(
@@ -150,6 +195,14 @@ class CeleryQueue(ScoringSystem):
             self.task_tracker.lock(key, task_id)
 
     def _lookup_inprogress_results(self, request, response):
+        """
+        Returns a dict of results for a list of the results.
+
+        Args:
+            self: (todo): write your description
+            request: (todo): write your description
+            response: (todo): write your description
+        """
         context = self[request.context_name]
 
         inprogress_results = {}
@@ -178,6 +231,14 @@ class CeleryQueue(ScoringSystem):
         return inprogress_results
 
     def _register_model_set_revs_to_process(self, request, model_set_revs):
+        """
+        Sets the list of the process.
+
+        Args:
+            self: (todo): write your description
+            request: (todo): write your description
+            model_set_revs: (dict): write your description
+        """
         context = self[request.context_name]
 
         for model_set, rev_ids in model_set_revs.items():
@@ -191,10 +252,22 @@ class CeleryQueue(ScoringSystem):
                         task_id, {}, REQUESTED)
 
     def _score(self, *args, **kwargs):
+        """
+        Calculate the score.
+
+        Args:
+            self: (todo): write your description
+        """
         self._check_queue_full()
         return super()._score(*args, **kwargs)
 
     def _check_queue_full(self):
+        """
+        Checks if the queue is full.
+
+        Args:
+            self: (todo): write your description
+        """
         # Check redis to see if the queue of waiting tasks is too big.
         # This is a hack to implement backpressure because celery doesn't
         # support it natively.
@@ -209,6 +282,15 @@ class CeleryQueue(ScoringSystem):
 
     @classmethod
     def from_config(cls, config, name, section_key="scoring_systems"):
+        """
+        Create an instance of - class name. task config file.
+
+        Args:
+            cls: (todo): write your description
+            config: (todo): write your description
+            name: (str): write your description
+            section_key: (str): write your description
+        """
         from ores import ores
         from ..scoring_context import ServerScoringContext, ClientScoringContext
 

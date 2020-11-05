@@ -20,6 +20,12 @@ from .util import build_config, configure_logging
 
 
 def main(argv=None):
+    """
+    Main entry point.
+
+    Args:
+        argv: (str): write your description
+    """
     args = docopt.docopt(__doc__, argv=argv)
     verbose = args['--verbose']
     debug = args['--debug']
@@ -29,12 +35,22 @@ def main(argv=None):
 
 
 def run(**kwargs):
+    """
+    Run the worker.
+
+    Args:
+    """
     application = build(**kwargs)
     application.worker_main(
         argv=["celery_worker"])
 
 
 def build(**kwargs):
+    """
+    Create a new : class.
+
+    Args:
+    """
     config = build_config(**kwargs)
     configure_logging(config=config, **kwargs)
     scoring_system = CeleryQueue.from_config(

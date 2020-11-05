@@ -9,10 +9,21 @@ from ores.wsgi.util import (build_event_set, build_precache_map,
 
 @pytest.fixture
 def app():
+    """
+    Yields the app.
+
+    Args:
+    """
     yield build()
 
 
 def test_build_score_request(app):
+    """
+    The test test request.
+
+    Args:
+        app: (todo): write your description
+    """
     with app.test_request_context('/?models=foo|bar&revids=123|234', environ_base={'REMOTE_ADDR': '127.0.0.1'}):
         scoring_system = ScoringSystem({})
         actual = build_score_request(scoring_system, flask.request).to_json()
@@ -33,6 +44,12 @@ def test_build_score_request(app):
 
 
 def test_build_score_request_(app):
+    """
+    The test test test.
+
+    Args:
+        app: (todo): write your description
+    """
     with app.test_request_context('/?models=foo&precache&features', environ_base={'REMOTE_ADDR': '127.0.0.1'}):
         scoring_system = ScoringSystem({})
         actual = build_score_request(scoring_system, flask.request, context_name='testwiki', rev_id=7251).to_json()
@@ -51,6 +68,12 @@ def test_build_score_request_(app):
 
 
 def test_build_score_request_injection(app):
+    """
+    Builds a test test test.
+
+    Args:
+        app: (todo): write your description
+    """
     with app.test_request_context(
             '/?models=foo&revids=123|234&feature.foo.bar=1',
             environ_base={'REMOTE_ADDR': '127.0.0.1'}):
@@ -71,6 +94,11 @@ def test_build_score_request_injection(app):
 
 
 def test_build_precache_map():
+    """
+    Generate a build map
+
+    Args:
+    """
     precache_config = {
         'revid': {'on': ['edit']}, 'goodfaith': {'on': ['edit']}
     }
@@ -90,6 +118,11 @@ def test_build_precache_map():
 
 
 def test_build_event_set():
+    """
+    Build a test events.
+
+    Args:
+    """
     event = {
         'rev_content_model': 'wikitext',
         'page_is_redirect': False,
@@ -127,6 +160,11 @@ def test_build_event_set():
 
 
 def test_event():
+    """
+    Generate a test event.
+
+    Args:
+    """
     event = {
         "database": "enwiki",
         "meta": {

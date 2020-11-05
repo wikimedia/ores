@@ -5,6 +5,11 @@ from ores.score_caches.score_cache import ScoreCache
 
 
 def test_lru():
+    """
+    Test if a lru.
+
+    Args:
+    """
     lru = LRU(2)
 
     cache_context = lru.context("foo", "bar")
@@ -21,6 +26,11 @@ def test_lru():
 
 
 def test_lru_cache():
+    """
+    Test if a lru cache.
+
+    Args:
+    """
     lru = LRU(2)
 
     cache_context = lru.context("foo", "bar")
@@ -37,6 +47,11 @@ def test_lru_cache():
 
 
 def test_from_config():
+    """
+    Create a test config.
+
+    Args:
+    """
     config = {
         'score_caches': {
             'mycache': {

@@ -35,6 +35,14 @@ def format_v1_score_response(response, limit_to_model=None):
 
 
 def format_some_model_info(scoring_system, request, limit_to_model=None):
+    """
+    Return a formatted as a dictionary that can be sentry. model.
+
+    Args:
+        scoring_system: (todo): write your description
+        request: (todo): write your description
+        limit_to_model: (todo): write your description
+    """
     scoring_system.check_context_models(request)
     model_infos = {}
     for model_name in request.model_names:

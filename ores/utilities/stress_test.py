@@ -43,6 +43,12 @@ REQUEST_THREADS = 1000
 
 
 def main(argv=None):
+    """
+    Main function.
+
+    Args:
+        argv: (str): write your description
+    """
     args = docopt.docopt(__doc__, argv=argv)
 
     logging.basicConfig(
@@ -72,6 +78,18 @@ def main(argv=None):
 
 
 def run(ores_urls, context, models, rev_ids, batch_size, delay, verbose):
+    """
+    Runs a list of models.
+
+    Args:
+        ores_urls: (str): write your description
+        context: (dict): write your description
+        models: (todo): write your description
+        rev_ids: (str): write your description
+        batch_size: (int): write your description
+        delay: (int): write your description
+        verbose: (bool): write your description
+    """
     url_cycle = cycle(ores_urls)
     rev_ids_cycle = cycle(rev_ids)
     stats = defaultdict(int)
@@ -116,6 +134,17 @@ def run(ores_urls, context, models, rev_ids, batch_size, delay, verbose):
 
 
 def request_and_stat(ores_url, context, models, rev_ids, stats, verbose):
+    """
+    Return statistics about a list of revisions.
+
+    Args:
+        ores_url: (str): write your description
+        context: (todo): write your description
+        models: (todo): write your description
+        rev_ids: (str): write your description
+        stats: (str): write your description
+        verbose: (bool): write your description
+    """
     path = "/v3/scores/{0}/".format(context)
     logger.debug("Requesting {0} rev_ids...".format(len(rev_ids)))
     params = {'revids': "|".join(str(r) for r in rev_ids),

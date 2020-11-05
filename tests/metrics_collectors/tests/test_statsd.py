@@ -8,19 +8,52 @@ from ores.score_request import ScoreRequest
 
 
 def test_statsd():
+    """
+    Executes stats for all statsd.
+
+    Args:
+    """
     class StatsClient:
 
         def __init__(self):
+            """
+            Initialize all messages
+
+            Args:
+                self: (todo): write your description
+            """
             self.messages = []
 
         def incr(self, name, count=1):
+            """
+            Increments a count of a count.
+
+            Args:
+                self: (todo): write your description
+                name: (str): write your description
+                count: (int): write your description
+            """
             self.messages.append(("INCR", name, count))
 
         def timing(self, name, duration):
+            """
+            Add a new timer.
+
+            Args:
+                self: (todo): write your description
+                name: (str): write your description
+                duration: (int): write your description
+            """
             self.messages.append(("TIMING", name, duration))
 
         @contextmanager
         def pipeline(self):
+            """
+            Return the pipeline.
+
+            Args:
+                self: (todo): write your description
+            """
             yield self
 
     fake_client = StatsClient()
@@ -74,6 +107,11 @@ def test_statsd():
 
 
 def test_from_config():
+    """
+    Create a test instance from a configuration.
+
+    Args:
+    """
     # Should throw a socket connection error and no others
     config = {
         'metrics_collectors': {

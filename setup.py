@@ -14,6 +14,12 @@ if sys.version_info <= (3, 0):
 
 
 def read(fname):
+    """
+    Read file
+
+    Args:
+        fname: (str): write your description
+    """
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 

@@ -5,10 +5,22 @@ from ores.score_response import ScoreResponse
 class FakeContext:
 
     def __init__(self, name):
+        """
+        Sets the name.
+
+        Args:
+            self: (todo): write your description
+            name: (str): write your description
+        """
         self.name = name
 
 
 def test_score_request():
+    """
+    Displays a test test.
+
+    Args:
+    """
     sr = ScoreResponse(
         FakeContext("foowiki"),
         ScoreRequest("foo", [1, 2, 3], ["bar", "baz"]))

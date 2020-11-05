@@ -6,12 +6,25 @@ from ...util import build_score_request
 
 
 def configure(config, bp, scoring_system):
+    """
+    Configure a bocities request.
+
+    Args:
+        config: (dict): write your description
+        bp: (todo): write your description
+        scoring_system: (todo): write your description
+    """
 
     # /v3/scores/
     @bp.route("/v3/scores/", methods=["GET"])
     @preprocessors.nocache
     @preprocessors.minifiable
     def scores_v3():
+        """
+        Computes the score score for a score.
+
+        Args:
+        """
         try:
             score_request = build_score_request(scoring_system, request)
         except Exception as e:
@@ -24,6 +37,12 @@ def configure(config, bp, scoring_system):
     @preprocessors.nocache
     @preprocessors.minifiable
     def score_model_revisions_v3(context):
+        """
+        Compute the score.
+
+        Args:
+            context: (todo): write your description
+        """
         try:
             score_request = build_score_request(
                 scoring_system, request, context)
@@ -37,6 +56,13 @@ def configure(config, bp, scoring_system):
     @preprocessors.nocache
     @preprocessors.minifiable
     def score_revisions_v3(context, revid):
+        """
+        Compute the score of a score.
+
+        Args:
+            context: (todo): write your description
+            revid: (str): write your description
+        """
         try:
             score_request = build_score_request(
                 scoring_system, request, context, rev_id=revid)
@@ -50,6 +76,14 @@ def configure(config, bp, scoring_system):
     @preprocessors.nocache
     @preprocessors.minifiable
     def score_revision_v3(context, model, rev_id):
+        """
+        Displays the current revision score.
+
+        Args:
+            context: (todo): write your description
+            model: (todo): write your description
+            rev_id: (int): write your description
+        """
         try:
             score_request = build_score_request(
                 scoring_system, request, context, rev_id=rev_id,

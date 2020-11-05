@@ -32,6 +32,12 @@ ores._is_wsgi_client = True
 
 
 def main(argv=None):
+    """
+    Main function.
+
+    Args:
+        argv: (str): write your description
+    """
     args = docopt.docopt(__doc__, argv=argv)
     host = args['--host']
     port = int(args['--port'])
@@ -45,12 +51,25 @@ def main(argv=None):
 
 
 def run(host, port, processes, **kwargs):
+    """
+    Runs a web server.
+
+    Args:
+        host: (str): write your description
+        port: (int): write your description
+        processes: (int): write your description
+    """
     application = build(**kwargs)
     application.debug = True
     application.run(host=host, port=port, processes=processes, threaded=False, debug=True)
 
 
 def build(**kwargs):
+    """
+    Build a server.
+
+    Args:
+    """
     config = build_config(**kwargs)
     configure_logging(config=config, **kwargs)
     return server.configure(config)

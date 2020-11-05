@@ -55,6 +55,12 @@ logger = logging.getLogger(__name__)
 
 
 def main(argv=None):
+    """
+    Main entry point.
+
+    Args:
+        argv: (str): write your description
+    """
     args = docopt.docopt(__doc__, argv=argv)
 
     logging.basicConfig(
@@ -92,6 +98,21 @@ def main(argv=None):
 
 def run(ores_host, user_agent, context, model_names, batch_size,
         parallel_requests, retries, input, output, verbose):
+    """
+    Run a set of a batch.
+
+    Args:
+        ores_host: (todo): write your description
+        user_agent: (str): write your description
+        context: (dict): write your description
+        model_names: (str): write your description
+        batch_size: (int): write your description
+        parallel_requests: (bool): write your description
+        retries: (int): write your description
+        input: (str): write your description
+        output: (todo): write your description
+        verbose: (bool): write your description
+    """
     rev_docs = [json.loads(l) for l in input]
     session = api.Session(
         ores_host, user_agent=user_agent, batch_size=batch_size,

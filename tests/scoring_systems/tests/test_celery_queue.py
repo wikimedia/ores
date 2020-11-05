@@ -11,6 +11,11 @@ from .util import fakewiki
 
 
 def test_score():
+    """
+    Test the test test.
+
+    Args:
+    """
     application = celery.Celery(__name__)
     CeleryQueue(
         {'fakewiki': fakewiki}, application=application, timeout=15)
@@ -22,6 +27,11 @@ def test_score():
 
 
 def test_celery_queue():
+    """
+    Test if the queue is running.
+
+    Args:
+    """
     application = celery.Celery(__name__)
     CeleryQueue(
         {'fakewiki': fakewiki}, application=application, timeout=0.10)
@@ -38,6 +48,11 @@ def test_celery_queue():
 
 
 def test_task():
+    """
+    Test the task is running.
+
+    Args:
+    """
     revid = RevIdScorer(version='0.0.1')
     fakewiki = ScoringContext(
         'fakewiki', {'revid': revid}, OfflineExtractor())
@@ -63,6 +78,11 @@ def test_task():
 
 
 def test_locking():
+    """
+    Test for a task to be invoked test.
+
+    Args:
+    """
     application = celery.Celery(__name__)
     revid = RevIdScorer(version='0.0.1')
     fakewiki = ScoringContext(

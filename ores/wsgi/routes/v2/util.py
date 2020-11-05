@@ -44,6 +44,14 @@ def format_v2_score_response(request, response):
 
 
 def format_v2_model(request, response, model_name):
+    """
+    Formats a model model.
+
+    Args:
+        request: (todo): write your description
+        response: (todo): write your description
+        model_name: (str): write your description
+    """
 
     model_doc = defaultdict(dict)
     model_doc['version'] = response.context.model_version(model_name)

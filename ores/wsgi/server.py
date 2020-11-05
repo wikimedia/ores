@@ -5,6 +5,12 @@ import flask_wikimediaui
 
 
 def configure(config):
+    """
+    Configure flask application.
+
+    Args:
+        config: (dict): write your description
+    """
 
     from flask import Blueprint, Flask
 

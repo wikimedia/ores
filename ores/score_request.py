@@ -35,6 +35,12 @@ class ScoreRequest:
         self.ip = ip
 
     def __str__(self):
+        """
+        Return a string representation of the format.
+
+        Args:
+            self: (todo): write your description
+        """
         return self.format()
 
     def format(self, rev_id=None, model_name=None):
@@ -62,6 +68,12 @@ class ScoreRequest:
                                  ", ".join(optional))
 
     def __repr__(self):
+        """
+        Return a human - readable representation of this object.
+
+        Args:
+            self: (todo): write your description
+        """
         return "{0}({1})".format(
             self.__class__.__name__,
             ", ".join(repr(v) for v in [
@@ -75,6 +87,12 @@ class ScoreRequest:
                 "model_info={0!r}".format(self.model_info)]))
 
     def to_json(self):
+        """
+        Return a dict to json.
+
+        Args:
+            self: (todo): write your description
+        """
         return {
             'context': self.context_name,
             'rev_ids': list(self.rev_ids),
@@ -88,6 +106,13 @@ class ScoreRequest:
 
     @classmethod
     def from_json(cls, data):
+        """
+        Deserialize object from a dictionary.
+
+        Args:
+            cls: (todo): write your description
+            data: (str): write your description
+        """
         return cls(
             data['context'],
             set(data['rev_ids']),

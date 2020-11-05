@@ -10,6 +10,12 @@ logger = logging.getLogger(__name__)
 
 
 def jsonify_error(error):
+    """
+    Return a json error message to json.
+
+    Args:
+        error: (todo): write your description
+    """
     error_type = error.__class__.__name__
     message = str(error)
 
@@ -17,6 +23,13 @@ def jsonify_error(error):
 
 
 def timeout(func, *args, seconds=None, **kwargs):
+    """
+    Executes a function.
+
+    Args:
+        func: (todo): write your description
+        seconds: (float): write your description
+    """
     if seconds is None:
         return func(*args, **kwargs)
 

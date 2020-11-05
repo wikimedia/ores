@@ -16,11 +16,26 @@ logger = logging.getLogger(__name__)
 
 class PoolCounter(LockManager):
     def __init__(self, nodes, connection_timeout=0.1):
+        """
+        Initialize the connection.
+
+        Args:
+            self: (todo): write your description
+            nodes: (list): write your description
+            connection_timeout: (float): write your description
+        """
         self.nodes = nodes
         self.connection_timeout = connection_timeout
         self.stream = None
 
     def connect(self, key):
+        """
+        Connect to a redis server
+
+        Args:
+            self: (todo): write your description
+            key: (str): write your description
+        """
         hashes = []
         for node in self.nodes:
             hashes.append(
@@ -43,6 +58,16 @@ class PoolCounter(LockManager):
         return True
 
     def lock(self, key, workers, maxqueue, timeout):
+        """
+        Waits for a given queue.
+
+        Args:
+            self: (todo): write your description
+            key: (str): write your description
+            workers: (int): write your description
+            maxqueue: (int): write your description
+            timeout: (int): write your description
+        """
         if not self.stream:
             connected = self.connect(key)
             if not connected:
@@ -65,6 +90,13 @@ class PoolCounter(LockManager):
         return data.strip() == 'LOCKED'
 
     def release(self, key):
+        """
+        Release the lock.
+
+        Args:
+            self: (todo): write your description
+            key: (str): write your description
+        """
         if not self.stream:
             return False
 
@@ -78,6 +110,12 @@ class PoolCounter(LockManager):
         return data.strip() == 'RELEASED'
 
     def close(self):
+        """
+        Close the stream.
+
+        Args:
+            self: (todo): write your description
+        """
         if self.stream:
             self.stream.close()
             self.stream = None
@@ -87,6 +125,15 @@ class PoolCounter(LockManager):
 
     @classmethod
     def from_config(cls, config, name, section_key="lock_managers"):
+        """
+        Initialize a configuration object from a configuration file.
+
+        Args:
+            cls: (todo): write your description
+            config: (todo): write your description
+            name: (str): write your description
+            section_key: (str): write your description
+        """
         nodes = []
         # TODO: Fix config so we can inject connection_timeout
         for node in config[section_key][name]:
