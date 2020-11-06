@@ -28,6 +28,8 @@ class Redis(ScoreCache):
 
         logger.debug("Looking up score at {0}".format(key))
         value = self.redis.get(key)
+        # T263910
+        self.redis.close()
         if value is None:
             raise KeyError(key)
         else:
@@ -41,6 +43,7 @@ class Redis(ScoreCache):
 
         logger.debug("Storing score at {0}".format(key))
         self.redis.setex(key, self.ttl, bytes(json.dumps(score), 'utf-8'))
+        self.redis.close()
 
     def _generate_key(self, wiki, model, rev_id, version=None,
                       injection_cache=None):
