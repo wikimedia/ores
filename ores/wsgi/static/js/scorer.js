@@ -80,7 +80,7 @@ function createTable( data ) {
 }
 
 function getResults() {
-	var revs = $( '#revIds' ).val().replace( ',', '|' ),
+	var revs = $( '#revIds' ).val().replace( /,/g, '|' ),
 		modelsUrl = '',
 		url = '',
 		container = '<div id="tableContainer" class="col-md-6 col-md-offset-3" style="margin-top: 3em; margin-bottom: 3em;">',
@@ -126,7 +126,7 @@ if ( getParameterByName( 'wiki' ) ) {
 if ( getParameterByName( 'revids' ) ) {
 	$( function () {
 		setTimeout( function () {
-			$( '#revIds' ).val( getParameterByName( 'revids' ).replace( '|', ',' ) );
+			$( '#revIds' ).val( getParameterByName( 'revids' ).replace( /\|/g, ',' ) );
 		}, 3000 );
 	} );
 }
