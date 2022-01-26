@@ -110,6 +110,15 @@ class ScoringSystem(dict):
         # 3.5. Record extraction errors
         for rev_id, error in extraction_errors.items():
             for model in request.model_names:
+                # To avoid too may logs, we filter errors related
+                # to missing resources, since they are expected
+                # and generally not a problem.
+                # See https://phabricator.wikimedia.org/T299137
+                if not isinstance(error, revscoring.errors.MissingResource):
+                    logger.error(
+                        "Feature extraction error for model {} "
+                        "and revision {} due to: {}"
+                        .format(rev_id, model, error))
                 response.add_error(rev_id, model, error)
                 self.metrics_collector.score_errored(request, model)
 
@@ -130,6 +139,15 @@ class ScoringSystem(dict):
         # 4.5 Record scoring errors
         for rev_id, error in scoring_errors.items():
             for model in request.model_names:
+                # To avoid too may logs, we filter errors related
+                # to missing resources, since they are expected
+                # and generally not a problem.
+                # See https://phabricator.wikimedia.org/T299137
+                if not isinstance(error, revscoring.errors.MissingResource):
+                    logger.error(
+                        "Feature extraction error for model {} "
+                        "and revision {} due to: {}"
+                        .format(rev_id, model, error))
                 response.add_error(rev_id, model, error)
                 self.metrics_collector.score_errored(request, model)
 
