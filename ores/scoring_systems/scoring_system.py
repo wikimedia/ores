@@ -118,7 +118,7 @@ class ScoringSystem(dict):
                     logger.error(
                         "Feature extraction error for model {} "
                         "and revision {} due to: {}"
-                        .format(rev_id, model, error))
+                        .format(model, rev_id, error))
                 response.add_error(rev_id, model, error)
                 self.metrics_collector.score_errored(request, model)
 
@@ -147,7 +147,7 @@ class ScoringSystem(dict):
                     logger.error(
                         "Feature extraction error for model {} "
                         "and revision {} due to: {}"
-                        .format(rev_id, model, error))
+                        .format(model, rev_id, error))
                 response.add_error(rev_id, model, error)
                 self.metrics_collector.score_errored(request, model)
 
