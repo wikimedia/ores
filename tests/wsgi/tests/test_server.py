@@ -123,6 +123,18 @@ def test_scores_v3(client):
     assert json.loads(res.get_data().decode('utf-8')) == \
            {'testwiki': {'models': {'revid': {'version': '0.0.0'}}}}
 
+def test_scores_v3_model_info_valid(client):
+    res = client.get('/v3/scores/?model_info=type', follow_redirects=True)
+    assert res.status_code == 200
+    assert json.loads(res.get_data().decode('utf-8')) == \
+           {'testwiki': {'models': {'revid': {'type': 'RevIDScorer'}}}}
+
+def test_scores_v3_model_info_invalid(client):
+    res = client.get('/v3/scores/?model_info=foo', follow_redirects=True)
+    assert res.status_code == 400
+    assert json.loads(res.get_data().decode('utf-8')) == \
+           {'error': {'code': 'bad request', 'message': "Model information could not be retrieved for 'foo'"}}
+
 
 def test_scores_v3_context(client):
     res = client.get('/v3/scores/testwiki/', follow_redirects=True)
