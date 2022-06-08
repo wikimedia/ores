@@ -91,6 +91,8 @@ def build_v3_context_model_map(score_request, scoring_system):
                     model_name, score_request.model_info or ['version'])
                 context_models_doc[context_name]['models'][model_name] = model_doc
         return util.jsonify(context_models_doc)
+    except ModelInfoLookupError as e:
+        return responses.model_info_lookup_error(e)
     except Exception:
         return responses.unknown_error(traceback.format_exc())
 
