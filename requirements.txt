@@ -12,3 +12,6 @@ sseclient >= 0.0.18
 stopit >= 1.1.1, < 1.1.999
 werkzeug == 0.16.1
 yamlconf >= 0.2.4, < 0.2.999
+jinja2 == 2.11.3
+itsdangerous == 1.1.0
+markupsafe == 1.1.1
