@@ -150,16 +150,16 @@
   "paths": {
     "/v3/precache": {
       "post": {
-        "summary": "Precache scores of a recentchange (https://stream.wikimedia.org/v2/stream/recentchange) event based on precaching configs.  ORES expects that requests to this endpoint will provide the event's JSON in the post body",
+        "summary": "Precache scores of a revision-create (https://stream.wikimedia.org/v2/ui/#/?streams=revision-create) event based on precaching configs.  ORES expects that requests to this endpoint will provide the event's JSON in the post body",
         "parameters": [
           {
             "in": "body",
             "name": "event",
             "required": true,
-            "schema": {"$ref": "https://github.com/wikimedia/mediawiki-event-schemas/tree/master/jsonschema/mediawiki/recentchange"}
+            "schema": {"$ref": "https://github.com/wikimedia/mediawiki-event-schemas/tree/master/jsonschema/mediawiki/revision/create"}
           }
 	],
-        "description": "If the ORES configuration calls for precaching based on the type of recentchange event recieved, a score document with all relevant scores will be returned. ",
+        "description": "If the ORES configuration calls for precaching based on the type of revision-create event received, a score document with all relevant scores will be returned. ",
         "tags": [
           "scoring"
         ],
