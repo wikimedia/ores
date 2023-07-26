@@ -14,3 +14,28 @@ body,
 	font-family: -apple-system, BlinkMacSystemFont, 'Seogoe UI', 'Roboto', 'Lato', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
 }
 
+/*
+mediawiki style warning alert
+used on deprecation message
+*/
+
+.mw-style-warning-alert {
+    margin-bottom: 25px;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    color: #ff5d00;
+    padding: .5em;
+    border-color: #ff5d00;
+    padding-top: 15px;
+}
+
+.mw-style-warning-alert > p,
+.ml-team-contact-channels {
+    margin: .5em 1em;
+    color: #3f3f3f;
+}
+
+.mw-style-warning-alert > p > .alert-link {
+    font-weight: 700;
+    color: #cc4a00;
+}
