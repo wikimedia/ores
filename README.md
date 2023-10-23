@@ -5,6 +5,11 @@
 
 ORES
 ====
+
+**WARNING:** The ORES infrastructure is being deprecated by the Machine
+Learning team, please check [Wikitech docs on
+ORES](https://wikitech.wikimedia.org/wiki/ORES) for more info.
+
 A webserver for hosting scoring services. For more information, see [the ORES documentation on MediaWiki](https://mediawiki.org/wiki/ORES).
 
 Installation
