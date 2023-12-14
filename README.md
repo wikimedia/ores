@@ -6,9 +6,9 @@
 ORES
 ====
 
-Warning: As of late 2023, the ORES infrastructure is being deprecated by the
-WMF  Machine Learning team, please check
-https://wikitech.wikimedia.org/wiki/ORES for more info.
+<blockquote>
+⚠️ Warning: As of late 2023, the ORES infrastructure is being deprecated by the
+WMF Machine Learning team, please check https://wikitech.wikimedia.org/wiki/ORES for more info.
 
 While the code in this repository may still work, it is unmaintained, and as
 such may break at any time. Special consideration should also be given to
@@ -28,6 +28,7 @@ specifically tailored to be run on modern ML infrastructure like Lift Wing.
 
 If you have any questions, contact the WMF Machine Learning team:
 https://wikitech.wikimedia.org/wiki/Machine_Learning
+</blockquote>
 
 A webserver for hosting scoring services. For more information, see [the ORES documentation on MediaWiki](https://mediawiki.org/wiki/ORES).
 
